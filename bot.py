@@ -1,14 +1,19 @@
 import collections
+import logging
 import os
 import random
+import sys
 
 import discord
 import dotenv
 
 dotenv.load_dotenv(".env")
 token = os.getenv("DISCORD_TOKEN")
+logfile = os.getenv("DISCORD_BOT_LOGFILE")
+
 
 client = discord.Client()
+logging.basicConfig(stream=sys.stderr, level=logging.INFO)
 
 WINNERS = collections.defaultdict(int)
 LOSERS = collections.defaultdict(int)
@@ -24,8 +29,10 @@ async def roll_die_and_update(message):
         return
     roll = random.randint(1, num)
     if roll == 1:
+        logging.info(f"{message.author.name} - critical failure")
         LOSERS[message.author.id] += 1
     elif roll == num:
+        logging.info(f"{message.author.name} - critical success")
         WINNERS[message.author.id] += 1
     await message.channel.send(f"```# {roll}\nDetails: [d{num} ({roll})]```")
 

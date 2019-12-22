@@ -5,7 +5,7 @@ import random
 import discord
 import dotenv
 
-dotenv.load_dotenv()
+dotenv.load_dotenv(".env")
 token = os.getenv("DISCORD_TOKEN")
 
 client = discord.Client()

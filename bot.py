@@ -2,6 +2,7 @@ import collections
 import enum
 import logging
 import os
+import pickle
 import random
 import sys
 
@@ -10,8 +11,14 @@ import dotenv
 
 import db_helper
 
+
+DEFAULT_ROLL_VALUE = 6
+DICEBOSS_ROLENAME = "diceboss"
+
+
 dotenv.load_dotenv(".env")
 DB_FILENAME = os.getenv("DB_FILENAME")
+ROLL_FILENAME = os.getenv("ROLL_FILENAME")
 LOGFILE = os.getenv("DISCORD_BOT_LOGFILE")
 TOKEN = os.getenv("DISCORD_TOKEN")
 
@@ -30,6 +37,35 @@ class Status(enum.Enum):
 class Rename(enum.Enum):
     SERVER = 0
     TEXT_CHAT = 1
+
+
+def get_roll_dict():
+    d = {}
+    try:
+        with open(ROLL_FILENAME, "rb") as f:
+            d = pickle.load(f)
+    except Exception:
+        logging.error(f"Failed to load roll file ({ROLL_FILENAME})")
+    return d
+
+
+def get_next_roll(roll_dict, guild_id):
+    return roll_dict.get(guild_id, DEFAULT_ROLL_VALUE)
+
+
+def set_roll_for_guild(roll_dict, guild_id, value):
+        # Increment next roll value for this guild
+        roll_dict[guild_id] = value
+        with open(ROLL_FILENAME, "wb") as f:
+            try:
+                pickle.dump(roll_dict, f)
+            except Exception:
+                logging.error(f"Failed to write roll file ({ROLL_FILENAME})")
+
+
+
+def has_diceboss_role(user):
+    return any(role.name == DICEBOSS_ROLENAME for role in user.roles)
 
 
 async def roll_die_simple(channel, num):
@@ -82,6 +118,11 @@ async def on_message(message):
     if message.author == CLIENT.user:
         return
 
+    if not message.content.startswith("TEST "):
+        return
+    len_prefix = len("TEST ")
+    message.content = message.content[len_prefix:]
+
     guild = message.channel.guild
     channel = message.channel
     content = message.content
@@ -91,7 +132,8 @@ async def on_message(message):
     log_message(guild_id, discord_id, username, content)
 
     if content == "!roll":
-        next_roll = db_helper.get_next_roll(DB_CONN, guild_id)
+        roll_dict = get_roll_dict()
+        next_roll = get_next_roll(roll_dict, guild_id)
         logging.info(f"Next roll in guild ({guild_id}) for user {username} is {next_roll}")
         status = await roll_die_and_update(channel, username, discord_id, next_roll)
 
@@ -99,6 +141,9 @@ async def on_message(message):
             db_helper.add_loser(DB_CONN, guild_id, discord_id, next_roll)
         elif status == Status.WIN:
             db_helper.add_winner(DB_CONN, guild_id, discord_id, next_roll)
+            # Increment next roll value for this guild
+            set_roll_for_guild(roll_dict, guild_id, next_roll + 1)
+            logging.info(f"Set next roll for guild ({guild_id}) to {next_roll + 1}")
     elif content == "!scoreboard":
         logging.info(f"Request for scoreboard in guild ({guild_id})")
         winners = db_helper.get_all_winners(DB_CONN, guild_id)
@@ -130,6 +175,26 @@ async def on_message(message):
                     "This incident will be recorded.")
             # TODO: React with skull or something
             await channel.send(msg)
+    elif content.startswith("!resetroll"):
+        len_prefix = len("!resetroll")
+        num_str = content[len_prefix:]
+        try:
+            num = int(num_str)
+            roll_dict = get_roll_dict()
+            set_roll_for_guild(roll_dict, guild_id, num)
+            await channel.send(f"Set next roll for this server to {num}")
+        except Exception:
+            await channel.send(f"Not sure how to reset roll to {num_str}")
+    elif content.startswith("!clearstats"):
+        if has_diceboss_role(message.author):
+            db_helper.clear_all(DB_CONN, guild_id)
+            roll_dict = get_roll_dict()
+            set_roll_for_guild(roll_dict, guild_id, DEFAULT_ROLL_VALUE)
+            await channel.send("All winner/loser stats have been cleared for this server.")
+            await channel.send(f"The next roll for this server has been reset to {DEFAULT_ROLL_VALUE}.")
+        else:
+            await channel.send("You're not a diceboss.")
+            await channel.send("Don't try that shit again, bucko.")
     elif content.startswith("!d"):
         len_prefix = len("!d")
         try:

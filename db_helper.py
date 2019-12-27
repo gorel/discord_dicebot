@@ -60,8 +60,15 @@ ORDER BY 2 DESC
 """
 
 
+DELETE_ALL_SQL = """
+DELETE FROM {identifier}
+WHERE guild_id = ?
+"""
+
+
 def db_connect(db_filename):
     return sqlite3.connect(db_filename)
+
 
 def create_winners_table(conn):
     sql = WINNER_LOSER_SQL.format(identifier=WINNERS_TABLENAME)
@@ -81,18 +88,23 @@ def create_all(conn):
     create_losers_table(conn)
 
 
-def get_next_roll(conn, guild_id):
-    sql = """
-    SELECT MAX(roll)
-    FROM winners
-    WHERE guild_id = ?
-    """
+def clear_winners(conn, guild_id):
+    sql = DELETE_ALL_SQL.format(identifier=WINNERS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, ))
-    row = cur.fetchone()
-    if row is None or row[0] is None:
-        return STARTING_ROLL_VALUE
-    return row[0] + 1
+    conn.commit()
+
+
+def clear_losers(conn, guild_id):
+    sql = DELETE_ALL_SQL.format(identifier=LOSERS_TABLENAME)
+    cur = conn.cursor()
+    cur.execute(sql, (guild_id, ))
+    conn.commit()
+
+
+def clear_all(conn, guild_id):
+    clear_winners(conn, guild_id)
+    clear_losers(conn, guild_id)
 
 
 def add_winner(conn, guild_id, discord_id, roll):

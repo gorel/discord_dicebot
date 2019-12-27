@@ -118,11 +118,6 @@ async def on_message(message):
     if message.author == CLIENT.user:
         return
 
-    if not message.content.startswith("TEST "):
-        return
-    len_prefix = len("TEST ")
-    message.content = message.content[len_prefix:]
-
     guild = message.channel.guild
     channel = message.channel
     content = message.content

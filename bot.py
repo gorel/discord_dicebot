@@ -190,10 +190,19 @@ async def on_message(message):
         else:
             await channel.send("You're not a diceboss.")
             await channel.send("Don't try that shit again, bucko.")
+    elif content.startswith("!info"):
+        roll_dict = get_roll_dict()
+        next_roll = get_next_roll(roll_dict, guild_id)
+        await channel.send(f"Current roll is {next_roll}.")
     elif content.startswith("!d"):
         len_prefix = len("!d")
         try:
             num = int(content[len_prefix:])
+            roll_dict = get_roll_dict()
+            next_roll = get_next_roll(roll_dict, guild_id)
+            if next_roll == num:
+                await channel.send("Hey fuckface, just use !roll next time.")
+                await channel.send("I don't record wins when you do this.")
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")

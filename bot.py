@@ -93,7 +93,7 @@ async def scoreboard_command(channel, winners, losers):
     for record in winners:
         user = CLIENT.get_user(record["discord_id"])
         msg += f"\t- {user.name}: {record['count']}\n"
-    msg += "\n**Losing rolls:**\n"
+    msg += "**Losing rolls:**\n"
     for record in losers:
         user = CLIENT.get_user(record["discord_id"])
         msg += f"\t- {user.name}: {record['count']}\n"
@@ -143,6 +143,8 @@ async def on_message(message):
         msg += "\t- !resetroll <n>: Set next roll for server to <n>\n"
         msg += "\t- !clearstats: Clear all roll stats \\*CANNOT BE UNDONE\\*\n"
         msg += "\t- !info: Display current roll\n"
+        msg += "\t- !code: Display the github address for the bot code\n"
+        msg += "\t- !d<n>: Roll a die with N sides (doesn't record stats)\n"
         msg += "\t- !help: Display this help text again\n"
         await channel.send(msg)
     elif content == "!roll":
@@ -221,6 +223,8 @@ async def on_message(message):
         roll_dict = get_roll_dict()
         next_roll = get_next_roll(roll_dict, guild_id)
         await channel.send(f"Current roll is {next_roll}.")
+    elif content.startswith("!code"):
+        await channel.send("https://github.com/gorel/discord_dicebot\n")
     elif content.startswith("!d"):
         len_prefix = len("!d")
         try:

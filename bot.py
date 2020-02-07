@@ -21,6 +21,7 @@ DB_FILENAME = os.getenv("DB_FILENAME")
 ROLL_FILENAME = os.getenv("ROLL_FILENAME")
 LOGFILE = os.getenv("DISCORD_BOT_LOGFILE")
 TOKEN = os.getenv("DISCORD_TOKEN")
+TEST_ENV = os.getenv("TEST_ENV")
 
 
 CLIENT = discord.Client()
@@ -54,14 +55,13 @@ def get_next_roll(roll_dict, guild_id):
 
 
 def set_roll_for_guild(roll_dict, guild_id, value):
-        # Increment next roll value for this guild
-        roll_dict[guild_id] = value
-        with open(ROLL_FILENAME, "wb") as f:
-            try:
-                pickle.dump(roll_dict, f)
-            except Exception:
-                logging.error(f"Failed to write roll file ({ROLL_FILENAME})")
-
+    # Increment next roll value for this guild
+    roll_dict[guild_id] = value
+    with open(ROLL_FILENAME, "wb") as f:
+        try:
+            pickle.dump(roll_dict, f)
+        except Exception:
+            logging.error(f"Failed to write roll file ({ROLL_FILENAME})")
 
 
 def has_diceboss_role(user):
@@ -91,10 +91,12 @@ async def roll_die_and_update(channel, username, discord_id, num):
 async def scoreboard_command(channel, winners, losers):
     msg = "**Winning rolls:**\n"
     for record in winners:
-        msg += f"<@{record['discord_id']}>: {record['count']}"
+        user = CLIENT.get_user(record["discord_id"])
+        msg += f"\t- {user.name}: {record['count']}\n"
     msg += "\n**Losing rolls:**\n"
     for record in losers:
-        msg += f"<@{record['discord_id']}>: {record['count']}"
+        user = CLIENT.get_user(record["discord_id"])
+        msg += f"\t- {user.name}: {record['count']}\n"
     await channel.send(msg)
 
 
@@ -126,10 +128,29 @@ async def on_message(message):
     username = message.author.name
     log_message(guild_id, discord_id, username, content)
 
-    if content == "!roll":
+    # If we're in a test environment, only process commands starting with
+    # "TEST " to not conflict with prod bot.
+    if TEST_ENV:
+        if not content.startswith("TEST "):
+            return
+        content = content[len("TEST ") :]
+
+    if content == "!help":
+        msg = "Bot usage:\n"
+        msg += "\t- !roll: Roll the dice\n"
+        msg += "\t- !scoreboard: Display the scoreboard\n"
+        msg += "\t- !rename <name>: Rename the server/channel to <name>\n"
+        msg += "\t- !resetroll <n>: Set next roll for server to <n>\n"
+        msg += "\t- !clearstats: Clear all roll stats \\*CANNOT BE UNDONE\\*\n"
+        msg += "\t- !info: Display current roll\n"
+        msg += "\t- !help: Display this help text again\n"
+        await channel.send(msg)
+    elif content == "!roll":
         roll_dict = get_roll_dict()
         next_roll = get_next_roll(roll_dict, guild_id)
-        logging.info(f"Next roll in guild ({guild_id}) for user {username} is {next_roll}")
+        logging.info(
+            f"Next roll in guild ({guild_id}) for user {username} is {next_roll}"
+        )
         status = await roll_die_and_update(channel, username, discord_id, next_roll)
 
         if status == Status.LOSE:
@@ -166,8 +187,10 @@ async def on_message(message):
                 DB_CONN, guild_id, discord_id, record["roll"]
             )
         if not rename_allowed:
-            msg = (f"I can't let you do that, <@{discord_id}>.\n"
-                    "This incident will be recorded.")
+            msg = (
+                f"I can't let you do that, <@{discord_id}>.\n"
+                "This incident will be recorded."
+            )
             # TODO: React with skull or something
             await channel.send(msg)
     elif content.startswith("!resetroll"):
@@ -185,8 +208,12 @@ async def on_message(message):
             db_helper.clear_all(DB_CONN, guild_id)
             roll_dict = get_roll_dict()
             set_roll_for_guild(roll_dict, guild_id, DEFAULT_ROLL_VALUE)
-            await channel.send("All winner/loser stats have been cleared for this server.")
-            await channel.send(f"The next roll for this server has been reset to {DEFAULT_ROLL_VALUE}.")
+            await channel.send(
+                "All winner/loser stats have been cleared for this server."
+            )
+            await channel.send(
+                f"The next roll for this server has been reset to {DEFAULT_ROLL_VALUE}."
+            )
         else:
             await channel.send("You're not a diceboss.")
             await channel.send("Don't try that shit again, bucko.")

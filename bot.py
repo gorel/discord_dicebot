@@ -10,6 +10,7 @@ import discord
 import dotenv
 
 import db_helper
+import r6_helper
 
 
 DEFAULT_ROLL_VALUE = 6
@@ -145,6 +146,9 @@ async def on_message(message):
         msg += "\t- !info: Display current roll\n"
         msg += "\t- !code: Display the github address for the bot code\n"
         msg += "\t- !d<n>: Roll a die with N sides (doesn't record stats)\n"
+        msg += "\t- !disable_op <op1>,<op2>,...: Disable operators for random selection\n"
+        msg += "\t- !enable_op <op1>,<op2>,...: \n"
+        msg += "\t- !operator (attack|defend): Pick a random operator to play\n"
         msg += "\t- !help: Display this help text again\n"
         await channel.send(msg)
     elif content == "!roll":
@@ -237,6 +241,24 @@ async def on_message(message):
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")
+    elif content.startswith("!disable_op"):
+        len_prefix = len("!disable_op")
+        ops = [x.strip() for x in content[len_prefix:].split(",")]
+        disabled_ops = r6_helper.disable_operators(discord_id, ops)
+        await channel.send(f"Your disabled operators: {disabled_ops}")
+    elif content.startswith("!enable_op"):
+        len_prefix = len("!enable_op")
+        ops = [x.strip() for x in content[len_prefix:].split(",")]
+        disabled_ops = r6_helper.enable_operators(discord_id, ops)
+        await channel.send(f"Your disabled operators: {disabled_ops}")
+    elif content.startswith("!operator"):
+        len_prefix = len("!operator")
+        side = content[len_prefix:].strip()
+        if side.lower() in ("atk", "attack"):
+            op = r6_helper.pick_attacker(discord_id)
+        else:
+            op = r6_helper.pick_defender(discord_id)
+        await channel.send(f"<@{discord_id}>: Today you are a {op} main.")
 
 
 print("Creating db tables...", end="", flush=True)

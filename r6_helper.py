@@ -1,8 +1,9 @@
 import enum
 import json
+import os
 import random
 
-from typing import List
+from typing import Dict, List
 
 
 USER_DATA_JSON = "user_data.json"
@@ -70,6 +71,12 @@ class OperatorSide(enum.Enum):
     DEFENSE = 1
 
 
+def _init():
+    if not os.path.exists(USER_DATA_JSON):
+        with open(USER_DATA_JSON, "w") as f:
+            f.write("{}")
+
+
 def _get_valid_ops(side: OperatorSide, user_id: str) -> List[str]:
     with open(USER_DATA_JSON) as f:
         disabled_ops = json.load(f)
@@ -121,3 +128,13 @@ def enable_operators(user_id: int, ops: List[str]) -> List[str]:
     with open(USER_DATA_JSON, "w") as f:
         json.dump(operators, f)
     return sorted(op.title() for op in operators[user_str])
+
+
+def get_available_ops(user_id: int) -> Dict[OperatorSide, List[str]]:
+    user_str = str(user_id)
+    return {
+        OperatorSide.ATTACK: _get_valid_ops(OperatorSide.ATTACK, user_str),
+        OperatorSide.DEFENSE: _get_valid_ops(OperatorSide.DEFENSE, user_str),
+    }
+
+_init()

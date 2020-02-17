@@ -2,5 +2,6 @@
 *.pkl
 *.pyc
 *.db
+user_data.json
 
 .mypy_cache/

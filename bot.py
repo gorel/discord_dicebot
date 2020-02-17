@@ -146,7 +146,9 @@ async def on_message(message):
         msg += "\t- !info: Display current roll\n"
         msg += "\t- !code: Display the github address for the bot code\n"
         msg += "\t- !d<n>: Roll a die with N sides (doesn't record stats)\n"
-        msg += "\t- !disable_op <op1>,<op2>,...: Disable operators for random selection\n"
+        msg += (
+            "\t- !disable_op <op1>,<op2>,...: Disable operators for random selection\n"
+        )
         msg += "\t- !enable_op <op1>,<op2>,...: \n"
         msg += "\t- !operator (attack|defend): Pick a random operator to play\n"
         msg += "\t- !help: Display this help text again\n"
@@ -229,7 +231,7 @@ async def on_message(message):
         await channel.send(f"Current roll is {next_roll}.")
     elif content.startswith("!code"):
         await channel.send("https://github.com/gorel/discord_dicebot\n")
-    elif content.startswith("!d"):
+    elif content.startswith("!d") and len(content) > 2 and content[2].isdigit():
         len_prefix = len("!d")
         try:
             num = int(content[len_prefix:])
@@ -245,12 +247,12 @@ async def on_message(message):
         len_prefix = len("!disable_op")
         ops = [x.strip() for x in content[len_prefix:].split(",")]
         disabled_ops = r6_helper.disable_operators(discord_id, ops)
-        await channel.send(f"Your disabled operators: {disabled_ops}")
+        await channel.send(f"Your disabled operators: {', '.join(disabled_ops)}")
     elif content.startswith("!enable_op"):
         len_prefix = len("!enable_op")
         ops = [x.strip() for x in content[len_prefix:].split(",")]
         disabled_ops = r6_helper.enable_operators(discord_id, ops)
-        await channel.send(f"Your disabled operators: {disabled_ops}")
+        await channel.send(f"Your disabled operators: {', '.join(disabled_ops)}")
     elif content.startswith("!operator"):
         len_prefix = len("!operator")
         side = content[len_prefix:].strip()

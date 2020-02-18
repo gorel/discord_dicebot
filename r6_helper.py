@@ -94,14 +94,14 @@ def _get_valid_ops(side: OperatorSide, user_id: str) -> List[str]:
     return [op for op in possible_ops if op.lower() not in disabled_ops[user_id]]
 
 
-def pick_attacker(user_id: int) -> str:
+def pick_attacker(user_id: int, num: int) -> List[str]:
     ops = _get_valid_ops(OperatorSide.ATTACK, str(user_id))
-    return random.choice(ops)
+    return random.sample(ops, num)
 
 
-def pick_defender(user_id: int) -> str:
+def pick_defender(user_id: int, num: int) -> List[str]:
     ops = _get_valid_ops(OperatorSide.DEFENSE, str(user_id))
-    return random.choice(ops)
+    return random.sample(ops, num)
 
 
 def disable_operators(user_id: int, ops: List[str]) -> List[str]:

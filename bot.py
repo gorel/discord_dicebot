@@ -275,12 +275,22 @@ async def on_message(message):
         await channel.send(f"Your disabled operators: {', '.join(disabled_ops)}")
     elif content.startswith("!operator"):
         len_prefix = len("!operator")
-        side = content[len_prefix:].strip()
-        if side.lower() in ("atk", "attack"):
-            op = r6_helper.pick_attacker(discord_id)
+        rest = content[len_prefix:].strip()
+        num = 1
+        if " " in rest:
+            side, num_str = rest.split(" ")
+            try:
+                num = int(num)
+            except Exception:
+                await channel.send(f"What number is {num_str}??")
+                num = 1
         else:
-            op = r6_helper.pick_defender(discord_id)
-        await channel.send(f"<@{discord_id}>: Today you are a {op} main.")
+            side = rest
+        if side.lower() in ("atk", "attack"):
+            op = r6_helper.pick_attacker(discord_id, num)
+        else:
+            op = r6_helper.pick_defender(discord_id, num)
+        await channel.send(f"<@{discord_id}>: Today you may play {', '.join(ops)}.")
 
 
 print("Creating db tables...", end="", flush=True)

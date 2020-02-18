@@ -280,16 +280,16 @@ async def on_message(message):
         if " " in rest:
             side, num_str = rest.split(" ")
             try:
-                num = int(num)
+                num = int(num_str)
             except Exception:
                 await channel.send(f"What number is {num_str}??")
                 num = 1
         else:
             side = rest
         if side.lower() in ("atk", "attack"):
-            op = r6_helper.pick_attacker(discord_id, num)
+            ops = r6_helper.pick_attackers(discord_id, num)
         else:
-            op = r6_helper.pick_defender(discord_id, num)
+            ops = r6_helper.pick_defenders(discord_id, num)
         await channel.send(f"<@{discord_id}>: Today you may play {', '.join(ops)}.")
 
 

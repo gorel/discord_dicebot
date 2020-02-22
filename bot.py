@@ -11,6 +11,7 @@ import dotenv
 
 import db_helper
 import r6_helper
+import tournament_helper
 
 
 DEFAULT_ROLL_VALUE = 6
@@ -295,7 +296,7 @@ async def on_message(message):
         # TODO: Parsing stuff manually is really stupid
         # I should fix this but I'm too lazy
         len_prefix = len("!tournament ")
-        args = [part.strip() for part in content[len_prefix:]]
+        args = [part.strip() for part in content[len_prefix:].split()]
         command = args[0]
         if command == "new" and has_diceboss_role(message.author) and len(args) == 2:
             tournament_helper.new_tournament(guild_id, args[1])
@@ -320,4 +321,6 @@ print("Creating db tables...", end="", flush=True)
 db_helper.create_all(DB_CONN)
 print("Done.")
 print("Starting bot.")
+if TEST_ENV:
+    print("Starting in TEST mode")
 CLIENT.run(TOKEN)

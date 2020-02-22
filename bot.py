@@ -11,6 +11,7 @@ import dotenv
 
 import db_helper
 import r6_helper
+import tournament_helper
 
 
 DEFAULT_ROLL_VALUE = 6
@@ -291,10 +292,35 @@ async def on_message(message):
         else:
             ops = r6_helper.pick_defenders(discord_id, num)
         await channel.send(f"<@{discord_id}>: Today you may play {', '.join(ops)}.")
+    elif content.startswith("!tournament "):
+        # TODO: Parsing stuff manually is really stupid
+        # I should fix this but I'm too lazy
+        len_prefix = len("!tournament ")
+        args = [part.strip() for part in content[len_prefix:].split()]
+        command = args[0]
+        if command == "new" and has_diceboss_role(message.author) and len(args) == 2:
+            tournament_helper.new_tournament(guild_id, args[1])
+            msg = f"<@{discord_id}> created a new tournament!"
+            msg += "\nType '!tournament join' to join."
+            await channel.send(msg)
+        elif command == "join":
+            tournament_helper.join_tournament(guild_id, discord_id)
+            await channel.send(f"<@{discord_id}> joined the tournament!")
+        elif command == "start" and has_diceboss_role(message.author):
+            teams = tournament_helper.start_tournament(guild_id)
+            msg = "The tournament is starting! Here are your teams:"
+            for team in teams:
+                member_str = " + ".join(f"<@{discord_id}>" for discord_id in team)
+                msg += f"\n\t-> {member_str}"
+            await channel.send(msg)
+        else:
+            await channel.send(tournament_helper.help_message())
 
 
 print("Creating db tables...", end="", flush=True)
 db_helper.create_all(DB_CONN)
 print("Done.")
 print("Starting bot.")
+if TEST_ENV:
+    print("Starting in TEST mode")
 CLIENT.run(TOKEN)

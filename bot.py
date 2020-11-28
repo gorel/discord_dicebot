@@ -240,8 +240,7 @@ async def on_message(message):
             roll_dict = get_roll_dict()
             next_roll = get_next_roll(roll_dict, guild_id)
             if next_roll == num:
-                await channel.send("Hey fuckface, just use !roll next time.")
-                await channel.send("I don't record wins when you do this.")
+                await channel.send(f"Why do you continue to ignore my pleas, <@{discord_id}>")
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")

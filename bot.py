@@ -10,7 +10,6 @@ import discord
 import dotenv
 
 import db_helper
-import r6_helper
 import tournament_helper
 
 
@@ -94,10 +93,14 @@ async def scoreboard_command(channel, winners, losers):
     msg = "**Winning rolls:**\n"
     for record in winners:
         user = CLIENT.get_user(record["discord_id"])
+        if not user:
+            user = await CLIENT.fetch_user(record["discord_id"])
         msg += f"\t- {user.name}: {record['count']}\n"
     msg += "**Losing rolls:**\n"
     for record in losers:
         user = CLIENT.get_user(record["discord_id"])
+        if not user:
+            user = await CLIENT.fetch_user(record["discord_id"])
         msg += f"\t- {user.name}: {record['count']}\n"
     await channel.send(msg)
 
@@ -241,53 +244,6 @@ async def on_message(message):
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")
-    elif content.startswith("!operators"):
-        len_prefix = len("!operators")
-        all_ops = r6_helper.get_available_ops(discord_id)
-        if " " in content:
-            side = content[len_prefix:].strip()
-            if side.lower() in ("atk", "attack"):
-                msg = "Attackers:\n"
-                msg += ", ".join(sorted(op for op in all_ops[r6_helper.OperatorSide.ATTACK]))
-                await channel.send(msg)
-            else:
-                msg = "Defenders:\n"
-                msg += ", ".join(sorted(op for op in all_ops[r6_helper.OperatorSide.DEFENSE]))
-                await channel.send(msg)
-        else:
-            msg = "Attackers:\n"
-            msg += ", ".join(sorted(op for op in all_ops[r6_helper.OperatorSide.ATTACK]))
-            msg += "\n\nDefenders:\n"
-            msg += ", ".join(sorted(op for op in all_ops[r6_helper.OperatorSide.DEFENSE]))
-            await channel.send(msg)
-    elif content.startswith("!disable_op"):
-        len_prefix = len("!disable_op")
-        ops = [x.strip() for x in content[len_prefix:].split(",")]
-        disabled_ops = r6_helper.disable_operators(discord_id, ops)
-        await channel.send(f"Your disabled operators: {', '.join(disabled_ops)}")
-    elif content.startswith("!enable_op"):
-        len_prefix = len("!enable_op")
-        ops = [x.strip() for x in content[len_prefix:].split(",")]
-        disabled_ops = r6_helper.enable_operators(discord_id, ops)
-        await channel.send(f"Your disabled operators: {', '.join(disabled_ops)}")
-    elif content.startswith("!operator"):
-        len_prefix = len("!operator")
-        rest = content[len_prefix:].strip()
-        num = 1
-        if " " in rest:
-            side, num_str = rest.split(" ")
-            try:
-                num = int(num_str)
-            except Exception:
-                await channel.send(f"What number is {num_str}??")
-                num = 1
-        else:
-            side = rest
-        if side.lower() in ("atk", "attack"):
-            ops = r6_helper.pick_attackers(discord_id, num)
-        else:
-            ops = r6_helper.pick_defenders(discord_id, num)
-        await channel.send(f"<@{discord_id}>: Today you may play {', '.join(ops)}.")
     elif content.startswith("!tournament "):
         # TODO: Parsing stuff manually is really stupid
         # I should fix this but I'm too lazy

@@ -10,7 +10,6 @@ import discord
 import dotenv
 
 import db_helper
-import tournament_helper
 
 
 DEFAULT_ROLL_VALUE = 6
@@ -28,12 +27,6 @@ TEST_ENV = os.getenv("TEST_ENV")
 CLIENT = discord.Client()
 DB_CONN = db_helper.db_connect(DB_FILENAME)
 logging.basicConfig(stream=sys.stderr, level=logging.INFO)
-
-
-class Status(enum.Enum):
-    NONE = 0
-    LOSE = 1
-    WIN = 2
 
 
 class Rename(enum.Enum):
@@ -76,32 +69,24 @@ async def roll_die_simple(channel, num):
 
 
 async def roll_die_and_update(channel, username, discord_id, num):
-    status = Status.NONE
     roll = await roll_die_simple(channel, num)
     if roll == 1:
         logging.info(f"{username} - critical failure")
         await channel.send(f"<@{discord_id}> gets to rename the chat channel!")
-        status = Status.LOSE
     elif roll == num:
         logging.info(f"{username} - critical success")
         await channel.send(f"<@{discord_id}> gets to rename the server!")
-        status = Status.WIN
-    return status
+    return roll
 
 
-async def scoreboard_command(channel, winners, losers):
-    msg = "**Winning rolls:**\n"
-    for record in winners:
+async def scoreboard_command(channel, stats):
+    sorted_stats = sorted(stats, key=lambda record: record["wins"] - record["losses"])
+    msg = "**Stats:**\n"
+    for record in sorted_stats:
         user = CLIENT.get_user(record["discord_id"])
         if not user:
             user = await CLIENT.fetch_user(record["discord_id"])
-        msg += f"\t- {user.name}: {record['count']}\n"
-    msg += "**Losing rolls:**\n"
-    for record in losers:
-        user = CLIENT.get_user(record["discord_id"])
-        if not user:
-            user = await CLIENT.fetch_user(record["discord_id"])
-        msg += f"\t- {user.name}: {record['count']}\n"
+        msg += f"\t- {user.name}: {record['wins']} wins, {record['losses']} losses ({record['attempts']} rolls)\n"
     await channel.send(msg)
 
 
@@ -150,12 +135,6 @@ async def on_message(message):
         msg += "\t- !info: Display current roll\n"
         msg += "\t- !code: Display the github address for the bot code\n"
         msg += "\t- !d<n>: Roll a die with N sides (doesn't record stats)\n"
-        msg += "\t- !operators (attack|defense): List your enabled operators\n"
-        msg += (
-            "\t- !disable_op <op1>,<op2>,...: Disable operators for random selection\n"
-        )
-        msg += "\t- !enable_op <op1>,<op2>,...: \n"
-        msg += "\t- !operator (attack|defense): Pick a random operator to play\n"
         msg += "\t- !help: Display this help text again\n"
         await channel.send(msg)
     elif content == "!roll":
@@ -164,20 +143,17 @@ async def on_message(message):
         logging.info(
             f"Next roll in guild ({guild_id}) for user {username} is {next_roll}"
         )
-        status = await roll_die_and_update(channel, username, discord_id, next_roll)
+        roll = await roll_die_and_update(channel, username, discord_id, next_roll)
+        db_helper.record_roll(DB_CONN, guild_id, discord_id, roll, next_roll)
 
-        if status == Status.LOSE:
-            db_helper.add_loser(DB_CONN, guild_id, discord_id, next_roll)
-        elif status == Status.WIN:
-            db_helper.add_winner(DB_CONN, guild_id, discord_id, next_roll)
+        if roll == next_roll:
             # Increment next roll value for this guild
             set_roll_for_guild(roll_dict, guild_id, next_roll + 1)
             logging.info(f"Set next roll for guild ({guild_id}) to {next_roll + 1}")
     elif content == "!scoreboard":
         logging.info(f"Request for scoreboard in guild ({guild_id})")
-        winners = db_helper.get_all_winners(DB_CONN, guild_id)
-        losers = db_helper.get_all_losers(DB_CONN, guild_id)
-        await scoreboard_command(channel, winners, losers)
+        stats = db_helper.get_all_stats(DB_CONN, guild_id)
+        await scoreboard_command(channel, stats)
     elif content.startswith("!rename"):
         logging.info(f"{username} attempting to rename in guild ({guild_id})")
         rename_allowed = False
@@ -244,29 +220,6 @@ async def on_message(message):
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")
-    elif content.startswith("!tournament "):
-        # TODO: Parsing stuff manually is really stupid
-        # I should fix this but I'm too lazy
-        len_prefix = len("!tournament ")
-        args = [part.strip() for part in content[len_prefix:].split()]
-        command = args[0]
-        if command == "new" and has_diceboss_role(message.author) and len(args) == 2:
-            tournament_helper.new_tournament(guild_id, args[1])
-            msg = f"<@{discord_id}> created a new tournament!"
-            msg += "\nType '!tournament join' to join."
-            await channel.send(msg)
-        elif command == "join":
-            tournament_helper.join_tournament(guild_id, discord_id)
-            await channel.send(f"<@{discord_id}> joined the tournament!")
-        elif command == "start" and has_diceboss_role(message.author):
-            teams = tournament_helper.start_tournament(guild_id)
-            msg = "The tournament is starting! Here are your teams:"
-            for team in teams:
-                member_str = " + ".join(f"<@{discord_id}>" for discord_id in team)
-                msg += f"\n\t-> {member_str}"
-            await channel.send(msg)
-        else:
-            await channel.send(tournament_helper.help_message())
 
 
 print("Creating db tables...", end="", flush=True)

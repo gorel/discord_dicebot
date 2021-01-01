@@ -55,8 +55,8 @@ LIMIT 1
 SELECT_ALL_AGGREGATED_SQL = """
 SELECT
     discord_id,
-    COUNT_IF(actual_roll = target_roll) AS wins,
-    COUNT_IF(actual_roll = 1) AS losses,
+    SUM(CASE WHEN actual_roll = target_roll THEN 1 ELSE 0 END) AS wins,
+    SUM(CASE WHEN actual_roll = 1 THEN 1 ELSE 0 END) AS losses,
     COUNT(1) AS cnt
 FROM {identifier}
 WHERE guild_id = ?

@@ -136,7 +136,7 @@ def get_last_roll_time(conn, guild_id, discord_id):
         return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S.%f")
     except Exception:
         # It may be the case that this user has never rolled before
-        return float('inf')
+        return None
 
 
 def get_all_stats(conn, guild_id):

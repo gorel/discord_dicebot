@@ -173,17 +173,18 @@ async def on_message(message):
         last_roll_time = db_helper.get_last_roll_time(DB_CONN, guild_id, discord_id)
         now = datetime.datetime.now()
         # Convert to hours
-        last_roll_delta = (now - last_roll_time).seconds // 3600
-        if last_roll_delta < timeout:
-            msg = (
-                f"<@{discord_id}> last rolled {last_roll_delta} hours ago.\n"
-                f"This server only allows rolling once every {timeout} hours.\n"
-                "This incident will be recorded."
-            )
-            # TODO: React with skull or something
-            await channel.send(msg)
-            # Bail out early; don't allow rolling
-            return
+        if last_roll_time is not None:
+            last_roll_delta = (now - last_roll_time).seconds // 3600
+            if last_roll_delta < timeout:
+                msg = (
+                    f"<@{discord_id}> last rolled {last_roll_delta} hours ago.\n"
+                    f"This server only allows rolling once every {timeout} hours.\n"
+                    "This incident will be recorded."
+                )
+                # TODO: React with skull or something
+                await channel.send(msg)
+                # Bail out early; don't allow rolling
+                return
         logging.info(
             f"Next roll in guild ({guild_id}) for user {username} is {next_roll}"
         )

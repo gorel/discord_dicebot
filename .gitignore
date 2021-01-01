@@ -2,6 +2,7 @@
 *.pkl
 *.pyc
 *.db
+*.db-journal
 *.json
 
 .mypy_cache/

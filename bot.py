@@ -72,7 +72,7 @@ def get_timeout_dict():
 
 
 def get_timeout(timeout_dict, guild_id):
-    return roll_dict.get(guild_id, DEFAULT_TIMEOUT)
+    return timeout_dict.get(guild_id, DEFAULT_TIMEOUT)
 
 
 def set_timeout_for_guild(timeout_dict, guild_id, value):
@@ -176,8 +176,8 @@ async def on_message(message):
         last_roll_delta = (now - last_roll_time).seconds // 3600
         if last_roll_delta < timeout:
             msg = (
-                f"<@{discord_id}> last rolled at {last_roll_time}\n"
-                "This server only allows rolling once every {timeout} hours.\n"
+                f"<@{discord_id}> last rolled {last_roll_delta} hours ago.\n"
+                f"This server only allows rolling once every {timeout} hours.\n"
                 "This incident will be recorded."
             )
             # TODO: React with skull or something
@@ -236,6 +236,16 @@ async def on_message(message):
             await channel.send(f"Set next roll for this server to {num}")
         except Exception:
             await channel.send(f"Not sure how to reset roll to {num_str}")
+    elif content.startswith("!set_timeout"):
+        len_prefix = len("!set_timeout")
+        num_str = content[len_prefix:]
+        try:
+            num = int(num_str)
+            timeout_dict = get_timeout_dict()
+            set_timeout_for_guild(timeout_dict, guild_id, num)
+            await channel.send(f"Set roll timeout to {num} hours")
+        except Exception:
+            await channel.send(f"Not sure how to set timeout to {num_str}")
     elif content.startswith("!clearstats"):
         if has_diceboss_role(message.author):
             db_helper.clear_all(DB_CONN, guild_id)

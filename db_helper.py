@@ -52,6 +52,17 @@ LIMIT 1
 """
 
 
+SELECT_LAST_ROLL_TIME_SQL = """
+SELECT
+    date
+FROM {identifier}
+WHERE guild_id = ?
+  AND discord_id = ?
+ORDER BY date DESC
+LIMIT 1
+"""
+
+
 SELECT_ALL_AGGREGATED_SQL = """
 SELECT
     discord_id,
@@ -114,6 +125,18 @@ def record_rename_used_loser(conn, guild_id, discord_id, roll):
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
     conn.commit()
+
+
+def get_last_roll_time(conn, guild_id, discord_id):
+    sql = SELECT_LAST_ROLL_TIME_SQL.format(identifier=TABLENAME)
+    cur = conn.cursor()
+    cur.execute(sql, (guild_id, discord_id))
+    try:
+        row = cur.fetchone()
+        return datetime.datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S.%f")
+    except Exception:
+        # It may be the case that this user has never rolled before
+        return float('inf')
 
 
 def get_all_stats(conn, guild_id):

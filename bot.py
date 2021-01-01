@@ -1,4 +1,5 @@
 import collections
+import datetime
 import enum
 import logging
 import os
@@ -13,12 +14,14 @@ import db_helper
 
 
 DEFAULT_ROLL_VALUE = 6
+DEFAULT_TIMEOUT = 18
 DICEBOSS_ROLENAME = "diceboss"
 
 
 dotenv.load_dotenv(".env")
 DB_FILENAME = os.getenv("DB_FILENAME")
 ROLL_FILENAME = os.getenv("ROLL_FILENAME")
+TIMEOUT_FILENAME = os.getenv("TIMEOUT_FILENAME")
 LOGFILE = os.getenv("DISCORD_BOT_LOGFILE")
 TOKEN = os.getenv("DISCORD_TOKEN")
 TEST_ENV = os.getenv("TEST_ENV")
@@ -56,6 +59,29 @@ def set_roll_for_guild(roll_dict, guild_id, value):
             pickle.dump(roll_dict, f)
         except Exception:
             logging.error(f"Failed to write roll file ({ROLL_FILENAME})")
+
+
+def get_timeout_dict():
+    d = {}
+    try:
+        with open(TIMEOUT_FILENAME, "rb") as f:
+            d = pickle.load(f)
+    except Exception:
+        logging.error(f"Failed to load timeout file ({TIMEOUT_FILENAME})")
+    return d
+
+
+def get_timeout(timeout_dict, guild_id):
+    return roll_dict.get(guild_id, DEFAULT_TIMEOUT)
+
+
+def set_timeout_for_guild(timeout_dict, guild_id, value):
+    timeout_dict[guild_id] = value
+    with open(TIMEOUT_FILENAME, "wb") as f:
+        try:
+            pickle.dump(timeout_dict, f)
+        except Exception:
+            logging.error(f"Failed to write timeout file ({TIMEOUT_FILENAME})")
 
 
 def has_diceboss_role(user):
@@ -131,6 +157,7 @@ async def on_message(message):
         msg += "\t- !scoreboard: Display the scoreboard\n"
         msg += "\t- !rename <name>: Rename the server/channel to <name>\n"
         msg += "\t- !resetroll <n>: Set next roll for server to <n>\n"
+        msg += "\t- !set_timeout <n>: Set roll timeout to N hours\n"
         msg += "\t- !clearstats: Clear all roll stats \\*CANNOT BE UNDONE\\*\n"
         msg += "\t- !info: Display current roll\n"
         msg += "\t- !code: Display the github address for the bot code\n"
@@ -139,7 +166,24 @@ async def on_message(message):
         await channel.send(msg)
     elif content == "!roll":
         roll_dict = get_roll_dict()
+        timeout_dict = get_timeout_dict()
         next_roll = get_next_roll(roll_dict, guild_id)
+        timeout = get_timeout(timeout_dict, guild_id)
+
+        last_roll_time = db_helper.get_last_roll_time(DB_CONN, guild_id, discord_id)
+        now = datetime.datetime.now()
+        # Convert to hours
+        last_roll_delta = (now - last_roll_time).seconds // 3600
+        if last_roll_delta < timeout:
+            msg = (
+                f"<@{discord_id}> last rolled at {last_roll_time}\n"
+                "This server only allows rolling once every {timeout} hours.\n"
+                "This incident will be recorded."
+            )
+            # TODO: React with skull or something
+            await channel.send(msg)
+            # Bail out early; don't allow rolling
+            return
         logging.info(
             f"Next roll in guild ({guild_id}) for user {username} is {next_roll}"
         )

@@ -72,7 +72,6 @@ SELECT
 FROM {identifier}
 WHERE guild_id = ?
 GROUP BY discord_id
-ORDER BY 2 DESC
 """
 
 
@@ -105,6 +104,7 @@ def record_roll(conn, guild_id, discord_id, actual_roll, target_roll):
     sql = INSERT_ROLLS_SQL.format(identifier=TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, actual_roll, target_roll, now, 0))
+    conn.commit()
 
 
 def record_rename_used_winner(conn, guild_id, discord_id, roll):

@@ -174,7 +174,7 @@ async def on_message(message):
         now = datetime.datetime.now()
         # Convert to hours
         if last_roll_time is not None:
-            last_roll_delta = (now - last_roll_time).seconds // 3600
+            last_roll_delta = (now - last_roll_time).total_seconds() // 3600
             if last_roll_delta < timeout:
                 msg = (
                     f"<@{discord_id}> last rolled {last_roll_delta} hours ago.\n"

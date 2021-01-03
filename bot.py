@@ -1,3 +1,4 @@
+import asyncio
 import collections
 import datetime
 import enum
@@ -88,6 +89,31 @@ def has_diceboss_role(user):
     return any(role.name == DICEBOSS_ROLENAME for role in user.roles)
 
 
+def get_seconds_from_timer(timer: str) -> int:
+    total = 0
+    start = 0
+    while start < len(timer):
+        i = start
+        while i < len(timer) and timer[i].isdigit():
+            i += 1
+        num = int(timer[start:i])
+        unit = timer[i]
+        if unit.lower() == "h":
+            total += num * 3600
+        elif unit.lower() == "m":
+            total += num * 60
+        else:
+            total += num
+        start = i + 1
+    return total
+
+
+async def remind_command(channel, discord_id, seconds: int, text: str) -> None:
+    await asyncio.sleep(seconds)
+    msg = f"Reminder for <@{discord_id}>: {text}"
+    await channel.send(msg)
+
+
 async def roll_die_simple(channel, num):
     roll = random.randint(1, num)
     await channel.send(f"```# {roll}\nDetails: [d{num} ({roll})]```")
@@ -157,6 +183,8 @@ async def on_message(message):
         msg += "\t- !scoreboard: Display the scoreboard\n"
         msg += "\t- !rename <name>: Rename the server/channel to <name>\n"
         msg += "\t- !resetroll <n>: Set next roll for server to <n>\n"
+        msg += "\t- !remindme <offset> <text>\n"
+        msg += "\t\t time should be formatted like 2h30m or 10m\n"
         msg += "\t- !set_timeout <n>: Set roll timeout to N hours\n"
         msg += "\t- !clearstats: Clear all roll stats \\*CANNOT BE UNDONE\\*\n"
         msg += "\t- !info: Display current roll\n"
@@ -174,6 +202,7 @@ async def on_message(message):
         now = datetime.datetime.now()
         # Convert to hours
         if last_roll_time is not None:
+            logging.info(f"{discord_id} last rolled at {last_roll_time}")
             last_roll_delta = (now - last_roll_time).total_seconds() // 3600
             if last_roll_delta < timeout:
                 msg = (
@@ -195,7 +224,7 @@ async def on_message(message):
             # Increment next roll value for this guild
             set_roll_for_guild(roll_dict, guild_id, next_roll + 1)
             logging.info(f"Set next roll for guild ({guild_id}) to {next_roll + 1}")
-    elif content == "!scoreboard":
+    elif content == "!scoreboard" or content == "!stats":
         logging.info(f"Request for scoreboard in guild ({guild_id})")
         stats = db_helper.get_all_stats(DB_CONN, guild_id)
         await scoreboard_command(channel, stats)
@@ -238,15 +267,19 @@ async def on_message(message):
         except Exception:
             await channel.send(f"Not sure how to reset roll to {num_str}")
     elif content.startswith("!set_timeout"):
-        len_prefix = len("!set_timeout")
-        num_str = content[len_prefix:]
-        try:
-            num = int(num_str)
-            timeout_dict = get_timeout_dict()
-            set_timeout_for_guild(timeout_dict, guild_id, num)
-            await channel.send(f"Set roll timeout to {num} hours")
-        except Exception:
-            await channel.send(f"Not sure how to set timeout to {num_str}")
+        if has_diceboss_role(message.author):
+            len_prefix = len("!set_timeout")
+            num_str = content[len_prefix:]
+            try:
+                num = int(num_str)
+                timeout_dict = get_timeout_dict()
+                set_timeout_for_guild(timeout_dict, guild_id, num)
+                await channel.send(f"Set roll timeout to {num} hours")
+            except Exception:
+                await channel.send(f"Not sure how to set timeout to {num_str}")
+        else:
+            msg = "You're not a diceboss.\nDon't try that shit again, bucko."
+            await channel.send(msg)
     elif content.startswith("!clearstats"):
         if has_diceboss_role(message.author):
             db_helper.clear_all(DB_CONN, guild_id)
@@ -259,8 +292,8 @@ async def on_message(message):
                 f"The next roll for this server has been reset to {DEFAULT_ROLL_VALUE}."
             )
         else:
-            await channel.send("You're not a diceboss.")
-            await channel.send("Don't try that shit again, bucko.")
+            msg = "You're not a diceboss.\nDon't try that shit again, bucko."
+            await channel.send(msg)
     elif content.startswith("!info"):
         roll_dict = get_roll_dict()
         next_roll = get_next_roll(roll_dict, guild_id)
@@ -275,6 +308,17 @@ async def on_message(message):
             await roll_die_simple(channel, num)
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")
+    elif content.startswith("!remindme"):
+        len_prefix = len("!remindme")
+        try:
+            # TODO - should probably limit how many reminders one person can set
+            # in order to avoid a DoS attack by my asshole friends
+            timer, text = content[len_prefix:].split(" ")
+            seconds = get_seconds_from_timer(timer)
+            await remind_command(channel, discord_id, seconds, text)
+            thread = threading.Thread(target=remind_command, args=(channel, discord_id, seconds, text))
+        except Exception:
+            pass
 
 
 print("Creating db tables...", end="", flush=True)

@@ -309,16 +309,18 @@ async def on_message(message):
         except Exception:
             await channel.send(f"Not sure what you want me to do with {content}.")
     elif content.startswith("!remindme"):
-        len_prefix = len("!remindme")
+        len_prefix = len("!remindme ")
         try:
             # TODO - should probably limit how many reminders one person can set
             # in order to avoid a DoS attack by my asshole friends
-            timer, text = content[len_prefix:].split(" ")
+            timer, text = content[len_prefix:].split(" ", maxsplit=1)
             seconds = get_seconds_from_timer(timer)
+            logging.info(f"Sending a reminder to {discord_id} in {seconds} seconds")
+            await channel.send(f"Okay, <@{discord_id}>, I'll remind you in {timer}")
             await remind_command(channel, discord_id, seconds, text)
-            thread = threading.Thread(target=remind_command, args=(channel, discord_id, seconds, text))
-        except Exception:
-            pass
+        except Exception as e:
+            logging.warning(f"Exception sending remind command")
+            await channel.send("I'm not sure what you want...")
 
 
 print("Creating db tables...", end="", flush=True)

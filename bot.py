@@ -5,6 +5,7 @@ import enum
 import logging
 import os
 import pickle
+import pytz
 import random
 import sys
 
@@ -17,6 +18,11 @@ import db_helper
 DEFAULT_ROLL_VALUE = 6
 DEFAULT_TIMEOUT = 18
 DICEBOSS_ROLENAME = "diceboss"
+
+EASTERN_TZ = pytz.timezone("US/Eastern")
+PACIFIC_TZ = pytz.timezone("US/Pacific")
+AF_START = EASTERN_TZ.localize(datetime.datetime(2021, 4, 1))
+AF_END = PACIFIC_TZ.localize(datetime.datetime(2021, 4, 1, 23, 59))
 
 
 dotenv.load_dotenv(".env")
@@ -121,7 +127,13 @@ async def roll_die_simple(channel, num):
 
 
 async def roll_die_and_update(channel, username, discord_id, num):
-    roll = await roll_die_simple(channel, num)
+    now = PACIFIC_TZ.localize(datetime.datetime.now())
+    if AF_START <= now <= AF_END:
+        # secret feature
+        roll = 1
+    else:
+        roll = await roll_die_simple(channel, num)
+
     if roll == 1:
         logging.info(f"{username} - critical failure")
         await channel.send(f"<@{discord_id}> gets to rename the chat channel!")

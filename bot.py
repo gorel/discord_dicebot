@@ -121,18 +121,19 @@ async def remind_command(channel, discord_id, seconds: int, text: str) -> None:
 
 
 async def roll_die_simple(channel, num):
-    roll = random.randint(1, num)
-    await channel.send(f"```# {roll}\nDetails: [d{num} ({roll})]```")
-    return roll
-
-
-async def roll_die_and_update(channel, username, discord_id, num):
     now = PACIFIC_TZ.localize(datetime.datetime.now())
     if AF_START <= now <= AF_END:
         # secret feature
         roll = 1
     else:
-        roll = await roll_die_simple(channel, num)
+        roll = random.randint(1, num)
+
+    await channel.send(f"```# {roll}\nDetails: [d{num} ({roll})]```")
+    return roll
+
+
+async def roll_die_and_update(channel, username, discord_id, num):
+    roll = await roll_die_simple(channel, num)
 
     if roll == 1:
         logging.info(f"{username} - critical failure")

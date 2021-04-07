@@ -11,6 +11,7 @@ import sys
 
 import discord
 import dotenv
+from emojipasta.generator import EmojipastaGenerator
 
 import db_helper
 
@@ -19,10 +20,9 @@ DEFAULT_ROLL_VALUE = 6
 DEFAULT_TIMEOUT = 18
 DICEBOSS_ROLENAME = "diceboss"
 
-EASTERN_TZ = pytz.timezone("US/Eastern")
-PACIFIC_TZ = pytz.timezone("US/Pacific")
-AF_START = EASTERN_TZ.localize(datetime.datetime(2021, 4, 1))
-AF_END = PACIFIC_TZ.localize(datetime.datetime(2021, 4, 1, 23, 59))
+
+EMOJIFIER = EmojipastaGenerator.of_default_mappings()
+LAST_MSG = ""
 
 
 dotenv.load_dotenv(".env")
@@ -121,13 +121,7 @@ async def remind_command(channel, discord_id, seconds: int, text: str) -> None:
 
 
 async def roll_die_simple(channel, num):
-    now = PACIFIC_TZ.localize(datetime.datetime.now())
-    if AF_START <= now <= AF_END:
-        # secret feature
-        roll = 1
-    else:
-        roll = random.randint(1, num)
-
+    roll = random.randint(1, num)
     await channel.send(f"```# {roll}\nDetails: [d{num} ({roll})]```")
     return roll
 
@@ -172,6 +166,7 @@ def log_message(guild_id, discord_id, username, content):
 
 @CLIENT.event
 async def on_message(message):
+    global LAST_MSG
     if message.author == CLIENT.user:
         return
 
@@ -334,6 +329,19 @@ async def on_message(message):
         except Exception as e:
             logging.warning(f"Exception sending remind command")
             await channel.send("I'm not sure what you want...")
+    elif content.startswith("!emojify"):
+        len_prefix = len("!emojify")
+        msg = content[len_prefix:].strip()
+        if len(msg) == 0:
+            msg = LAST_MSG
+        pasta = EMOJIFIER.generate_emojipasta(msg)
+        await channel.send(pasta)
+
+    # Remember to set this as the last message we saw
+    # I know we sometimes bail and `return` early, but that's not my problem.
+    LAST_MSG = content
+
+
 
 
 print("Creating db tables...", end="", flush=True)

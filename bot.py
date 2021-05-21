@@ -29,9 +29,14 @@ dotenv.load_dotenv(".env")
 DB_FILENAME = os.getenv("DB_FILENAME")
 ROLL_FILENAME = os.getenv("ROLL_FILENAME")
 TIMEOUT_FILENAME = os.getenv("TIMEOUT_FILENAME")
+ROLL_MSG_FILENAME = os.getenv("ROLL_MSG_FILENAME")
 LOGFILE = os.getenv("DISCORD_BOT_LOGFILE")
 TOKEN = os.getenv("DISCORD_TOKEN")
 TEST_ENV = os.getenv("TEST_ENV")
+
+
+WIN_STR = "WIN"
+LOSE_STR = "LOSE"
 
 
 CLIENT = discord.Client()
@@ -82,6 +87,7 @@ def get_timeout(timeout_dict, guild_id):
     return timeout_dict.get(guild_id, DEFAULT_TIMEOUT)
 
 
+
 def set_timeout_for_guild(timeout_dict, guild_id, value):
     timeout_dict[guild_id] = value
     with open(TIMEOUT_FILENAME, "wb") as f:
@@ -89,6 +95,31 @@ def set_timeout_for_guild(timeout_dict, guild_id, value):
             pickle.dump(timeout_dict, f)
         except Exception:
             logging.error(f"Failed to write timeout file ({TIMEOUT_FILENAME})")
+
+
+def get_roll_msg_dict():
+    d = {}
+    try:
+        with open(ROLL_MSG_FILENAME, "rb") as f:
+            d = pickle.load(f)
+    except Exception:
+        logging.error(f"Failed to load roll_msg file ({roll_msg_FILENAME})")
+    return d
+
+
+def get_roll_msg(roll_msg_dict, guild_id):
+    return roll_msg_dict.get(guild_id, {WIN_STR: "", LOSE_STR: ""})
+
+
+def set_roll_msg_for_guild(roll_msg_dict, guild_id, win_or_lose, value):
+    if guild_id not in roll_msg_dict:
+        roll_msg_dict[guild_id] = {}
+    roll_msg_dict[guild_id][win_or_lose] = value
+    with open(ROLL_MSG_FILENAME, "wb") as f:
+        try:
+            pickle.dump(roll_msg_dict, f)
+        except Exception:
+            logging.error(f"Failed to write roll_msg file ({roll_msg_FILENAME})")
 
 
 def has_diceboss_role(user):
@@ -126,15 +157,23 @@ async def roll_die_simple(channel, num):
     return roll
 
 
-async def roll_die_and_update(channel, username, discord_id, num):
+async def roll_die_and_update(channel, username, discord_id, num, roll_msg_override_dict):
     roll = await roll_die_simple(channel, num)
 
     if roll == 1:
         logging.info(f"{username} - critical failure")
-        await channel.send(f"<@{discord_id}> gets to rename the chat channel!")
+        lose_str = roll_msg_override_dict[LOSE_STR]
+        if lose_str != "":
+            await channel.send(f"<@{discord_id}>: {lose_str}")
+        else:
+            await channel.send(f"<@{discord_id}> gets to rename the chat channel!")
     elif roll == num:
         logging.info(f"{username} - critical success")
-        await channel.send(f"<@{discord_id}> gets to rename the server!")
+        win_str = roll_msg_override_dict[WIN_STR]
+        if win_str != "":
+            await channel.send(f"<@{discord_id}>: {win_str}")
+        else:
+            await channel.send(f"<@{discord_id}> gets to rename the server!")
     return roll
 
 
@@ -189,14 +228,11 @@ async def on_message(message):
         msg = "Bot usage:\n"
         msg += "\t- !roll: Roll the dice\n"
         msg += "\t- !scoreboard: Display the scoreboard\n"
-        msg += "\t- !rename <name>: Rename the server/channel to <name>\n"
         msg += "\t- !resetroll <n>: Set next roll for server to <n>\n"
-        msg += "\t- !remindme <offset> <text>\n"
         msg += "\t\t time should be formatted like 2h30m or 10m\n"
         msg += "\t- !set_timeout <n>: Set roll timeout to N hours\n"
         msg += "\t- !clearstats: Clear all roll stats \\*CANNOT BE UNDONE\\*\n"
         msg += "\t- !info: Display current roll\n"
-        msg += "\t- !code: Display the github address for the bot code\n"
         msg += "\t- !d<n>: Roll a die with N sides (doesn't record stats)\n"
         msg += "\t- !help: Display this help text again\n"
         await channel.send(msg)
@@ -225,7 +261,8 @@ async def on_message(message):
         logging.info(
             f"Next roll in guild ({guild_id}) for user {username} is {next_roll}"
         )
-        roll = await roll_die_and_update(channel, username, discord_id, next_roll)
+        rmd = get_roll_msg(get_roll_msg_dict(), guild_id)
+        roll = await roll_die_and_update(channel, username, discord_id, next_roll, rmd)
         db_helper.record_roll(DB_CONN, guild_id, discord_id, roll, next_roll)
 
         if roll == next_roll:
@@ -236,6 +273,17 @@ async def on_message(message):
         logging.info(f"Request for scoreboard in guild ({guild_id})")
         stats = db_helper.get_all_stats(DB_CONN, guild_id)
         await scoreboard_command(channel, stats)
+    elif content.startswith("!setmsg"):
+        if has_diceboss_role(message.author):
+            parts = content.split(" ", 2)
+            win_or_lose = WIN_STR
+            if parts[1].lower() != "win":
+                win_or_lose = LOSE_STR
+            rd = get_roll_msg_dict()
+            set_roll_msg_for_guild(rd, guild_id, win_or_lose, parts[2])
+        else:
+            msg = "You're not a diceboss.\nDon't try that shit again, bucko."
+            await channel.send(msg)
     elif content.startswith("!rename"):
         logging.info(f"{username} attempting to rename in guild ({guild_id})")
         rename_allowed = False

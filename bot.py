@@ -103,7 +103,7 @@ def get_roll_msg_dict():
         with open(ROLL_MSG_FILENAME, "rb") as f:
             d = pickle.load(f)
     except Exception:
-        logging.error(f"Failed to load roll_msg file ({roll_msg_FILENAME})")
+        logging.error(f"Failed to load roll_msg file ({ROLL_MSG_FILENAME})")
     return d
 
 
@@ -119,7 +119,7 @@ def set_roll_msg_for_guild(roll_msg_dict, guild_id, win_or_lose, value):
         try:
             pickle.dump(roll_msg_dict, f)
         except Exception:
-            logging.error(f"Failed to write roll_msg file ({roll_msg_FILENAME})")
+            logging.error(f"Failed to write roll_msg file ({ROLL_MSG_FILENAME})")
 
 
 def has_diceboss_role(user):
@@ -281,6 +281,7 @@ async def on_message(message):
                 win_or_lose = LOSE_STR
             rd = get_roll_msg_dict()
             set_roll_msg_for_guild(rd, guild_id, win_or_lose, parts[2])
+            await channel.send(f"Set {win_or_lose} message to {parts[2]}")
         else:
             msg = "You're not a diceboss.\nDon't try that shit again, bucko."
             await channel.send(msg)

@@ -8,6 +8,7 @@ import pickle
 import pytz
 import random
 import sys
+import time
 
 import discord
 import dotenv
@@ -30,6 +31,7 @@ DB_FILENAME = os.getenv("DB_FILENAME")
 ROLL_FILENAME = os.getenv("ROLL_FILENAME")
 TIMEOUT_FILENAME = os.getenv("TIMEOUT_FILENAME")
 ROLL_MSG_FILENAME = os.getenv("ROLL_MSG_FILENAME")
+BANNED_FILENAME = os.getenv("BANNED_FILENAME")
 LOGFILE = os.getenv("DISCORD_BOT_LOGFILE")
 TOKEN = os.getenv("DISCORD_TOKEN")
 TEST_ENV = os.getenv("TEST_ENV")
@@ -107,6 +109,16 @@ def get_roll_msg_dict():
     return d
 
 
+def get_banned_dict():
+    d = {}
+    try:
+        with open(BANNED_FILENAME, "rb") as f:
+            d = pickle.load(f)
+    except Exception:
+        logging.error(f"Failed to load banned filename ({BANNED_FILENAME})")
+    return d
+
+
 def get_roll_msg(roll_msg_dict, guild_id):
     return roll_msg_dict.get(guild_id, {WIN_STR: "", LOSE_STR: ""})
 
@@ -119,7 +131,7 @@ def set_roll_msg_for_guild(roll_msg_dict, guild_id, win_or_lose, value):
         try:
             pickle.dump(roll_msg_dict, f)
         except Exception:
-            logging.error(f"Failed to write roll_msg file ({ROLL_MSG_FILENAME})")
+            logging.error(f"Failed to write roll_msg file ({roll_msg_FILENAME})")
 
 
 def has_diceboss_role(user):
@@ -149,6 +161,56 @@ async def remind_command(channel, discord_id, seconds: int, text: str) -> None:
     await asyncio.sleep(seconds)
     msg = f"Reminder for <@{discord_id}>: {text}"
     await channel.send(msg)
+
+
+def set_bantime(ban_dict, guild_id, target_id, seconds, use_latest=True):
+    # Record unixtime of when the ban will end
+    current_bantime = 0
+    try:
+        if guild_id not in ban_dict:
+            ban_dict[guild_id] = {}
+        current_bantime = ban_dict[guild_id][target_id]
+    except Exception:
+        pass
+    # If the user is already banned, keep the more severe ban
+    if use_latest:
+        ban_dict[guild_id][target_id] = max(current_bantime, int(time.time() + seconds))
+    else:
+        ban_dict[guild_id][target_id] = int(time.time() + seconds)
+
+    with open(BANNED_FILENAME, "wb") as f:
+        try:
+            pickle.dump(ban_dict, f)
+        except Exception:
+            logging.error(f"Failed to write ban file ({BANNED_FILENAME})")
+
+
+async def swing_banhammer(channel, guild_id, target_id, seconds):
+    ban_dict = get_banned_dict()
+    set_bantime(ban_dict, guild_id, target_id, seconds)
+
+    await asyncio.sleep(seconds)
+    ban_dict = get_banned_dict()
+    if is_banned(ban_dict, guild_id, target_id):
+        msg = f"<@{target_id}>: you have been unbanned."
+        msg += "\nI hope you learned your lesson, *bucko*."
+        await channel.send(msg)
+
+async def unban_early(channel, guild_id, target_id):
+    ban_dict = get_banned_dict()
+    # Set the bantime to now minus one second
+    set_bantime(ban_dict, guild_id, target_id, -1, use_latest=False)
+    msg = f"<@{target_id}> has been unbanned early."
+    msg += "\nYou should thank your benevolent savior."
+    await channel.send(msg)
+
+
+def is_banned(ban_dict, guild_id, discord_id) -> bool:
+    try:
+        now = int(time.time())
+        return ban_dict[guild_id][discord_id] > now
+    except Exception:
+        return False
 
 
 async def roll_die_simple(channel, num):
@@ -217,6 +279,16 @@ async def on_message(message):
     username = message.author.name
     log_message(guild_id, discord_id, username, content)
 
+    # If the user is banned, we react SHAME
+    ban_dict = get_banned_dict()
+    if is_banned(ban_dict, guild_id, discord_id):
+        logging.info(f"{discord_id} is banned! Shame them.")
+        await message.add_reaction("🇸")
+        await message.add_reaction("🇭")
+        await message.add_reaction("🇦")
+        await message.add_reaction("🇲")
+        await message.add_reaction("🇪")
+
     # If we're in a test environment, only process commands starting with
     # "TEST " to not conflict with prod bot.
     if TEST_ENV:
@@ -281,7 +353,6 @@ async def on_message(message):
                 win_or_lose = LOSE_STR
             rd = get_roll_msg_dict()
             set_roll_msg_for_guild(rd, guild_id, win_or_lose, parts[2])
-            await channel.send(f"Set {win_or_lose} message to {parts[2]}")
         else:
             msg = "You're not a diceboss.\nDon't try that shit again, bucko."
             await channel.send(msg)
@@ -385,6 +456,22 @@ async def on_message(message):
             msg = LAST_MSG
         pasta = EMOJIFIER.generate_emojipasta(msg)
         await channel.send(pasta)
+    elif content.startswith("!ban"):
+        len_prefix = len("!ban ")
+        person, timer = content[len_prefix:].strip().split(" ", maxsplit=1)
+        # Strip <!@IDENTIFIER> to IDENTIFIER
+        target_id = int(person[3:-1])
+        seconds = get_seconds_from_timer(timer)
+        msg = f"<@{discord_id}> has banned <@{person}> for {timer}."
+        msg += "\nMay God have mercy on your soul."
+        await channel.send(msg)
+        await swing_banhammer(channel, guild_id, target_id, seconds)
+    elif content.startswith("!unban"):
+        len_prefix = len("!unban ")
+        person = content[len_prefix:].strip()
+        # Strip <!@IDENTIFIER> to IDENTIFIER
+        target_id = int(person[3:-1])
+        await unban_early(channel, guild_id, target_id)
 
     # Remember to set this as the last message we saw
     # I know we sometimes bail and `return` early, but that's not my problem.

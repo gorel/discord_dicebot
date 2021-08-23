@@ -462,7 +462,7 @@ async def on_message(message):
         # Strip <!@IDENTIFIER> to IDENTIFIER
         target_id = int(person[3:-1])
         seconds = get_seconds_from_timer(timer)
-        msg = f"<@{discord_id}> has banned <@{person}> for {timer}."
+        msg = f"<@{discord_id}> has banned {person} for {timer}."
         msg += "\nMay God have mercy on your soul."
         await channel.send(msg)
         await swing_banhammer(channel, guild_id, target_id, seconds)

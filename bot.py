@@ -191,11 +191,14 @@ async def swing_banhammer(channel, guild_id, target_id, seconds):
 
     # We add a bit of a delay here to ensure the below is_banned call works
     await asyncio.sleep(seconds - 3)
-    logging.info("Done sleeping, check if {target_id} is still banned")
+    logging.info(f"Done sleeping, check if {target_id} is still banned")
     ban_dict = get_banned_dict()
     if is_banned(ban_dict, guild_id, target_id):
-        logging.info(f"{target_id} is still banned, let's tell them they're good now")
-        msg = f"<@{target_id}>: you have been unbanned."
+        user = CLIENT.get_user(target_id)
+        if not user:
+            user = await CLIENT.fetch_user(target_id)
+        logging.info(f"{user} is still banned, let's tell them they're good now")
+        msg = f"{user}: you have been unbanned."
         msg += "\nI hope you learned your lesson, *bucko*."
         await channel.send(msg)
 
@@ -203,7 +206,10 @@ async def unban_early(channel, guild_id, target_id):
     ban_dict = get_banned_dict()
     # Set the bantime to now minus one second
     set_bantime(ban_dict, guild_id, target_id, -1, use_latest=False)
-    msg = f"<@{target_id}> has been unbanned early."
+    user = CLIENT.get_user(target_id)
+    if not user:
+        user = await CLIENT.fetch_user(target_id)
+    msg = f"{user} has been unbanned early."
     msg += "\nYou should thank your benevolent savior."
     await channel.send(msg)
 

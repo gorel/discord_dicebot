@@ -189,7 +189,8 @@ async def swing_banhammer(channel, guild_id, target_id, seconds):
     ban_dict = get_banned_dict()
     set_bantime(ban_dict, guild_id, target_id, seconds)
 
-    await asyncio.sleep(seconds)
+    # We add a bit of a delay here to ensure the below is_banned call works
+    await asyncio.sleep(seconds + 3)
     ban_dict = get_banned_dict()
     if is_banned(ban_dict, guild_id, target_id):
         msg = f"<@{target_id}>: you have been unbanned."

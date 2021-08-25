@@ -24,6 +24,7 @@ DICEBOSS_ROLENAME = "diceboss"
 
 EMOJIFIER = EmojipastaGenerator.of_default_mappings()
 LAST_MSG = ""
+WITTY_REMARK_LIST = ["kid", "bucko", "glue eater", "scrub", "cockalorum", "ninny", "wanker"]
 
 
 dotenv.load_dotenv(".env")
@@ -199,7 +200,7 @@ async def swing_banhammer(channel, guild_id, target_id, seconds):
             user = await CLIENT.fetch_user(target_id)
         logging.info(f"{user} is still banned, let's tell them they're good now")
         msg = f"{user}: you have been unbanned."
-        msg += "\nI hope you learned your lesson, *bucko*."
+        msg += f"\nI hope you learned your lesson, *{random.choice(WITTY_REMARK_LIST)}*."
         await channel.send(msg)
 
 async def unban_early(channel, guild_id, target_id):

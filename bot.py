@@ -482,6 +482,8 @@ async def on_message(message):
         # Strip <!@IDENTIFIER> to IDENTIFIER
         target_id = int(person[3:-1])
         await unban_early(channel, guild_id, target_id)
+    elif contents.startswith("!jpeg") or content.startswith("!jpg"):
+        await channel.send("https://www.youtube.com/watch?v=QEzhxP-pdos")
 
     # Remember to set this as the last message we saw
     # I know we sometimes bail and `return` early, but that's not my problem.

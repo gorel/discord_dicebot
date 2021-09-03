@@ -483,7 +483,7 @@ async def on_message(message):
         target_id = int(person[3:-1])
         await unban_early(channel, guild_id, target_id)
     elif contents.startswith("!jpeg") or content.startswith("!jpg"):
-        await channel.send("https://www.youtube.com/watch?v=QEzhxP-pdos")
+        await channel.send("https://www.youtube.com/watch?v=fZCRYo-0K0c")
     elif content.startswith("!rigged"):
         await channel.send("Yeah I'm rigged, fuck you")
 

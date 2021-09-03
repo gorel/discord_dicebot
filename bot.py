@@ -484,6 +484,8 @@ async def on_message(message):
         await unban_early(channel, guild_id, target_id)
     elif contents.startswith("!jpeg") or content.startswith("!jpg"):
         await channel.send("https://www.youtube.com/watch?v=QEzhxP-pdos")
+    elif content.startswith("!rigged"):
+        await channel.send("Yeah I'm rigged, fuck you")
 
     # Remember to set this as the last message we saw
     # I know we sometimes bail and `return` early, but that's not my problem.

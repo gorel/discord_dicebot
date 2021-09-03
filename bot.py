@@ -486,6 +486,10 @@ async def on_message(message):
         await channel.send("https://www.youtube.com/watch?v=fZCRYo-0K0c")
     elif content.startswith("!rigged"):
         await channel.send("Yeah I'm rigged, fuck you")
+    elif content.startswith("!lgtm"):
+        await channel.send("https://www.dropbox.com/s/01tg912z0t8vze0/foil_lgtm.gif?dl=0")
+    elif content.startswith("!zuckban"):
+        await channel.send("https://www.dropbox.com/s/dm3dazuqyxd7g37/30dayban.jpg?dl=0")
 
     # Remember to set this as the last message we saw
     # I know we sometimes bail and `return` early, but that's not my problem.

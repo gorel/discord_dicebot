@@ -10,10 +10,10 @@ from models import BotParam, DiscordUser, Time
 
 
 async def ban(
-        ctx: MessageContext,
-        target: DiscordUser,
-        timer: Time,
-        ban_as_bot: BotParam[bool] = False,
+    ctx: MessageContext,
+    target: DiscordUser,
+    timer: Time,
+    ban_as_bot: BotParam[bool] = False,
 ) -> None:
     """Ban a user for a given amount of time (bot will shame them)"""
     if ban_as_bot:
@@ -56,9 +56,7 @@ async def ban(
         )
 
 
-async def unban(
-    ctx: MessageContext, target: DiscordUser
-) -> None:
+async def unban(ctx: MessageContext, target: DiscordUser) -> None:
     """Unban a user immediately"""
     ctx.server_ctx.bans[target.id] = -1
     await ctx.channel.send(

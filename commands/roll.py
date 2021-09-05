@@ -36,16 +36,12 @@ async def roll(ctx: MessageContext) -> None:
             # Bail early - don't allow rolling
             return
 
-    logging.info(
-        f"Next roll in server({guild_id}) for {username} is {next_roll}"
-    )
+    logging.info(f"Next roll in server({guild_id}) for {username} is {next_roll}")
 
     # Finally, actually roll the die
     roll = random.randint(1, next_roll)
     db_helper.record_roll(ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll)
-    await ctx.channel.send(
-        f"```# {roll}\nDetails: [d{next_roll} ({roll})]```"
-    )
+    await ctx.channel.send(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
     logging.info(f"{username} rolled a {roll} (d{next_roll})")
 
     if roll == 1:
@@ -53,7 +49,9 @@ async def roll(ctx: MessageContext) -> None:
         if s != "":
             await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
         else:
-            await ctx.channel.send(f"<@{ctx.discord_id}>: gets to rename the chat channel!")
+            await ctx.channel.send(
+                f"<@{ctx.discord_id}>: gets to rename the chat channel!"
+            )
     elif roll == next_roll:
         # Increment the current roll
         ctx.server_ctx.current_roll = next_roll + 1

@@ -6,9 +6,7 @@ from message_context import MessageContext
 from models import GreedyStr, Rename
 
 
-async def rename(
-    ctx: MessageContext, new_name: GreedyStr
-) -> None:
+async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
     """Rename either the server or chat channel (must be the most recent winner)"""
     location = None
 

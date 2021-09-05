@@ -95,7 +95,7 @@ def create_all(conn):
 def clear_all(conn, guild_id):
     sql = DELETE_ALL_SQL.format(identifier=TABLENAME)
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, ))
+    cur.execute(sql, (guild_id,))
     conn.commit()
 
 
@@ -109,8 +109,7 @@ def record_roll(conn, guild_id, discord_id, actual_roll, target_roll):
 
 def record_rename_used_winner(conn, guild_id, discord_id, roll):
     sql = UPDATE_RENAME_USED_SQL.format(
-        identifier=TABLENAME,
-        roll_target="target_roll",
+        identifier=TABLENAME, roll_target="target_roll",
     )
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
@@ -118,10 +117,7 @@ def record_rename_used_winner(conn, guild_id, discord_id, roll):
 
 
 def record_rename_used_loser(conn, guild_id, discord_id, roll):
-    sql = UPDATE_RENAME_USED_SQL.format(
-        identifier=TABLENAME,
-        roll_target="1",
-    )
+    sql = UPDATE_RENAME_USED_SQL.format(identifier=TABLENAME, roll_target="1",)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
     conn.commit()
@@ -142,7 +138,7 @@ def get_last_roll_time(conn, guild_id, discord_id):
 def get_all_stats(conn, guild_id):
     sql = SELECT_ALL_AGGREGATED_SQL.format(identifier=TABLENAME)
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, ))
+    cur.execute(sql, (guild_id,))
     return [
         {"discord_id": row[0], "wins": row[1], "losses": row[2], "attempts": row[3]}
         for row in cur.fetchall()
@@ -151,11 +147,10 @@ def get_all_stats(conn, guild_id):
 
 def get_last_winner(conn, guild_id):
     sql = SELECT_LAST_WINNER_LOSER_SQL.format(
-        identifier=TABLENAME,
-        roll_target="target_roll",
+        identifier=TABLENAME, roll_target="target_roll",
     )
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, ))
+    cur.execute(sql, (guild_id,))
     row = cur.fetchone()
     discord_id, roll, rename_used = None, None, None
     if row is not None:
@@ -168,12 +163,9 @@ def get_last_winner(conn, guild_id):
 
 
 def get_last_loser(conn, guild_id):
-    sql = SELECT_LAST_WINNER_LOSER_SQL.format(
-        identifier=TABLENAME,
-        roll_target="1",
-    )
+    sql = SELECT_LAST_WINNER_LOSER_SQL.format(identifier=TABLENAME, roll_target="1",)
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, ))
+    cur.execute(sql, (guild_id,))
     row = cur.fetchone()
     discord_id, roll, rename_used = None, None, None
     if row is not None:

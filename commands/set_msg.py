@@ -6,9 +6,7 @@ from models import GreedyStr, SetMessageSubcommand
 
 
 async def set_msg(
-    ctx: MessageContext,
-    win_or_lose: SetMessageSubcommand,
-    msg: GreedyStr,
+    ctx: MessageContext, win_or_lose: SetMessageSubcommand, msg: GreedyStr,
 ) -> None:
     """Set the win/loss message in this server for critical success or failure"""
     if command.has_diceboss_role(ctx.message.author):
@@ -21,6 +19,5 @@ async def set_msg(
     else:
         insult = command.get_witty_insult()
         await ctx.channel.send(
-           f"You're not a diceboss.\nDon't try that shit again, {insult}.")
-
-
+            f"You're not a diceboss.\nDon't try that shit again, {insult}."
+        )

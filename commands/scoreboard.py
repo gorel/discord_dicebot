@@ -19,5 +19,3 @@ async def scoreboard(ctx: MessageContext) -> None:
         attempts = record["attempts"]
         msg += f"\t- {user.name}: {wins} wins, {losses} losses ({attempts} rolls)\n"
     await ctx.channel.send(msg)
-
-

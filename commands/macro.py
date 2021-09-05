@@ -5,9 +5,7 @@ from message_context import MessageContext
 from models import GreedyStr
 
 
-async def macro_add(
-    ctx: MessageContext, name: str, value: GreedyStr
-) -> None:
+async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
     """Add a new macro to the server"""
     if name in ctx.server_ctx.macros:
         old = ctx.server_ctx.macros[name]

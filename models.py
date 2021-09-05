@@ -22,6 +22,7 @@ class BotParam(Generic[T]):
     the actor to be the bot itself instead of the original message sender.
     """
 
+
 class SetMessageSubcommand(enum.Enum):
     WIN = 1
     LOSE = 2
@@ -84,7 +85,6 @@ class DiscordUser:
 
     def __str__(self) -> str:
         return str(self.id)
-
 
     def __repr__(self) -> str:
         return str(self)

@@ -50,7 +50,7 @@ class Client(discord.Client):
         # Test messages are designated with a leading "tt "
         if self.is_test:
             if message.content.startswith("tt "):
-                message.content = message.content[len("tt "):]
+                message.content = message.content[len("tt ") :]
             else:
                 return
 
@@ -62,9 +62,7 @@ class Client(discord.Client):
 def main() -> None:
     # Load environment
     dotenv.load_dotenv(".env")
-    db_filename = pathlib.Path(
-        os.getenv("DB_FILENAME") or DEFAULT_DB_FILENAME
-    )
+    db_filename = pathlib.Path(os.getenv("DB_FILENAME") or DEFAULT_DB_FILENAME)
     server_manager_filename = pathlib.Path(
         os.getenv("SERVER_MANAGER_FILENAME") or DEFAULT_SERVER_MANAGER_FILENAME
     )

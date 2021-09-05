@@ -10,7 +10,7 @@ from typing import (
     Optional,
     Type,
     TypeVar,
-    get_type_hints
+    get_type_hints,
 )
 
 import discord
@@ -64,9 +64,7 @@ DEFAULT_REGISTERED_COMMANDS = [
 
 class CommandRunner:
     def __init__(
-        self,
-        ctx: MessageContext,
-        cmds: Optional[List[CommandFunc]] = None,
+        self, ctx: MessageContext, cmds: Optional[List[CommandFunc]] = None,
     ):
         self.ctx = ctx
         cmds = cmds or DEFAULT_REGISTERED_COMMANDS
@@ -95,7 +93,7 @@ class CommandRunner:
 
         # Validate that this is a function taking a MessageContext
         ctx_param = None
-        for k,v in types.items():
+        for k, v in types.items():
             if v is MessageContext:
                 ctx_param = k
 
@@ -119,7 +117,8 @@ class CommandRunner:
 
         # Also check if there are bot params we should disable
         parameters = [
-            param for param in parameters
+            param
+            for param in parameters
             if not CommandRunner.is_botparam_type(types[param])
         ]
 
@@ -141,7 +140,7 @@ class CommandRunner:
             k: CommandRunner.typify(types[k], v)
             # TODO: We implicitly rely on ctx being the first param here,
             # which isn't good style... it could break a function
-            for k,v in zip(parameters, args)
+            for k, v in zip(parameters, args)
         }
         return typed_args
 
@@ -187,9 +186,7 @@ class CommandRunner:
         # instantiate a generic and then check its __class__ attribute since
         # calling issubclass immediately tells us that types[arg] is not a class
         args_str += " ".join(
-            f"<{arg}>"
-            for arg in args
-            if not CommandRunner.is_botparam_type(types[arg])
+            f"<{arg}>" for arg in args if not CommandRunner.is_botparam_type(types[arg])
         )
 
         usage = ""
@@ -201,4 +198,3 @@ class CommandRunner:
             else:
                 usage = f":\n{doc}"
         return f"__!{f.__name__}__{args_str}{usage}"
-

@@ -17,6 +17,5 @@ async def clear_stats(ctx: MessageContext) -> None:
     else:
         insult = command.get_witty_insult()
         await ctx.channel.send(
-            f"You're not a diceboss.\nDon't try that shit again, {insult}.")
-
-
+            f"You're not a diceboss.\nDon't try that shit again, {insult}."
+        )

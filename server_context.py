@@ -47,10 +47,7 @@ class ServerContext:
         logging.info(f"{username}: {message.content}")
 
         ctx = MessageContext(
-            server_ctx=self,
-            client=client,
-            message=message,
-            db_conn=db_conn,
+            server_ctx=self, client=client, message=message, db_conn=db_conn,
         )
 
         runner = CommandRunner(self)
@@ -110,7 +107,6 @@ class ServerContext:
     def save(self) -> None:
         with open(self.filepath, "wb") as f:
             pickle.dump(self, f)
-
 
     def reload(self) -> None:
         with open(self.filepath, "rb") as f:

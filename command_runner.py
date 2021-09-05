@@ -159,9 +159,10 @@ class CommandRunner:
             args_str = ", ".join(args)
             logging.info(f"Calling {funcname}(ctx, {args_str}) successfully")
             await func(ctx, **prepared_args)
+        except KeyError as ke:
+            logging.error(f"Could not find function {funcname}")
+            raise
         except Exception as e:
-            # TODO: More granular exception
-            # TODO: Differentiate between unknown func, bad params, internal failure
             # TODO: Log helpful message to message.guild
             logging.error(f"Failed to call function: {funcname}(ctx, {args_str})")
             logging.error(f"{type(e)}: {e}")

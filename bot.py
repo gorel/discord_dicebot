@@ -23,6 +23,7 @@ import schema
 import sqlite3
 
 import db_helper
+from colored_log_formatter import ColoredLogFormatter
 from server_manager import ServerManager
 
 
@@ -74,6 +75,9 @@ def main() -> None:
 
     # Set up stderr logging
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
+    root_logger = logging.getLogger()
+    handler = root_logger.handlers[0]
+    handler.setFormatter(ColoredLogFormatter())
 
     # Ensure DB setup is complete
     logging.info("Setting up db connection and tables")

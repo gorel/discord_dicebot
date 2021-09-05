@@ -10,6 +10,7 @@ from typing import Any, ClassVar, Dict, Optional
 
 import discord
 
+from colored_log_formatter import ColoredLogFormatter
 from command_runner import CommandRunner
 from message_context import MessageContext
 
@@ -43,8 +44,22 @@ class ServerContext:
         db_conn: sqlite3.Connection,
     ) -> None:
         # TODO: Allow disabling of logging all messages?
+        # Don't propagate messages since this is used specifically for logging
+        # user messages, which can get spammy
+        message_logger = logging.getLogger("messages")
+        message_logger.propagate = False
+
+        # Only add the handler *once*
+        if len(message_logger.handlers) == 0:
+            hdl = logging.StreamHandler()
+            hdl.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
+            message_logger.addHandler(hdl)
+
+        guild_name = message.guild.name
         username = message.author.name
-        logging.info(f"{username}: {message.content}")
+        # Check the message length is > 0 to ignore logging image-only messages
+        if len(message.content) > 0:
+            message_logger.info(f"{guild_name} | {username}: {message.content}")
 
         ctx = MessageContext(
             server_ctx=self, client=client, message=message, db_conn=db_conn,
@@ -54,7 +69,7 @@ class ServerContext:
 
         # If the user is banned, we react SHAME
         if self.bans.get(ctx.discord_id, -1) > time.time():
-            logging.info(f"{ctx.discord_id} is banned! Shame them.")
+            logging.warning(f"{ctx.discord_id} is banned! Shame them.")
             await message.add_reaction("🇸")
             await message.add_reaction("🇭")
             await message.add_reaction("🇦")

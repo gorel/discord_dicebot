@@ -4,5 +4,9 @@
 *.db
 *.db-journal
 *.json
+.*.swp
+*.sqlite3
 
 .mypy_cache/
+
+server_contexts/

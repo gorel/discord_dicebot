@@ -16,7 +16,6 @@ from typing import (
 import discord
 
 from commands import (
-    announce,
     ban,
     clear_stats,
     macro,
@@ -60,8 +59,6 @@ DEFAULT_REGISTERED_COMMANDS = [
     macro.macro_add,
     macro.macro_del,
     macro.m,
-    # Make an announcement somewhere
-    announce.announce,
 ]
 
 

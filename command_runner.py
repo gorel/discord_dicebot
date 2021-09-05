@@ -15,8 +15,20 @@ from typing import (
 
 import discord
 
-import command
+from commands import (
+    ban,
+    clear_stats,
+    macro,
+    remindme,
+    rename,
+    reset_roll,
+    roll,
+    scoreboard,
+    set_msg,
+    set_timeout,
+)
 from message_context import MessageContext
+from models import BotParam, GreedyStr
 
 
 CommandFunc = Callable[..., Awaitable[None]]
@@ -24,19 +36,29 @@ T = TypeVar("T")
 
 
 DEFAULT_REGISTERED_COMMANDS = [
-    command.roll,
-    command.scoreboard,
-    command.set_msg,
-    command.rename,
-    command.reset_roll,
-    command.set_timeout,
-    command.clear_stats,
-    command.remindme,
-    command.ban,
-    command.unban,
-    command.macro_add,
-    command.macro_del,
-    command.m,
+    # Basic roll commands
+    roll.roll,
+    # Scoreboard commands
+    scoreboard.scoreboard,
+    # Set win/loss message commands
+    set_msg.set_msg,
+    # Server/chat renaming commands
+    rename.rename,
+    # Reset roll commands
+    reset_roll.reset_roll,
+    # Roll timeout commands
+    set_timeout.set_timeout,
+    # Clear stats commands
+    clear_stats.clear_stats,
+    # Reminder commands
+    remindme.remindme,
+    # Ban commands
+    ban.ban,
+    ban.unban,
+    # Macro commands
+    macro.macro_add,
+    macro.macro_del,
+    macro.m,
 ]
 
 
@@ -54,11 +76,15 @@ class CommandRunner:
         self.cmds[cmd.__name__] = cmd
 
     @staticmethod
+    def is_botparam_type(t: Any) -> bool:
+        if hasattr(t, "__origin__"):
+            return issubclass(t.__origin__, BotParam)
+
+    @staticmethod
     def typify(typ: Type[T], value: str) -> Any:
-        if "from_str" in dir(typ):
-            # Classes explicitly set up with a from_str constructor
-            # TODO - Not sure how to make this not sketchy
-            return typ.from_str(value)
+        from_str_callable = getattr(typ, "from_str", None)
+        if callable(from_str_callable):
+            return from_str_callable(value)
         else:
             # Assume typ takes a string constructor
             return typ(value)
@@ -91,12 +117,24 @@ class CommandRunner:
                 del parameters[i]
                 break
 
-        if len(parameters) > 0 and types[parameters[-1]] is command.GreedyStr:
+        # Also check if there are bot params we should disable
+        parameters = [
+            param for param in parameters
+            if not CommandRunner.is_botparam_type(types[param])
+        ]
+
+        if len(parameters) > 0 and types[parameters[-1]] is GreedyStr:
             # This is -1 because the last argument will be part of the glob
             n = len(parameters) - 1
             args, glob = args[:n], args[n:]
             greedy_arg = " ".join(glob)
             args.append(greedy_arg)
+
+        # TODO: This is *maybe* a good idea, but if we want to support default
+        # arguments, I think it could cause some additional headaches. For now,
+        # let's just allow extraneous arguments.
+        # if len(parameters) != len(args):
+        #    raise ValueError(f"Have {len(parameters)} parameters bUt {len(args)} args given")
 
         # Make sure *all* arguments are kwargs now
         typed_args = {
@@ -133,13 +171,26 @@ class CommandRunner:
 
     @staticmethod
     def helptext(f: CommandFunc, limit: Optional[int] = None) -> str:
-        fname = f"!{f.__name__}"
         types = get_type_hints(f)
         argc = f.__code__.co_argcount
         args = f.__code__.co_varnames[:argc]
+
+        args_str = ""
         if len(args) > 0 and types[args[0]] is MessageContext:
             args = args[1:]
-        args_str = " ".join(f"<{arg}>" for arg in args)
+            # If there are args, we prepend a space character since it will
+            # start right after the function name (otherwise there's a somewhat
+            # awkward extra space with helptext for param-less functions)
+            if len(args) > 0:
+                args_str = " "
+        # This is going to look like some more witchcraft, but we have to fully
+        # instantiate a generic and then check its __class__ attribute since
+        # calling issubclass immediately tells us that types[arg] is not a class
+        args_str += " ".join(
+            f"<{arg}>"
+            for arg in args
+            if not CommandRunner.is_botparam_type(types[arg])
+        )
 
         usage = ""
         if f.__doc__ and len(f.__doc__) > 0:
@@ -149,5 +200,5 @@ class CommandRunner:
                 usage = f": {doc}"
             else:
                 usage = f":\n{doc}"
-        return f"!{f.__name__} {args_str}{usage}"
+        return f"__!{f.__name__}__{args_str}{usage}"
 

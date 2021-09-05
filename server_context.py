@@ -31,8 +31,8 @@ class ServerContext:
         self.guild_id = guild_id
         self.current_roll = ServerContext.DEFAULT_CURRENT_ROLL
         self.roll_timeout_hours = ServerContext.DEFAULT_ROLL_TIMEOUT_HOURS
-        self.critical_success_msg = ""
-        self.critical_failure_msg = ""
+        self.critical_success_msg = "Critical success!"
+        self.critical_failure_msg = "Critical failure!"
         self.bans = {}
         self.macros = {}
 
@@ -42,6 +42,10 @@ class ServerContext:
         message: discord.Message,
         db_conn: sqlite3.Connection,
     ) -> None:
+        # TODO: Allow disabling of logging all messages?
+        username = message.author.name
+        logging.info(f"{username}: {message.content}")
+
         ctx = MessageContext(
             server_ctx=self,
             client=client,
@@ -65,6 +69,9 @@ class ServerContext:
             if " " in message.content:
                 func = message.content.split(" ")[1]
                 text = self.helptext(runner, func)
+            else:
+                text = self.helptext(runner)
+            await ctx.channel.send(text)
         elif message.content.startswith("!"):
             # Defer to the command runner
             try:
@@ -75,6 +82,7 @@ class ServerContext:
                     end = message.content.index(" ")
                 func = message.content[1:end]
                 helptext = self.helptext(runner, func)
+                logging.exception("Failed to call command")
                 await ctx.channel.send(helptext)
 
     @staticmethod

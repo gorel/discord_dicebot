@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import asyncio
+import logging
 import pathlib
 import pickle
 import sqlite3
@@ -17,7 +19,9 @@ class ServerManager:
     server_files: Dict[int, pathlib.Path]
     servers: Dict[int, ServerContext]
 
-    def __init__(self):
+    def __init__(self, lock: asyncio.Lock, filepath: pathlib.Path) -> None:
+        self.lock = lock
+        self.filepath = filepath
         self.server_files = {}
         self.servers = {}
         SERVER_DIRECTORY.mkdir(parents=True, exist_ok=True)
@@ -45,17 +49,22 @@ class ServerManager:
         ctx = self.get_or_create_ctx(guild_id)
         await ctx.handle(client, message, db_conn)
 
-    def save(self, filepath: pathlib.Path) -> None:
-        with open(filepath, "wb") as f:
-            pickle.dump(self.server_files, f)
-        for guild_id in self.server_files:
-            server = self.servers[guild_id]
-            filepath = self.server_files[guild_id]
-            server.save()
+    async def save(self) -> None:
+        # When saving, get the *current state* and just update it
+        # This is necessary since we may be out of date
+        async with self.lock:
+            current_state = self.load(self.lock, self.filepath)
+            new_servers = current_state.servers.keys() - self.servers.keys()
+            logging.info(f"Manager saving after learning of new servers: {new_servers}")
+            self.server_files.update(current_state.server_files)
+            self.servers.update(current_state.servers)
+
+            with open(self.filepath, "wb") as f:
+                pickle.dump(self.server_files, f)
 
     @staticmethod
-    def load(filepath: pathlib.Path) -> "ServerManager":
-        manager = ServerManager()
+    def load(lock: asyncio.Lock, filepath: pathlib.Path) -> "ServerManager":
+        manager = ServerManager(lock, filepath)
         with open(filepath, "rb") as f:
             manager.server_files = pickle.load(f)
         for guild_id, filepath in manager.server_files.items():
@@ -63,8 +72,8 @@ class ServerManager:
         return manager
 
     @staticmethod
-    def try_load(filepath: pathlib.Path) -> "ServerManager":
+    def try_load(lock: asyncio.Lock, filepath: pathlib.Path) -> "ServerManager":
         try:
-            return ServerManager.load(filepath)
+            return ServerManager.load(lock, filepath)
         except Exception:
-            return ServerManager()
+            return ServerManager(lock, filepath)

@@ -28,12 +28,7 @@ async def ban(
             "May God have mercy on your soul."
         )
     current_ban = ctx.server_ctx.bans.get(target.id, -1)
-    ctx.server_ctx.bans[target.id] = max(current_ban, time.time() + timer.seconds)
-
-    # We need to save our state before sleeping so other workers will know
-    # about this ban
-    # TODO: What if *any* property update went to disk? Interesting idea...
-    ctx.server_ctx.save()
+    ctx.server_ctx.set_ban(target.id, max(current_ban, time.time() + timer.seconds))
 
     # Tell them they're unbanned 1 second late to ensure any weird delays
     # will still make the logic sound
@@ -58,7 +53,7 @@ async def ban(
 
 async def unban(ctx: MessageContext, target: DiscordUser) -> None:
     """Unban a user immediately"""
-    ctx.server_ctx.bans[target.id] = -1
+    ctx.server_ctx.set_ban(target.id, -1)
     await ctx.channel.send(
         f"<@{target.id}> has been unbanned early.\n"
         "You should think your benevolent savior.\n"

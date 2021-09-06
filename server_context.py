@@ -20,22 +20,90 @@ class ServerContext:
     DEFAULT_ROLL_TIMEOUT_HOURS: ClassVar[int] = 18
 
     guild_id: int
-    current_roll: int
-    roll_timeout: int
-    critical_success_msg: str
-    critical_failure_msg: str
-    bans: Dict[int, int]
-    macros: Dict[str, str]
+    _current_roll: int
+    _roll_timeout: int
+    _critical_success_msg: str
+    _critical_failure_msg: str
+    _bans: Dict[int, int]
+    _macros: Dict[str, str]
 
-    def __init__(self, filepath: pathlib.Path, guild_id: int):
+    def __init__(self, filepath: pathlib.Path, guild_id: int) -> None:
         self.filepath = filepath
         self.guild_id = guild_id
-        self.current_roll = ServerContext.DEFAULT_CURRENT_ROLL
-        self.roll_timeout_hours = ServerContext.DEFAULT_ROLL_TIMEOUT_HOURS
-        self.critical_success_msg = "Critical success!"
-        self.critical_failure_msg = "Critical failure!"
-        self.bans = {}
-        self.macros = {}
+        self._current_roll = ServerContext.DEFAULT_CURRENT_ROLL
+        self._roll_timeout_hours = ServerContext.DEFAULT_ROLL_TIMEOUT_HOURS
+        self._critical_success_msg = "Critical success!"
+        self._critical_failure_msg = "Critical failure!"
+        self._bans = {}
+        self._macros = {}
+
+    # Anything stateful *must* be stored as a property so we can always ensure
+    # save is called when it gets updated
+    @property
+    def current_roll(self) -> int:
+        return self._current_roll
+
+    @current_roll.setter
+    def current_roll(self, value: int) -> None:
+        self._current_roll = value
+        self.save()
+
+    @property
+    def roll_timeout_hours(self) -> int:
+        return self._roll_timeout_hours
+
+    @roll_timeout_hours.setter
+    def roll_timeout_hours(self, value: int) -> None:
+        self._roll_timeout_hours = value
+        self.save()
+
+    @property
+    def critical_success_msg(self) -> str:
+        return self._critical_success_msg
+
+    @critical_success_msg.setter
+    def critical_success_msg(self, value: str) -> None:
+        self.critical_success_msg = value
+        self.save()
+
+    @property
+    def critical_failure_msg(self) -> str:
+        return self._critical_failure_msg
+
+    @critical_failure_msg.setter
+    def critical_failure_msg(self, value: str) -> None:
+        self.critical_failure_msg = value
+        self.save()
+
+    @property
+    def bans(self) -> Dict[int, int]:
+        return self._bans
+
+    @bans.setter
+    def bans(self, value: Dict[int, int]) -> None:
+        self._bans = value
+        self.save()
+
+    def set_ban(self, key: int, value: int) -> None:
+        self._bans[key] = value
+        self.save()
+
+    @property
+    def macros(self) -> Dict[str, str]:
+        return self._macros
+
+    @macros.setter
+    def macros(self, value: Dict[str, str]) -> None:
+        self._macros = value
+        self.save()
+
+    def set_macro(self, key: str, value: str) -> None:
+        self._macros[key] = value
+        self.save()
+
+    def unset_macro(self, key: str) -> None:
+        del self._macros[key]
+        self.save()
 
     async def handle(
         self,
@@ -120,6 +188,8 @@ class ServerContext:
         return cmd_text
 
     def save(self) -> None:
+        # When saving, get the *current state* and just update it
+        # This is necessary since we may be out of date
         with open(self.filepath, "wb") as f:
             pickle.dump(self, f)
 

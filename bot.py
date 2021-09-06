@@ -11,6 +11,7 @@ Options:
     -t --test   Set the bot to only respond to messages prepended with TEST
 """
 
+import asyncio
 import logging
 import os
 import pathlib
@@ -39,6 +40,7 @@ class Client(discord.Client):
         is_test: bool = False,
     ):
         super().__init__()
+        self.lock = asyncio.Lock()
         self.db_conn = db_conn
         self.mgr_path = mgr_path
         self.is_test = is_test
@@ -55,9 +57,8 @@ class Client(discord.Client):
             else:
                 return
 
-        mgr = ServerManager.try_load(self.mgr_path)
+        mgr = ServerManager.try_load(self.lock, self.mgr_path)
         await mgr.handle(self, message, self.db_conn)
-        mgr.save(self.mgr_path)
 
 
 def main() -> None:

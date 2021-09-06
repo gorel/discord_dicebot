@@ -13,7 +13,7 @@ async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
             f"Warning: <@{ctx.discord_id}> overwrote the macro for {name}\n"
             f"\t- Old macro: {old}\n\t+ New macro: {value}"
         )
-    ctx.server_ctx.macros[name] = value
+    ctx.server_ctx.set_macro(name, value)
     await ctx.channel.send(f"Set macro for {name}")
 
 
@@ -25,7 +25,7 @@ async def macro_del(ctx: MessageContext, name: str) -> None:
             f"Warning: <@{ctx.discord_id}> deleted the macro for {name}\n"
             f"\t- Old macro: {old}"
         )
-        del ctx.server_ctx.macros[name]
+        ctx.server_ctx.unset_macro(name)
     else:
         insult = command.get_witty_insult()
         await ctx.channel.send(f"There's no macro defined for {name}, {insult}.")

@@ -21,7 +21,7 @@ class ServerContext:
 
     guild_id: int
     _current_roll: int
-    _roll_timeout: int
+    _roll_timeout_hours: int
     _critical_success_msg: str
     _critical_failure_msg: str
     _bans: Dict[int, int]

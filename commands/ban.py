@@ -5,6 +5,7 @@ import logging
 import time
 
 import command
+from commands import timezone
 from message_context import MessageContext
 from models import BotParam, DiscordUser, Time
 
@@ -16,18 +17,26 @@ async def ban(
     ban_as_bot: BotParam[bool] = False,
 ) -> None:
     """Ban a user for a given amount of time (bot will shame them)"""
+    new_ban = int(time.time()) + timer.seconds
+    new_ban_end_str = timezone.localize(new_ban, ctx.server_ctx.tz)
     if ban_as_bot:
         insult = command.get_witty_insult()
         await ctx.channel.send(
             f"I have chosen to ban <@{target}> for {timer}\n"
+            f"The ban will end at {new_ban_end_str}\n"
             f"May God have mercy on your soul, {insult}."
         )
     else:
         await ctx.channel.send(
             f"<@{ctx.discord_id}> has banned <@{target}> for {timer}\n"
+            f"The ban will end at {new_ban_end_str}\n"
             "May God have mercy on your soul."
         )
+
     current_ban = ctx.server_ctx.bans.get(target.id, -1)
+    if current_ban > new_ban:
+        localized = timezone.localize(current_ban, ctx.server_ctx.tz)
+        await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
     ctx.server_ctx.set_ban(target.id, max(current_ban, time.time() + timer.seconds))
 
     # Tell them they're unbanned 1 second late to ensure any weird delays

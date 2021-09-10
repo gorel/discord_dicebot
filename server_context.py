@@ -9,12 +9,10 @@ import time
 from typing import Any, ClassVar, Dict, Optional
 
 import discord
+import pytz
 
-from colored_log_formatter import ColoredLogFormatter
-from commands import ban
 from command_runner import CommandRunner
 from message_context import MessageContext
-from models import DiscordUser, Time
 from reaction_runner import ReactionRunner
 
 
@@ -29,6 +27,7 @@ class ServerContext:
     _critical_failure_msg: str
     _bans: Dict[int, int]
     _macros: Dict[str, str]
+    _tz: str
 
     def __init__(self, filepath: pathlib.Path, guild_id: int) -> None:
         self.filepath = filepath
@@ -39,6 +38,7 @@ class ServerContext:
         self._critical_failure_msg = "Critical failure!"
         self._bans = {}
         self._macros = {}
+        self._tz = "US/Pacific"
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -106,6 +106,20 @@ class ServerContext:
 
     def unset_macro(self, key: str) -> None:
         del self._macros[key]
+        self.save()
+
+    @property
+    def tz(self) -> str:
+        # Backwards compatibility
+        if getattr(self, "_tz", None) is None:
+            self.tz = "US/Pacific"
+        return self._tz
+
+    @tz.setter
+    def tz(self, value: str) -> None:
+        # We let this potentially fail on purpose to bubble up the error
+        tz = pytz.timezone(value)
+        self._tz = value
         self.save()
 
     async def handle_message(

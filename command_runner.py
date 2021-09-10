@@ -26,6 +26,7 @@ from commands import (
     scoreboard,
     set_msg,
     set_timeout,
+    timezone,
 )
 from message_context import MessageContext
 from models import BotParam, GreedyStr
@@ -59,6 +60,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     macro.macro_add,
     macro.macro_del,
     macro.m,
+    # Timezone settings
+    timezone.set_tz,
 ]
 
 

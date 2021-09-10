@@ -17,8 +17,7 @@ ReactionFunc = Callable[[discord.Reaction, MessageContext], Awaitable[HandlerSta
 
 # TODO: Move this into its own file
 async def handle_ban_reaction(
-    reaction: discord.Reaction,
-    ctx: MessageContext,
+    reaction: discord.Reaction, ctx: MessageContext,
 ) -> HandlerStatus:
     is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
     if not is_ban_emoji or reaction.count != 2:
@@ -57,9 +56,7 @@ class ReactionRunner:
         self.handlers = reaction_handlers or DEFAULT_REACTION_HANDLERS
 
     async def handle_reaction(
-        self,
-        reaction: discord.Reaction,
-        ctx: MessageContext,
+        self, reaction: discord.Reaction, ctx: MessageContext,
     ) -> None:
         logging.info("Called handle_reaction")
         for handler in self.handlers:

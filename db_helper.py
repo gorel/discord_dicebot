@@ -132,7 +132,9 @@ def clear_all(conn: sqlite3.Connection, guild_id):
     conn.commit()
 
 
-def record_roll(conn: sqlite3.Connection, guild_id, discord_id, actual_roll, target_roll):
+def record_roll(
+    conn: sqlite3.Connection, guild_id, discord_id, actual_roll, target_roll
+):
     now = datetime.datetime.now()
     sql = INSERT_ROLLS_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
@@ -196,7 +198,9 @@ def get_last_winner(conn: sqlite3.Connection, guild_id):
 
 
 def get_last_loser(conn: sqlite3.Connection, guild_id):
-    sql = SELECT_LAST_WINNER_LOSER_SQL.format(identifier=ROLLS_TABLENAME, roll_target="1")
+    sql = SELECT_LAST_WINNER_LOSER_SQL.format(
+        identifier=ROLLS_TABLENAME, roll_target="1"
+    )
     cur = conn.cursor()
     cur.execute(sql, (guild_id,))
     row = cur.fetchone()
@@ -211,9 +215,7 @@ def get_last_loser(conn: sqlite3.Connection, guild_id):
 
 
 def record_banned_message(
-    conn: sqlite3.Connection,
-    guild_id: int,
-    msg_id: int,
+    conn: sqlite3.Connection, guild_id: int, msg_id: int,
 ) -> None:
     sql = INSERT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
     cur = conn.cursor()
@@ -222,9 +224,7 @@ def record_banned_message(
 
 
 def has_message_been_banned(
-    conn: sqlite3.Connection,
-    guild_id: int,
-    msg_id: int,
+    conn: sqlite3.Connection, guild_id: int, msg_id: int,
 ) -> bool:
     sql = SELECT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
     cur = conn.cursor()

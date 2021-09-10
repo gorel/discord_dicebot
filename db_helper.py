@@ -134,7 +134,7 @@ def clear_all(conn: sqlite3.Connection, guild_id):
 
 def record_roll(conn: sqlite3.Connection, guild_id, discord_id, actual_roll, target_roll):
     now = datetime.datetime.now()
-    sql = INSERT_ROLLS_SQL.format(identifier=TABLENAME)
+    sql = INSERT_ROLLS_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, actual_roll, target_roll, now, 0))
     conn.commit()
@@ -142,7 +142,7 @@ def record_roll(conn: sqlite3.Connection, guild_id, discord_id, actual_roll, tar
 
 def record_rename_used_winner(conn: sqlite3.Connection, guild_id, discord_id, roll):
     sql = UPDATE_RENAME_USED_SQL.format(
-        identifier=TABLENAME, roll_target="target_roll",
+        identifier=ROLLS_TABLENAME, roll_target="target_roll",
     )
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
@@ -150,14 +150,14 @@ def record_rename_used_winner(conn: sqlite3.Connection, guild_id, discord_id, ro
 
 
 def record_rename_used_loser(conn: sqlite3.Connection, guild_id, discord_id, roll):
-    sql = UPDATE_RENAME_USED_SQL.format(identifier=TABLENAME, roll_target="1",)
+    sql = UPDATE_RENAME_USED_SQL.format(identifier=ROLLS_TABLENAME, roll_target="1",)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
     conn.commit()
 
 
 def get_last_roll_time(conn: sqlite3.Connection, guild_id, discord_id):
-    sql = SELECT_LAST_ROLL_TIME_SQL.format(identifier=TABLENAME)
+    sql = SELECT_LAST_ROLL_TIME_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id))
     try:
@@ -169,7 +169,7 @@ def get_last_roll_time(conn: sqlite3.Connection, guild_id, discord_id):
 
 
 def get_all_stats(conn: sqlite3.Connection, guild_id):
-    sql = SELECT_ALL_AGGREGATED_SQL.format(identifier=TABLENAME)
+    sql = SELECT_ALL_AGGREGATED_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id,))
     return [
@@ -180,7 +180,7 @@ def get_all_stats(conn: sqlite3.Connection, guild_id):
 
 def get_last_winner(conn: sqlite3.Connection, guild_id):
     sql = SELECT_LAST_WINNER_LOSER_SQL.format(
-        identifier=TABLENAME, roll_target="target_roll",
+        identifier=ROLLS_TABLENAME, roll_target="target_roll",
     )
     cur = conn.cursor()
     cur.execute(sql, (guild_id,))

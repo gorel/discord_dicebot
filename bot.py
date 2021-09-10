@@ -63,6 +63,10 @@ class Client(discord.Client):
     async def on_reaction_add(
         self, reaction: discord.Reaction, user: discord.User,
     ) -> None:
+        if user == self.user:
+            # Don't let the bot listen to reactions from itself
+            return
+
         mgr = ServerManager.try_load(self.lock, self.mgr_path)
         await mgr.handle_reaction_add(self, reaction, self.db_conn)
 

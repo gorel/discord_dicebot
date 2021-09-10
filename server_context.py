@@ -15,6 +15,7 @@ from commands import ban
 from command_runner import CommandRunner
 from message_context import MessageContext
 from models import DiscordUser, Time
+from reaction_runner import ReactionRunner
 
 
 class ServerContext:
@@ -135,7 +136,7 @@ class ServerContext:
             server_ctx=self, client=client, message=message, db_conn=db_conn,
         )
 
-        runner = CommandRunner(self)
+        runner = CommandRunner()
 
         # If the user is banned, we react SHAME
         if self.bans.get(ctx.discord_id, -1) > time.time():
@@ -173,28 +174,11 @@ class ServerContext:
         reaction: discord.Reaction,
         db_conn: sqlite3.Connection,
     ) -> None:
-        # TODO: There's technically a weird thing that can happen where someone
-        # removes a reaction and then adds another, resulting in the reaction
-        # count going back to two and *rebanning* the user
-        is_ban_emoji = (
-            not isinstance(reaction.emoji, str)
-            and reaction.count == 2
-            and reaction.emoji.name == "BAN"
+        ctx = MessageContext(
+            server_ctx=self, client=client, message=reaction.message, db_conn=db_conn,
         )
-        if is_ban_emoji:
-            ctx = MessageContext(
-                server_ctx=self,
-                client=client,
-                message=reaction.message,
-                db_conn=db_conn,
-            )
-            await reaction.message.channel.send("Bro", reference=reaction.message)
-            await ban.ban(
-                ctx,
-                target=DiscordUser(reaction.message.author.id),
-                timer=Time("1hr"),
-                ban_as_bot=True,
-            )
+        runner = ReactionRunner()
+        await runner.handle_reaction(reaction, ctx)
 
     @staticmethod
     def helptext(runner: CommandRunner, cmd: Optional[str] = None) -> str:

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import enum
-from typing import Generic, TypeVar
+from typing import Generic, Optional, TypeVar
 
 
 T = TypeVar("T")
@@ -21,6 +21,18 @@ class BotParam(Generic[T]):
     usage helptext. This is useful for bot-only arguments such as changing
     the actor to be the bot itself instead of the original message sender.
     """
+
+
+class Status(enum.Enum):
+    Success = 1
+    Failure = 2
+    Invalid = 3
+
+
+class HandlerStatus:
+    def __init__(self, status: Status, msg: Optional[str] = None) -> None:
+        self.status = status
+        self.msg = msg or ""
 
 
 class SetMessageSubcommand(enum.Enum):

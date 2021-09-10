@@ -63,10 +63,7 @@ DEFAULT_REGISTERED_COMMANDS = [
 
 
 class CommandRunner:
-    def __init__(
-        self, ctx: MessageContext, cmds: Optional[List[CommandFunc]] = None,
-    ):
-        self.ctx = ctx
+    def __init__(self, cmds: Optional[List[CommandFunc]] = None) -> None:
         cmds = cmds or DEFAULT_REGISTERED_COMMANDS
         self.cmds = {cmd.__name__: cmd for cmd in cmds}
 

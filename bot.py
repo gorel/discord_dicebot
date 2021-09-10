@@ -45,7 +45,7 @@ class Client(discord.Client):
         self.mgr_path = mgr_path
         self.is_test = is_test
 
-    async def on_message(self, message) -> None:
+    async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:
             # Don't let the bot respond to itself
             return
@@ -58,7 +58,15 @@ class Client(discord.Client):
                 return
 
         mgr = ServerManager.try_load(self.lock, self.mgr_path)
-        await mgr.handle(self, message, self.db_conn)
+        await mgr.handle_message(self, message, self.db_conn)
+
+    async def on_reaction_add(
+        self,
+        reaction: discord.Reaction,
+        user: discord.User,
+    ) -> None:
+        mgr = ServerManager.try_load(self.lock, self.mgr_path)
+        await mgr.handle_reaction_add(self, reaction, self.db_conn)
 
 
 def main() -> None:

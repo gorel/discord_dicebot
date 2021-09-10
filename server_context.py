@@ -11,8 +11,10 @@ from typing import Any, ClassVar, Dict, Optional
 import discord
 
 from colored_log_formatter import ColoredLogFormatter
+from commands import ban
 from command_runner import CommandRunner
 from message_context import MessageContext
+from models import DiscordUser, Time
 
 
 class ServerContext:
@@ -105,7 +107,7 @@ class ServerContext:
         del self._macros[key]
         self.save()
 
-    async def handle(
+    async def handle_message(
         self,
         client: discord.Client,
         message: discord.Message,
@@ -164,6 +166,21 @@ class ServerContext:
                 helptext = self.helptext(runner, func)
                 logging.exception("Failed to call command")
                 await ctx.channel.send(helptext)
+
+    async def handle_reaction_add(
+        self,
+        client: discord.Client,
+        reaction: discord.Reaction,
+        db_conn: sqlite3.Connection,
+    ) -> None:
+        is_ban_emoji = (
+            not isinstance(reaction.emoji, str) and reaction.count == 1 and reaction.emoji.name == "BAN")
+        if is_ban_emoji:
+            ctx = MessageContext(
+                server_ctx=self, client=client, message=reaction.message, db_conn=db_conn,
+            )
+            await reaction.message.channel.send("Bro", reference=reaction.message)
+            await ban.ban(ctx, target=DiscordUser(reaction.message.author.id), timer=Time("1hr"), ban_as_bot=True)
 
     @staticmethod
     def helptext(runner: CommandRunner, cmd: Optional[str] = None) -> str:

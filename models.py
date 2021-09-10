@@ -95,4 +95,7 @@ class DiscordUser:
             s = s[1:-1]
         if len(s) > 0 and s[0:2] == "@!":
             s = s[2:]
+        elif len(s) > 0 and s[0] == "@":
+            # Sometimes there's a leading @ but no ! -- I don't know why
+            s = s[1:]
         return DiscordUser(int(s))

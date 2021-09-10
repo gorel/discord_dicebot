@@ -56,5 +56,5 @@ async def unban(ctx: MessageContext, target: DiscordUser) -> None:
     ctx.server_ctx.set_ban(target.id, -1)
     await ctx.channel.send(
         f"<@{target.id}> has been unbanned early.\n"
-        "You should think your benevolent savior.\n"
+        "You should thank your benevolent savior.\n"
     )

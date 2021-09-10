@@ -39,7 +39,7 @@ class ServerManager:
             self.servers[guild_id] = ctx
             return ctx
 
-    async def handle(
+    async def handle_message(
         self,
         client: discord.Client,
         message: discord.Message,
@@ -47,7 +47,17 @@ class ServerManager:
     ) -> None:
         guild_id = message.channel.guild.id
         ctx = self.get_or_create_ctx(guild_id)
-        await ctx.handle(client, message, db_conn)
+        await ctx.handle_message(client, message, db_conn)
+
+    async def handle_reaction_add(
+        self,
+        client: discord.Client,
+        reaction: discord.Reaction,
+        db_conn: sqlite3.Connection,
+    ) -> None:
+        guild_id = reaction.message.channel.guild.id
+        ctx = self.get_or_create_ctx(guild_id)
+        await ctx.handle_reaction_add(client, reaction, db_conn)
 
     async def save(self) -> None:
         # When saving, get the *current state* and just update it

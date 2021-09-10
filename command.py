@@ -12,7 +12,7 @@ def get_witty_insult() -> str:
     return random.choice(
         [
             "bucko",
-            "cockalorum",
+            "bud",
             "glue eater",
             "kid",
             "ninny",
@@ -20,6 +20,26 @@ def get_witty_insult() -> str:
             "scrub",
             "son",
             "wanker",
+            "bitch",
+            "buddy",
+            "libtard",
+            "autist",
+            "bonehead",
+            "jackass",
+            "asshole",
+            "mouthbreather",
+            "you fucker",
+            "whore",
+            "cocksucker",
+            "dick",
+            "piece of shit weeb",
+            "fuck face",
+            "goober",
+            "donkey",
+            "Gayboy Advanced"
+            "dildo",
+            "douche canoe",
+            "fuckface",
         ]
     )
 

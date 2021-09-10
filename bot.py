@@ -61,9 +61,7 @@ class Client(discord.Client):
         await mgr.handle_message(self, message, self.db_conn)
 
     async def on_reaction_add(
-        self,
-        reaction: discord.Reaction,
-        user: discord.User,
+        self, reaction: discord.Reaction, user: discord.User,
     ) -> None:
         mgr = ServerManager.try_load(self.lock, self.mgr_path)
         await mgr.handle_reaction_add(self, reaction, self.db_conn)

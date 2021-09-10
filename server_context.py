@@ -173,14 +173,28 @@ class ServerContext:
         reaction: discord.Reaction,
         db_conn: sqlite3.Connection,
     ) -> None:
+        # TODO: There's technically a weird thing that can happen where someone
+        # removes a reaction and then adds another, resulting in the reaction
+        # count going back to two and *rebanning* the user
         is_ban_emoji = (
-            not isinstance(reaction.emoji, str) and reaction.count == 1 and reaction.emoji.name == "BAN")
+            not isinstance(reaction.emoji, str)
+            and reaction.count == 2
+            and reaction.emoji.name == "BAN"
+        )
         if is_ban_emoji:
             ctx = MessageContext(
-                server_ctx=self, client=client, message=reaction.message, db_conn=db_conn,
+                server_ctx=self,
+                client=client,
+                message=reaction.message,
+                db_conn=db_conn,
             )
             await reaction.message.channel.send("Bro", reference=reaction.message)
-            await ban.ban(ctx, target=DiscordUser(reaction.message.author.id), timer=Time("1hr"), ban_as_bot=True)
+            await ban.ban(
+                ctx,
+                target=DiscordUser(reaction.message.author.id),
+                timer=Time("1hr"),
+                ban_as_bot=True,
+            )
 
     @staticmethod
     def helptext(runner: CommandRunner, cmd: Optional[str] = None) -> str:

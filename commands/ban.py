@@ -20,16 +20,15 @@ async def ban(
     new_ban = int(time.time()) + timer.seconds
     new_ban_end_str = timezone.localize(new_ban, ctx.server_ctx.tz)
     if ban_as_bot:
-        insult = command.get_witty_insult()
         await ctx.channel.send(
-            f"I have chosen to ban <@{target}> for {timer}\n"
-            f"The ban will end at {new_ban_end_str}\n"
-            f"May God have mercy on your soul, {insult}."
+            f"I have chosen to ban <@{target}>. "
+            f"The ban will end {new_ban_end_str}\n"
+            f"May God have mercy on your soul."
         )
     else:
         await ctx.channel.send(
-            f"<@{ctx.discord_id}> has banned <@{target}> for {timer}\n"
-            f"The ban will end at {new_ban_end_str}\n"
+            f"<@{ctx.discord_id}> has banned <@{target}>. "
+            f"The ban will end {new_ban_end_str}\n"
             "May God have mercy on your soul."
         )
 

@@ -22,13 +22,13 @@ async def ban(
     if ban_as_bot:
         await ctx.channel.send(
             f"I have chosen to ban <@{target}>. "
-            f"The ban will end {new_ban_end_str}\n"
+            f"The ban will end {new_ban_end_str}.\n"
             f"May God have mercy on your soul."
         )
     else:
         await ctx.channel.send(
             f"<@{ctx.discord_id}> has banned <@{target}>. "
-            f"The ban will end {new_ban_end_str}\n"
+            f"The ban will end {new_ban_end_str}.\n"
             "May God have mercy on your soul."
         )
 

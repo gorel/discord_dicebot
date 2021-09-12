@@ -10,8 +10,7 @@ from message_context import MessageContext
 
 
 def _localize_pretty(
-    now_localized: datetime.datetime,
-    target_localized: datetime.datetime,
+    now_localized: datetime.datetime, target_localized: datetime.datetime,
 ) -> str:
     delta = target_localized - now_localized
     td0 = datetime.timedelta(0)
@@ -64,7 +63,6 @@ def _localize_pretty(
     else:
         # Longer than a week, but still happening this year
         return target_localized.strftime("%b %d at %I:%M %p %Z")
-
 
 
 def localize(unixtime: int, tz: str) -> str:

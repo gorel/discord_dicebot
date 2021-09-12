@@ -12,13 +12,19 @@ def get_witty_insult() -> str:
     return random.choice(
         [
             "bucko",
-            "cockalorum",
+            "cumberworld",
+            "dunderhead",
+            "fopdoodle",
             "glue eater",
             "kid",
+            "lubberwort",
+            "mouthbreather",
             "ninny",
             "pal",
+            "quisby",
+            "rascal",
             "scrub",
-            "son",
+            "tallowcatch",
             "wanker",
         ]
     )

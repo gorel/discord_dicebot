@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import enum
 import logging
 from typing import Awaitable, Callable, List, Optional
@@ -37,6 +38,8 @@ async def handle_ban_reaction(
     )
 
     await reaction.message.channel.send("Bro", reference=reaction.message)
+    # Sleep 3 seconds to build suspense
+    await asyncio.sleep(3)
     await ban.ban(
         ctx,
         target=DiscordUser(reaction.message.author.id),

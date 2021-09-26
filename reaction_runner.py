@@ -23,7 +23,9 @@ class ReactionRunner:
         self.handlers = reaction_handlers or DEFAULT_REACTION_HANDLERS
 
     async def handle_reaction(
-        self, reaction: discord.Reaction, ctx: MessageContext,
+        self,
+        reaction: discord.Reaction,
+        ctx: MessageContext,
     ) -> None:
         logging.info("Called handle_reaction")
         for handler in self.handlers:

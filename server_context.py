@@ -39,6 +39,7 @@ class ServerContext:
         self._bans = {}
         self._macros = {}
         self._tz = "US/Pacific"
+        self._ban_reaction_threshold = 2
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -112,7 +113,7 @@ class ServerContext:
     def tz(self) -> str:
         # Backwards compatibility
         if getattr(self, "_tz", None) is None:
-            self.tz = "US/Pacific"
+            self._tz = "US/Pacific"
         return self._tz
 
     @tz.setter
@@ -120,6 +121,18 @@ class ServerContext:
         # We let this potentially fail on purpose to bubble up the error
         tz = pytz.timezone(value)
         self._tz = value
+        self.save()
+
+    @property
+    def ban_reaction_threshold(self) -> int:
+        # Backwards compatibility
+        if getattr(self, "_ban_reaction_threshold", None) is None:
+            self._ban_reaction_threshold = 2
+        return self._ban_reaction_threshold
+
+    @ban_reaction_threshold.setter
+    def ban_reaction_threshold(self, value: int) -> None:
+        self._ban_reaction_threshold = value
         self.save()
 
     async def handle_message(

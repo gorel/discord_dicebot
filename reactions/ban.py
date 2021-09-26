@@ -32,7 +32,7 @@ async def handle_ban_reaction(
 
     # Only ban a user if we've hit the reaction threshold
     # TODO: Make threshold configurable per-server
-    if not is_ban_emoji or reaction.count != 2:
+    if not is_ban_emoji or reaction.count != ctx.server_ctx.ban_reaction_threshold:
         return HandlerStatus(Status.Invalid)
 
     # Check if this message has been banned before

@@ -24,6 +24,7 @@ from commands import (
     reset_roll,
     roll,
     scoreboard,
+    set_ban_reaction_threshold,
     set_msg,
     set_timeout,
     timezone,
@@ -41,14 +42,14 @@ DEFAULT_REGISTERED_COMMANDS = [
     roll.roll,
     # Scoreboard commands
     scoreboard.scoreboard,
-    # Set win/loss message commands
+    # Set various server properties
+    set_ban_reaction_threshold.set_ban_reaction_threshold,
     set_msg.set_msg,
+    set_timeout.set_timeout,
     # Server/chat renaming commands
     rename.rename,
     # Reset roll commands
     reset_roll.reset_roll,
-    # Roll timeout commands
-    set_timeout.set_timeout,
     # Clear stats commands
     clear_stats.clear_stats,
     # Reminder commands

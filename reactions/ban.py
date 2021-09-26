@@ -12,7 +12,8 @@ from models import HandlerStatus, Status
 
 # TODO: Move this into its own file
 async def handle_ban_reaction(
-    reaction: discord.Reaction, ctx: MessageContext,
+    reaction: discord.Reaction,
+    ctx: MessageContext,
 ) -> HandlerStatus:
     is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
 

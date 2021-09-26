@@ -160,7 +160,10 @@ class ServerContext:
             message_logger.info(f"{guild_name} | {username}: {message.content}")
 
         ctx = MessageContext(
-            server_ctx=self, client=client, message=message, db_conn=db_conn,
+            server_ctx=self,
+            client=client,
+            message=message,
+            db_conn=db_conn,
         )
 
         runner = CommandRunner()
@@ -202,7 +205,10 @@ class ServerContext:
         db_conn: sqlite3.Connection,
     ) -> None:
         ctx = MessageContext(
-            server_ctx=self, client=client, message=reaction.message, db_conn=db_conn,
+            server_ctx=self,
+            client=client,
+            message=reaction.message,
+            db_conn=db_conn,
         )
         runner = ReactionRunner()
         await runner.handle_reaction(reaction, ctx)

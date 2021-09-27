@@ -10,7 +10,9 @@ from models import DiscordUser, HandlerStatus, Status, Time
 from reactions import ban
 
 
-ReactionFunc = Callable[[discord.Reaction, MessageContext], Awaitable[HandlerStatus]]
+ReactionFunc = Callable[
+    [discord.Reaction, discord.User, MessageContext], Awaitable[HandlerStatus]
+]
 
 
 DEFAULT_REACTION_HANDLERS = [
@@ -23,13 +25,11 @@ class ReactionRunner:
         self.handlers = reaction_handlers or DEFAULT_REACTION_HANDLERS
 
     async def handle_reaction(
-        self,
-        reaction: discord.Reaction,
-        ctx: MessageContext,
+        self, reaction: discord.Reaction, user: discord.User, ctx: MessageContext,
     ) -> None:
         logging.info("Called handle_reaction")
         for handler in self.handlers:
-            res = await handler(reaction, ctx)
+            res = await handler(reaction, user, ctx)
             if res.status is Status.Success:
                 logging.info(f"Executed reaction handler {handler.__name__}")
             elif res.status is Status.Failure:

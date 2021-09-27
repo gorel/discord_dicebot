@@ -53,11 +53,12 @@ class ServerManager:
         self,
         client: discord.Client,
         reaction: discord.Reaction,
+        user: discord.User,
         db_conn: sqlite3.Connection,
     ) -> None:
         guild_id = reaction.message.channel.guild.id
         ctx = self.get_or_create_ctx(guild_id)
-        await ctx.handle_reaction_add(client, reaction, db_conn)
+        await ctx.handle_reaction_add(client, reaction, user, db_conn)
 
     async def save(self) -> None:
         # When saving, get the *current state* and just update it

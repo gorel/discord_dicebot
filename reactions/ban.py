@@ -8,26 +8,22 @@ import discord
 import db_helper
 from commands import ban
 from message_context import MessageContext
-from models import HandlerStatus, Status
+from models import DiscordUser, HandlerStatus, Status, Time
 
 # TODO: Move this into its own file
 async def handle_ban_reaction(
-    reaction: discord.Reaction,
-    ctx: MessageContext,
+    reaction: discord.Reaction, user: discord.User, ctx: MessageContext,
 ) -> HandlerStatus:
     is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
 
     # Special feature for people trying to ban the bot itself
-    if is_ban_emoji and ctx.client.user == ctx.message.author.id:
+    if is_ban_emoji and ctx.client.user.id == ctx.message.author.id:
         my_name = ctx.client.user.name
         await reaction.message.channel.send(
             f"Who *dares* try to ban the mighty {my_name}?!"
         )
         await ban.ban(
-            ctx,
-            target=DiscordUser(reaction.author.id),
-            timer=Time("1hr"),
-            ban_as_bot=True,
+            ctx, target=DiscordUser(user.id), timer=Time("1hr"), ban_as_bot=True,
         )
         return HandlerStatus(Status.Success)
 

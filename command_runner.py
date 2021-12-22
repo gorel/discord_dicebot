@@ -18,6 +18,7 @@ import discord
 from commands import (
     ban,
     clear_stats,
+    eight_ball,
     macro,
     remindme,
     rename,
@@ -63,6 +64,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     macro.m,
     # Timezone settings
     timezone.set_tz,
+    # Magic eight ball
+    eight_ball.eight_ball,
 ]
 
 

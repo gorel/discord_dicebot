@@ -3,9 +3,11 @@
 import logging
 import random
 
+from commands import ban
 from message_context import MessageContext
 from models import GreedyStr
 
+RANDOM_BAN_THRESHOLD = 0.05
 EIGHT_BALL_RESPONSES = [
     "It is certain.",
     "It is decidedly so.",
@@ -29,7 +31,21 @@ EIGHT_BALL_RESPONSES = [
     "Very doubtful.",
 ]
 
+
 async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
     """Ask a question to the magic eight ball"""
-    response = random.choice(EIGHT_BALL_RESPONSES)
-    await ctx.channel.send(response, reference=ctx.message)
+    if random.random() < RANDOM_BAN_THRESHOLD:
+        await ctx.channel.send(
+            "This is such a stupid question, I'm just going to ban you instead of answering it.",
+            reference=ctx.message,
+        )
+        await asyncio.sleep(3)
+        await ban.ban(
+            ctx,
+            target=DiscordUser(ctx.message.author.id),
+            timer=Time("1hr"),
+            ban_as_bot=True,
+        )
+    else:
+        response = random.choice(EIGHT_BALL_RESPONSES)
+        await ctx.channel.send(response, reference=ctx.message)

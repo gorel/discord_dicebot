@@ -6,7 +6,7 @@ import pathlib
 import pickle
 import sqlite3
 import time
-from typing import Any, ClassVar, Dict, Optional
+from typing import Any, ClassVar, Dict, Optional, Set
 
 import discord
 import pytz
@@ -28,6 +28,7 @@ class ServerContext:
     _bans: Dict[int, int]
     _macros: Dict[str, str]
     _tz: str
+    _roll_reminders: Set[int]
 
     def __init__(self, filepath: pathlib.Path, guild_id: int) -> None:
         self.filepath = filepath
@@ -40,6 +41,7 @@ class ServerContext:
         self._macros = {}
         self._tz = "US/Pacific"
         self._ban_reaction_threshold = 2
+        self._roll_reminders = set()
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -135,6 +137,27 @@ class ServerContext:
         self._ban_reaction_threshold = value
         self.save()
 
+    def add_roll_reminder(self, user_id: int) -> None:
+        # Backwards compatibility
+        if getattr(self, "_roll_reminders", None) is None:
+            self._roll_reminders = set()
+        self._roll_reminders.add(user_id)
+        self.save()
+
+    def remove_roll_reminder(self, user_id: int) -> None:
+        # Backwards compatibility
+        if getattr(self, "_roll_reminders", None) is None:
+            self._roll_reminders = set()
+        if user.id in self._roll_reminders:
+            self._roll_reminders.remove(user_id)
+            self.save()
+
+    def should_remind(self, user_id: int) -> bool:
+        # Backwards compatibility
+        if getattr(self, "_roll_reminders", None) is None:
+            self._roll_reminders = set()
+        return user_id in self._roll_reminders
+
     async def handle_message(
         self,
         client: discord.Client,
@@ -160,7 +183,7 @@ class ServerContext:
             message_logger.info(f"{guild_name} | {username}: {message.content}")
 
         ctx = MessageContext(
-            server_ctx=self, client=client, message=message, db_conn=db_conn,
+            server_ctx=self, client=client, message=message, db_conn=db_conn
         )
 
         runner = CommandRunner()
@@ -203,7 +226,7 @@ class ServerContext:
         db_conn: sqlite3.Connection,
     ) -> None:
         ctx = MessageContext(
-            server_ctx=self, client=client, message=reaction.message, db_conn=db_conn,
+            server_ctx=self, client=client, message=reaction.message, db_conn=db_conn
         )
         runner = ReactionRunner()
         await runner.handle_reaction(reaction, user, ctx)

@@ -24,6 +24,7 @@ from commands import (
     rename,
     reset_roll,
     roll,
+    roll_remind,
     scoreboard,
     set_ban_reaction_threshold,
     set_msg,
@@ -66,6 +67,9 @@ DEFAULT_REGISTERED_COMMANDS = [
     timezone.set_tz,
     # Magic eight ball
     eight_ball.eight_ball,
+    # Roll reminders
+    roll_remind.add_roll_reminder,
+    roll_remind.remove_roll_reminder,
 ]
 
 

@@ -19,6 +19,7 @@ from commands import (
     ban,
     clear_stats,
     eight_ball,
+    giffer,
     macro,
     remindme,
     rename,
@@ -70,6 +71,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     # Roll reminders
     roll_remind.add_roll_reminder,
     roll_remind.remove_roll_reminder,
+    # Get random gifs
+    giffer.gif,
 ]
 
 

@@ -148,7 +148,7 @@ class ServerContext:
         # Backwards compatibility
         if getattr(self, "_roll_reminders", None) is None:
             self._roll_reminders = set()
-        if user.id in self._roll_reminders:
+        if user_id in self._roll_reminders:
             self._roll_reminders.remove(user_id)
             self.save()
 

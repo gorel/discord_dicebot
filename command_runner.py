@@ -21,6 +21,7 @@ from commands import (
     eight_ball,
     giffer,
     macro,
+    myrandom,
     remindme,
     rename,
     reset_roll,
@@ -73,6 +74,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     roll_remind.remove_roll_reminder,
     # Get random gifs
     giffer.gif,
+    # Random choices
+    myrandom.choice,
 ]
 
 

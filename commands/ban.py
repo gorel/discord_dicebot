@@ -5,6 +5,7 @@ import logging
 import time
 
 import command
+import db_helper
 from commands import timezone
 from message_context import MessageContext
 from models import BotParam, DiscordUser, Time
@@ -19,18 +20,27 @@ async def ban(
     """Ban a user for a given amount of time (bot will shame them)"""
     new_ban = int(time.time()) + timer.seconds
     new_ban_end_str = timezone.localize(new_ban, ctx.server_ctx.tz)
+    banner_id = ctx.message.author.id
     if ban_as_bot:
         await ctx.channel.send(
             f"I have chosen to ban <@{target}>. "
             f"The ban will end {new_ban_end_str}.\n"
             f"May God have mercy on your soul."
         )
+        # Need to override banner's ID to denote "no real banner"
+        # ID 0 is used as a sentinel for the bot being the banner
+        banner_id = 0
     else:
         await ctx.channel.send(
             f"<@{ctx.discord_id}> has banned <@{target}>. "
             f"The ban will end {new_ban_end_str}.\n"
             "May God have mercy on your soul."
         )
+
+    # Record this ban in the db
+    db_helper.record_banned_person(
+        ctx.db_conn, ctx.message.guild.id, banner_id, target.id
+    )
 
     current_ban = ctx.server_ctx.bans.get(target.id, -1)
     if current_ban > new_ban:
@@ -66,3 +76,17 @@ async def unban(ctx: MessageContext, target: DiscordUser) -> None:
         f"<@{target.id}> has been unbanned early.\n"
         "You should thank your benevolent savior.\n"
     )
+
+
+async def ban_leaderboard(ctx: MessageContext) -> None:
+    """View the ban leaderboard"""
+    stats = db_helper.get_ban_stats(ctx.db_conn, ctx.server_ctx.guild_id)
+    sorted_stats = sorted(stats, key=lambda rec: rec["ban_count"])
+    msg = "**Ban stats:**\n"
+    for record in sorted_stats:
+        user = ctx.client.get_user(record["discord_id"])
+        if not user:
+            user = await ctx.client.fetch_user(record["discord_id"])
+        count = record["ban_count"]
+        msg += f"\t- {user.name} has been banned {count} times\n"
+    await ctx.channel.send(msg)

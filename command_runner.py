@@ -61,6 +61,7 @@ DEFAULT_REGISTERED_COMMANDS = [
     # Ban commands
     ban.ban,
     ban.unban,
+    ban.ban_leaderboard,
     # Macro commands
     macro.macro_add,
     macro.macro_del,

@@ -22,13 +22,13 @@ async def roll(ctx: MessageContext) -> None:
 
     if last_roll_time is not None:
         last_roll_str = last_roll_time.strftime("%Y-%m-%d %I:%M:%S %p")
-        logging.info(f"{ctx.discord_id} last rolled at {last_roll_time}")
+        logging.info(f"{ctx.discord_id} last rolled at {last_roll_str}")
 
         last_roll_delta = int((now - last_roll_time).total_seconds() // 3600)
         timeout = ctx.server_ctx.roll_timeout_hours
         if last_roll_delta < timeout:
             await ctx.channel.send(
-                f"<@{ctx.discord_id}> last rolled at {last_roll_time} ({last_roll_delta} hours ago).\n"
+                f"<@{ctx.discord_id}> last rolled at {last_roll_str} ({last_roll_delta} hours ago).\n"
                 f"This server only allows rolling once every {timeout} hours.\n"
             )
             ban_time = Time("1hr")
@@ -45,6 +45,10 @@ async def roll(ctx: MessageContext) -> None:
     logging.info(f"{username} rolled a {roll} (d{next_roll})")
 
     if roll == 1:
+        await ctx.channel.send("Lol, you suck")
+        ban_time = Time(f"{next_roll}hr")
+        await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+    elif roll == next_roll - 1:
         s = ctx.server_ctx.critical_failure_msg
         if s != "":
             await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
@@ -64,8 +68,7 @@ async def roll(ctx: MessageContext) -> None:
             await ctx.channel.send(f"<@{ctx.discord_id}>: gets to rename the server!")
 
     # If the user has roll reminders set up, await that now
-    # I'm not sure why, but we need to reload in case the reminder was recently
-    # set up
+    # I'm not sure why, but we need to reload here
     ctx.server_ctx.reload()
     roll_timeout = ctx.server_ctx.roll_timeout_hours
     user_id = ctx.discord_id

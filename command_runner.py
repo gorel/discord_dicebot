@@ -160,6 +160,7 @@ class CommandRunner:
         return typed_args
 
     async def call(self, ctx: MessageContext) -> None:
+        ctx.server_ctx.reload()
         # Split args to prepare for dynamic dispatch
         argv = ctx.message.content.split(" ")
         funcname, args = argv[0], argv[1:]

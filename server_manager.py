@@ -45,9 +45,16 @@ class ServerManager:
         message: discord.Message,
         db_conn: sqlite3.Connection,
     ) -> None:
-        guild_id = message.channel.guild.id
-        ctx = self.get_or_create_ctx(guild_id)
-        await ctx.handle_message(client, message, db_conn)
+        if isinstance(message.channel, discord.DMChannel):
+            # Use the DM Channel ID as the guild_id
+            # TODO: Rename guild_id to chat_id or something more generic
+            channel_id = message.channel.id
+            ctx = self.get_or_create_ctx(channel_id)
+            await ctx.handle_dm(client, message, db_conn)
+        else:
+            guild_id = message.channel.guild.id
+            ctx = self.get_or_create_ctx(guild_id)
+            await ctx.handle_message(client, message, db_conn)
 
     async def handle_reaction_add(
         self,

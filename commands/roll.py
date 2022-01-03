@@ -21,19 +21,20 @@ async def roll(ctx: MessageContext) -> None:
     now = datetime.datetime.now()
 
     if last_roll_time is not None:
-       logging.info(f"{ctx.discord_id} last rolled at {last_roll_time}")
+        last_roll_str = last_roll_time.strftime("%Y-%m-%d %I:%M:%S %p")
+        logging.info(f"{ctx.discord_id} last rolled at {last_roll_time}")
 
-       last_roll_delta = int((now - last_roll_time).total_seconds() // 3600)
-       timeout = ctx.server_ctx.roll_timeout_hours
-       if last_roll_delta < timeout:
-           await ctx.channel.send(
-               f"<@{ctx.discord_id}> last rolled at {last_roll_time} ({last_roll_delta} hours ago).\n"
-               f"This server only allows rolling once every {timeout} hours.\n"
-           )
-           ban_time = Time("1hr")
-           await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
-           # Bail early - don't allow rolling
-           return
+        last_roll_delta = int((now - last_roll_time).total_seconds() // 3600)
+        timeout = ctx.server_ctx.roll_timeout_hours
+        if last_roll_delta < timeout:
+            await ctx.channel.send(
+                f"<@{ctx.discord_id}> last rolled at {last_roll_time} ({last_roll_delta} hours ago).\n"
+                f"This server only allows rolling once every {timeout} hours.\n"
+            )
+            ban_time = Time("1hr")
+            await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+            # Bail early - don't allow rolling
+            return
 
     logging.info(f"Next roll in server({guild_id}) for {username} is {next_roll}")
 

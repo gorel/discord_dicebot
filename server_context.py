@@ -231,6 +231,57 @@ class ServerContext:
         runner = ReactionRunner()
         await runner.handle_reaction(reaction, user, ctx)
 
+    async def handle_dm(
+        self,
+        client: discord.Client,
+        message: discord.Message,
+        db_conn: sqlite3.Connection,
+    ) -> None:
+        # TODO: Only allow certain commands?
+        # TODO: Allow disabling of logging all messages?
+        # Don't propagate messages since this is used specifically for logging
+        # user messages, which can get spammy
+        message_logger = logging.getLogger("messages")
+        message_logger.propagate = False
+
+        # Only add the handler *once*
+        if len(message_logger.handlers) == 0:
+            hdl = logging.StreamHandler()
+            hdl.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
+            message_logger.addHandler(hdl)
+
+        username = message.author.name
+        # Check the message length is > 0 to ignore logging image-only messages
+        if len(message.content) > 0:
+            message_logger.info(f"DM from {username}: {message.content}")
+
+        ctx = MessageContext(
+            server_ctx=self, client=client, message=message, db_conn=db_conn
+        )
+
+        runner = CommandRunner()
+
+        # Special handling for !help
+        if message.content.startswith("!help"):
+            if " " in message.content:
+                func = message.content.split(" ")[1]
+                text = self.helptext(runner, func)
+            else:
+                text = self.helptext(runner)
+            await ctx.channel.send(text)
+        elif message.content.startswith("!"):
+            # Defer to the command runner
+            try:
+                await runner.call(ctx)
+            except Exception as e:
+                end = len(message.content)
+                if " " in message.content:
+                    end = message.content.index(" ")
+                func = message.content[1:end]
+                helptext = self.helptext(runner, func)
+                logging.exception("Failed to call command")
+                await ctx.channel.send(helptext)
+
     @staticmethod
     def helptext(runner: CommandRunner, cmd: Optional[str] = None) -> str:
         if cmd is not None:

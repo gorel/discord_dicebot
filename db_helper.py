@@ -241,7 +241,7 @@ def get_last_winner(conn: sqlite3.Connection, guild_id: int) -> Dict[str, Any]:
 
 def get_last_loser(conn: sqlite3.Connection, guild_id: int) -> Dict[str, Any]:
     sql = SELECT_LAST_WINNER_LOSER_SQL.format(
-        identifier=ROLLS_TABLENAME, roll_target="1"
+        identifier=ROLLS_TABLENAME, roll_target="target_roll - 1"
     )
     cur = conn.cursor()
     cur.execute(sql, (guild_id,))

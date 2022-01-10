@@ -24,6 +24,7 @@ def get_witty_insult() -> str:
             "quisby",
             "rascal",
             "scrub",
+            "snollygoster",
             "tallowcatch",
             "wanker",
         ]

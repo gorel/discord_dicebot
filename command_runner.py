@@ -32,6 +32,7 @@ from commands import (
     set_msg,
     set_timeout,
     timezone,
+    wordle,
 )
 from message_context import MessageContext
 from models import BotParam, GreedyStr
@@ -77,6 +78,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     giffer.gif,
     # Random choices
     myrandom.choice,
+    # Play wordle
+    wordle.wordle,
 ]
 
 

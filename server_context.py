@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 
 import asyncio
+import functools
 import logging
+import os
 import pathlib
 import pickle
+import random
 import sqlite3
 import time
-from typing import Any, ClassVar, Dict, Optional, Set
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 import discord
 import pytz
@@ -14,6 +17,17 @@ import pytz
 from command_runner import CommandRunner
 from message_context import MessageContext
 from reaction_runner import ReactionRunner
+
+
+# TODO: Really belongs in the wordle file
+@functools.lru_cache
+def get_valid_words() -> List[str]:
+    words = []
+    with open(os.getenv("WORDS_FILE")) as f:
+        for line in f:
+            words.append(line.strip())
+    return words
+
 
 
 class ServerContext:
@@ -29,6 +43,7 @@ class ServerContext:
     _macros: Dict[str, str]
     _tz: str
     _roll_reminders: Set[int]
+    _wordle: str
 
     def __init__(self, filepath: pathlib.Path, guild_id: int) -> None:
         self.filepath = filepath
@@ -42,6 +57,7 @@ class ServerContext:
         self._tz = "US/Pacific"
         self._ban_reaction_threshold = 2
         self._roll_reminders = set()
+        self._wordle = ""
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -157,6 +173,17 @@ class ServerContext:
         if getattr(self, "_roll_reminders", None) is None:
             self._roll_reminders = set()
         return user_id in self._roll_reminders
+
+    def gen_new_wordle(self) -> str:
+        words = get_valid_words()
+        self._wordle = random.choice(words)
+        self.save()
+        return self._wordle
+
+    def get_wordle(self) -> str:
+        if getattr(self, "_wordle", None) is None:
+            self.gen_new_wordle()
+        return self._wordle
 
     async def handle_message(
         self,
@@ -311,10 +338,15 @@ class ServerContext:
             pickle.dump(self, f)
 
     def reload(self) -> None:
-        with open(self.filepath, "rb") as f:
-            updated = pickle.load(f)
-            # Hacky...
-            self.__dict__.update(updated.__dict__)
+        # It's possible this is a *brand new conversation* that hasn't even
+        # been saved yet
+        try:
+            with open(self.filepath, "rb") as f:
+                updated = pickle.load(f)
+                # Hacky...
+                self.__dict__.update(updated.__dict__)
+        except Exception:
+            logging.warning(f"Could not reload ctx {self.guild_id}")
 
     @staticmethod
     def load(filepath: pathlib.Path) -> "ServerContext":

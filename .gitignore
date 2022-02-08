@@ -9,4 +9,5 @@
 
 .mypy_cache/
 
+audio/
 server_contexts/

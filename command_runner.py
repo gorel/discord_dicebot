@@ -16,6 +16,7 @@ from typing import (
 import discord
 
 from commands import (
+    audio,
     ban,
     clear_stats,
     eight_ball,
@@ -80,6 +81,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     myrandom.choice,
     # Play wordle
     wordle.wordle,
+    # Play audio
+    audio.audio,
 ]
 
 

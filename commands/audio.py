@@ -1,35 +1,37 @@
 #!/usr/bin/env python3
 
+import asyncio
+import logging
+import os
 import pathlib
+
+import discord
 
 from message_context import MessageContext
 
 
-AUDIO_DIR = os.getenv("AUDIO_DIR")
-
-
 async def audio(ctx: MessageContext, name: str) -> None:
     """Play an audio file (must be known by the bot already)"""
-    dirname = pathlib.Path(dirname)
+    # Can't put this in a global since load_dotenv needs to be called first
+    dirname = pathlib.Path(os.getenv("AUDIO_DIR"))
     path = (dirname / name).with_suffix(".opus")
     if not path.is_file():
         await ctx.channel.send(f"Could not find audio file {path}")
     else:
-        # Find the correct audio channel
-        audio_channel = None
-        for channel in ctx.message.guild.voice_channels:
-            members = {member.id for member in channel.members}
-            if ctx.message.author.id in members:
-                audio_channel = channel
-                break
-
+        logging.info(f"Trying to play file {path}")
+        # Grab the correct audio channel
+        audio_channel = ctx.message.author.voice.channel
         # If we couldn't find the audio channel, bail now
         if audio_channel is None:
             await ctx.channel.send(
                 "Join an audio channel first to use the !audio command"
             )
         else:
-            await audio_channel.connect()
-            with open(path, "rb") as f:
-                await audio_channel.send_audio_packet(f.read(), encode=False)
-            await audio_channel.disconnect()
+            logging.info(f"Playing audio in channel {audio_channel.name}")
+            audio_source = await discord.FFmpegOpusAudio.from_probe(path)
+            voice_client = await audio_channel.connect()
+            voice_client.play(audio_source)
+            while voice_client.is_playing():
+                await asyncio.sleep(0.5)
+            logging.info(f"Done sending audio to {audio_channel.name}")
+            await voice_client.disconnect()

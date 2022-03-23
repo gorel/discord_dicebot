@@ -11,3 +11,6 @@
 
 audio/
 server_contexts/
+.idea/discord_dicebot.iml
+.idea/misc.xml
+.idea/workspace.xml

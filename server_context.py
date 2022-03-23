@@ -58,6 +58,7 @@ class ServerContext:
         self._ban_reaction_threshold = 2
         self._roll_reminders = set()
         self._wordle = ""
+        self._turbo_ban_timing_threshold = 300
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -153,6 +154,19 @@ class ServerContext:
         self._ban_reaction_threshold = value
         self.save()
 
+    @property
+    def turbo_ban_timing_threshold(self) -> int:
+        # Backwards compatibility
+        if getattr(self, "_turbo_ban_timing_threshold", None) is None:
+            # Stored in seconds
+            self._turbo_ban_timing_threshold = 300
+        return self._turbo_ban_timing_threshold
+
+    @turbo_ban_timing_threshold.setter
+    def turbo_ban_timing_threshold(self, value: int) -> None:
+        self._turbo_ban_timing_threshold = value
+        self.save()
+
     def add_roll_reminder(self, user_id: int) -> None:
         # Backwards compatibility
         if getattr(self, "_roll_reminders", None) is None:
@@ -186,10 +200,10 @@ class ServerContext:
         return self._wordle
 
     async def handle_message(
-        self,
-        client: discord.Client,
-        message: discord.Message,
-        db_conn: sqlite3.Connection,
+            self,
+            client: discord.Client,
+            message: discord.Message,
+            db_conn: sqlite3.Connection,
     ) -> None:
         # TODO: Allow disabling of logging all messages?
         # Don't propagate messages since this is used specifically for logging
@@ -246,11 +260,11 @@ class ServerContext:
                 await ctx.channel.send(helptext)
 
     async def handle_reaction_add(
-        self,
-        client: discord.Client,
-        reaction: discord.Reaction,
-        user: discord.User,
-        db_conn: sqlite3.Connection,
+            self,
+            client: discord.Client,
+            reaction: discord.Reaction,
+            user: discord.User,
+            db_conn: sqlite3.Connection,
     ) -> None:
         ctx = MessageContext(
             server_ctx=self, client=client, message=reaction.message, db_conn=db_conn
@@ -259,10 +273,10 @@ class ServerContext:
         await runner.handle_reaction(reaction, user, ctx)
 
     async def handle_dm(
-        self,
-        client: discord.Client,
-        message: discord.Message,
-        db_conn: sqlite3.Connection,
+            self,
+            client: discord.Client,
+            message: discord.Message,
+            db_conn: sqlite3.Connection,
     ) -> None:
         # TODO: Only allow certain commands?
         # TODO: Allow disabling of logging all messages?

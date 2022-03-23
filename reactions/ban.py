@@ -45,6 +45,22 @@ async def handle_ban_reaction(
         ctx.db_conn, reaction.message.guild.id, reaction.message.id
     )
 
+    # Check if the user was turbo banned
+    turbo_ban = db_helper.get_message_ban_timing(
+        ctx.db_conn, reaction.message.guild.id, reaction.message.id
+    ) <= ctx.server_ctx.turbo_ban_timing_threshold
+
+    if turbo_ban:
+        turbo_ban_msg = (":T_:  :U_:  :R_:  :B_:  :O_:     :B_:  :A_:  :N_:  :N_:  :E_: :D_:")
+        await reaction.message.channel.send(turbo_ban_msg, reference=reaction.message)
+        await ban.ban(
+            ctx,
+            target=DiscordUser(reaction.message.author.id),
+            timer=Time("5hr"),
+            ban_as_bot=True,
+        )
+        return HandlerStatus(Status.Success)
+
     await reaction.message.channel.send("Bro", reference=reaction.message)
     # Sleep 3 seconds to build suspense
     await asyncio.sleep(3)

@@ -153,6 +153,19 @@ class ServerContext:
         self._ban_reaction_threshold = value
         self.save()
 
+    @property
+    def turbo_ban_timing_threshold(self) -> int:
+        # Backwards compatibility
+        if getattr(self, "_turbo_ban_timing_threshold", None) is None:
+            # Stored in seconds
+            self._turbo_ban_timing_threshold = 300
+        return self._turbo_ban_timing_threshold
+
+    @turbo_ban_timing_threshold.setter
+    def turbo_ban_timing_threshold(self, value: int) -> None:
+        self._turbo_ban_timing_threshold = value
+        self.save()
+
     def add_roll_reminder(self, user_id: int) -> None:
         # Backwards compatibility
         if getattr(self, "_roll_reminders", None) is None:

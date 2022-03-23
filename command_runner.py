@@ -30,6 +30,7 @@ from commands import (
     roll_remind,
     scoreboard,
     set_ban_reaction_threshold,
+    set_turbo_ban_timing_threshold,
     set_msg,
     set_timeout,
     timezone,
@@ -50,6 +51,7 @@ DEFAULT_REGISTERED_COMMANDS = [
     scoreboard.scoreboard,
     # Set various server properties
     set_ban_reaction_threshold.set_ban_reaction_threshold,
+    set_turbo_ban_timing_threshold.set_turbo_ban_timing_threshold,
     set_msg.set_msg,
     set_timeout.set_timeout,
     # Server/chat renaming commands

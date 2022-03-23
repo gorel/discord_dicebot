@@ -56,6 +56,7 @@ class ServerContext:
         self._macros = {}
         self._tz = "US/Pacific"
         self._ban_reaction_threshold = 2
+        self._turbo_ban_timing_threshold = 300
         self._roll_reminders = set()
         self._wordle = ""
 

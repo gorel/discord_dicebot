@@ -109,6 +109,15 @@ WHERE guild_id = ?
   AND msg_id = ?
 """
 
+SELECT_BANNED_MSG_TIME_SQL = """
+SELECT
+    unixtime
+FROM {identifier}
+WHERE guild_id = ?
+  AND msg_id = ?
+ORDER BY unixtime
+"""
+
 #################
 # Banned people #
 #################
@@ -260,13 +269,24 @@ def record_banned_message(conn: sqlite3.Connection, guild_id: int, msg_id: int) 
 
 
 def has_message_been_banned(
-    conn: sqlite3.Connection, guild_id: int, msg_id: int
+        conn: sqlite3.Connection, guild_id: int, msg_id: int
 ) -> bool:
     sql = SELECT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, msg_id))
     return cur.fetchone() is not None
 
+def get_message_ban_timing(
+        conn: sqlite3.Connection, guild_id: int, msg_id: int
+) -> int:
+    sql = SELECT_BANNED_MSG_TIME_SQL.format(identifier=BANNED_MSG_TABLENAME)
+    cur = conn.cursor()
+    cur.execute(sql, (guild_id, msg_id))
+    row = cur.fetchone()
+    if row is not None:
+        time_diff = int(time.time()) - row
+        return time_diff
+    return -1
 
 def record_banned_person(
     conn: sqlite3.Connection,

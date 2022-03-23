@@ -269,7 +269,7 @@ def record_banned_message(conn: sqlite3.Connection, guild_id: int, msg_id: int) 
 
 
 def has_message_been_banned(
-        conn: sqlite3.Connection, guild_id: int, msg_id: int
+    conn: sqlite3.Connection, guild_id: int, msg_id: int
 ) -> bool:
     sql = SELECT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
     cur = conn.cursor()

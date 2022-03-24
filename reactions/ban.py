@@ -12,7 +12,9 @@ from models import DiscordUser, HandlerStatus, Status, Time
 
 # TODO: Move this into its own file
 async def handle_ban_reaction(
-    reaction: discord.Reaction, user: discord.User, ctx: MessageContext,
+    reaction: discord.Reaction,
+    user: discord.User,
+    ctx: MessageContext,
 ) -> HandlerStatus:
     is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
 
@@ -23,7 +25,10 @@ async def handle_ban_reaction(
             f"Who *dares* try to ban the mighty {my_name}?!"
         )
         await ban.ban(
-            ctx, target=DiscordUser(user.id), timer=Time("1hr"), ban_as_bot=True,
+            ctx,
+            target=DiscordUser(user.id),
+            timer=Time("1hr"),
+            ban_as_bot=True,
         )
         return HandlerStatus(Status.Success)
 
@@ -46,12 +51,20 @@ async def handle_ban_reaction(
     )
 
     # Check if the user was turbo banned
-    turbo_ban = db_helper.get_message_ban_timing(
-        ctx.db_conn, reaction.message.guild.id, reaction.message.id
-    ) <= ctx.server_ctx.turbo_ban_timing_threshold
+    turbo_ban = (
+        db_helper.get_message_ban_timing(
+            ctx.db_conn, reaction.message.guild.id, reaction.message.id
+        )
+        <= ctx.server_ctx.turbo_ban_timing_threshold
+    )
 
     if turbo_ban:
-        turbo_ban_msg = (":T_:  :U_:  :R_:  :B_:  :O_:     :B_:  :A_:  :N_:  :N_:  :E_: :D_:")
+        emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
+        turbo = ["T_", "U_", "R_", "B_", "O_"]
+        turbo_str = "".join(emojis[s] for s in turbo)
+        banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
+        banned_str = "".join(emojis[s] for s in banned)
+        turbo_ban_msg = f"{turbo_str} {banned_str}"
         await reaction.message.channel.send(turbo_ban_msg, reference=reaction.message)
         await ban.ban(
             ctx,

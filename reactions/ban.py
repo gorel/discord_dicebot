@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import asyncio
+import datetime
 import logging
 
 import discord
@@ -9,6 +10,7 @@ import db_helper
 from commands import ban
 from message_context import MessageContext
 from models import DiscordUser, HandlerStatus, Status, Time
+
 
 # TODO: Move this into its own file
 async def handle_ban_reaction(
@@ -51,12 +53,8 @@ async def handle_ban_reaction(
     )
 
     # Check if the user was turbo banned
-    turbo_ban = (
-        db_helper.get_message_ban_timing(
-            ctx.db_conn, reaction.message.guild.id, reaction.message.id
-        )
-        <= ctx.server_ctx.turbo_ban_timing_threshold
-    )
+    elapsed = datetime.datetime.now() - ctx.msg.created_at
+    turbo_ban = elapsed.total_seconds() <= ctx.server_ctx.turbo_ban_timing_threshold
 
     if turbo_ban:
         emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}

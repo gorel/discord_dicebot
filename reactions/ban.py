@@ -53,7 +53,7 @@ async def handle_ban_reaction(
     )
 
     # Check if the user was turbo banned
-    elapsed = datetime.datetime.now() - ctx.msg.created_at
+    elapsed = datetime.datetime.now() - reaction.msg.created_at
     turbo_ban = elapsed.total_seconds() <= ctx.server_ctx.turbo_ban_timing_threshold
 
     if turbo_ban:

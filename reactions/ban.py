@@ -19,6 +19,7 @@ async def handle_ban_reaction(
     ctx: MessageContext,
 ) -> HandlerStatus:
     is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
+    is_april_fools = datetime.datetime.today().date() == datetime.date(2022, 4, 1)
 
     # Special feature for people trying to ban the bot itself
     if is_ban_emoji and ctx.client.user.id == ctx.message.author.id:
@@ -26,6 +27,15 @@ async def handle_ban_reaction(
         await reaction.message.channel.send(
             f"Who *dares* try to ban the mighty {my_name}?!"
         )
+        await ban.ban(
+            ctx,
+            target=DiscordUser(user.id),
+            timer=Time("1hr"),
+            ban_as_bot=True,
+        )
+        return HandlerStatus(Status.Success)
+
+    if is_ban_emoji and is_april_fools:
         await ban.ban(
             ctx,
             target=DiscordUser(user.id),

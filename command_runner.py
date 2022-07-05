@@ -170,11 +170,12 @@ class CommandRunner:
     async def call(self, ctx: MessageContext) -> None:
         ctx.server_ctx.reload()
         # Split args to prepare for dynamic dispatch
-        argv = ctx.message.content.split(" ")
-        funcname, args = argv[0], argv[1:]
-        if funcname[0] != "!":
+        if ctx.message.content[0] != "!":
             raise ValueError("Called CommandRunner without leading `!`")
-        funcname = funcname[1:]
+        message_no_exclaim = ctx.message.content[1:]
+        message_no_spaces = message_no_exclaim.strip()  #Removing excess whitespaces
+        argv = message_no_spaces.split(" ")
+        funcname, args = argv[0].lower(), argv[1:]
 
         # Now try to call the referenced method
         try:

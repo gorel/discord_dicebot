@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
 import functools
 import logging
 import os
@@ -9,7 +8,7 @@ import pickle
 import random
 import sqlite3
 import time
-from typing import Any, ClassVar, Dict, List, Optional, Set
+from typing import ClassVar, Dict, List, Optional, Set
 
 import discord
 import pytz
@@ -17,6 +16,10 @@ import pytz
 from command_runner import CommandRunner
 from message_context import MessageContext
 from reaction_runner import ReactionRunner
+
+
+LONG_MESSAGE_CHAR_THRESHOLD = 700
+LONG_MESSAGE_RESPONSE = "https://user-images.githubusercontent.com/2358378/199403413-b1f903f3-998e-481c-9172-8b323cf746f4.png"
 
 
 # TODO: Really belongs in the wordle file
@@ -229,6 +232,9 @@ class ServerContext:
 
         runner = CommandRunner()
 
+        # TODO: Create a way to hook in generic message handlers
+        # instead of all the custom handling logic below hap-hazardly thrown in
+
         # If the user is banned, we react SHAME
         if self.bans.get(ctx.discord_id, -1) > time.time():
             logging.warning(f"{ctx.discord_id} is banned! Shame them.")
@@ -258,6 +264,8 @@ class ServerContext:
                 helptext = self.helptext(runner, func)
                 logging.exception("Failed to call command")
                 await ctx.channel.send(helptext)
+        elif len(message.content) > LONG_MESSAGE_CHAR_THRESHOLD:
+            await ctx.channel.send(LONG_MESSAGE_RESPONSE)
 
     async def handle_reaction_add(
         self,

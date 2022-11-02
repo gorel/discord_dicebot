@@ -4,9 +4,6 @@ import random
 
 import discord
 
-import db_helper
-from message_context import MessageContext
-
 
 def get_witty_insult() -> str:
     return random.choice(

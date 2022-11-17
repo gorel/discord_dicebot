@@ -13,13 +13,12 @@ from typing import (
     get_type_hints,
 )
 
-import discord
-
 from commands import (
     audio,
     ban,
     clear_stats,
     eight_ball,
+    fileatask,
     giffer,
     macro,
     myrandom,
@@ -85,6 +84,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     wordle.wordle,
     # Play audio
     audio.audio,
+    # File an issue on GitHub
+    fileatask.fileatask,
 ]
 
 

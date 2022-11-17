@@ -18,7 +18,7 @@ from commands import (
     ban,
     clear_stats,
     eight_ball,
-    fileatask,
+    #fileatask,
     giffer,
     macro,
     myrandom,
@@ -85,7 +85,7 @@ DEFAULT_REGISTERED_COMMANDS = [
     # Play audio
     audio.audio,
     # File an issue on GitHub
-    fileatask.fileatask,
+    #fileatask.fileatask,
 ]
 
 

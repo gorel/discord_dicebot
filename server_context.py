@@ -187,9 +187,15 @@ class ServerContext:
         birthday = self.birthdays.get(discord_id)
         if birthday is None:
             return False
-        target_datetime = dateutil.parser.parse(birthday)
-        now = datetime.datetime.now()
-        return target_datetime.date() == now.date()
+
+        # If we saved the birthday in an invalid format,
+        # we'll get a ParserError here which will break the bot
+        try:
+            target_datetime = dateutil.parser.parse(birthday)
+            now = datetime.datetime.now()
+            return target_datetime.date() == now.date()
+        except Exception:
+            return False
 
     def add_roll_reminder(self, user_id: int) -> None:
         # Backwards compatibility

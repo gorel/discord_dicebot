@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+import asyncio
 import logging
 import os
-import asyncio
 import random
-import requests
 import time
+
+import requests
 
 from commands import ban
 from message_context import MessageContext
@@ -15,6 +16,24 @@ ISSUES_URL = "https://api.github.com/repos/gorel/discord_dicebot/issues"
 SUCCESS_CODE = 201
 
 RANDOM_BAN_THRESHOLD = 0.20
+
+
+async def _fileatask_real(ctx: MessageContext, title: GreedyStr) -> None:
+    """Add a new issue to the github repository"""
+    headers = {"accept": "application/vnd.github+json"}
+    user = os.getenv("GITHUB_USER", "")
+    password = os.getenv("GITHUB_PASS", "")
+    r = requests.post(
+        ISSUES_URL, json={"title": title}, headers=headers, auth=(user, password)
+    )
+    if r.status_code == SUCCESS_CODE:
+        response_url = r.json()["html_url"]
+        await ctx.channel.send(f"Your suggestion has been noted: {response_url}")
+    else:
+        logging.error(f"Request to GitHub failed: {r.json()}")
+        await ctx.channel.send(
+            "Something went wrong submitting the issue to GitHub (status_code = {r.status_code})"
+        )
 
 
 async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:
@@ -32,11 +51,12 @@ async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:
 
 
 async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
-    """pretend to fileatask because authentication is hard"""
-
-    # TODO: if message author is gorel, call _fileatask_real
-
-    if "fix" in title.split():
+    """File a task against the GitHub repository... for the owner.
+    Otherwise say something witty."""
+    owner_discord_id = int(os.getenv("OWNER_DISCORD_ID", 0))
+    if ctx.message.author.id == owner_discord_id:
+        await _fileatask_real(ctx, title)
+    elif "fix" in title.split():
         await _ban_helper(
             ctx,
             "I'm not fixing this for you heathens.",
@@ -54,21 +74,3 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
             reference=ctx.message,
         )
         logging.info("Sending suggestion to /dev/null")
-
-
-async def _fileatask_real(ctx: MessageContext, title: GreedyStr) -> None:
-    """Add a new issue to the github repository"""
-    headers = {"accept": "application/vnd.github+json"}
-    user = os.getenv("GITHUB_USER") or ""
-    password = os.getenv("GITHUB_PASS") or ""
-    r = requests.post(
-        ISSUES_URL, json={"title": title}, headers=headers, auth=(user, password)
-    )
-    if r.status_code == SUCCESS_CODE:
-        response_url = r.json()["html_url"]
-        await ctx.channel.send(f"Your suggestion has been noted: {response_url}")
-    else:
-        logging.error(f"Request to GitHub failed: {r.json()}")
-        await ctx.channel.send(
-            "Something went wrong submitting the issue to GitHub (status_code = {r.status_code})"
-        )

@@ -183,7 +183,9 @@ class ServerContext:
         self.birthdays[discord_id] = birthday
 
     def is_today_birthday_of(self, discord_id: int) -> bool:
-        birthday = self.birthdays[discord_id]
+        birthday = self.birthdays.get(discord_id)
+        if birthday is None:
+            return False
         target_datetime = dateutil.parser.parse(birthday)
         now = datetime.datetime.now()
         return target_datetime.date() == now.date()

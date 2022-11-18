@@ -5,6 +5,7 @@ import os
 import asyncio
 import random
 import requests
+import time
 
 from commands import ban
 from message_context import MessageContext
@@ -45,7 +46,7 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
             ctx,
             "This is a bad idea and you should feel bad.",
         )
-    elif ctx.server_ctx.bans.get(ctx.message.author.id):
+    elif ctx.server_ctx.bans.get(ctx.message.author.id, -1) > time.time():
         await ctx.channel.send("Your opinion does not matter.", reference=ctx.message)
     else:
         await ctx.channel.send(

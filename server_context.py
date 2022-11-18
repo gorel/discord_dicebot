@@ -191,8 +191,8 @@ class ServerContext:
         # If we saved the birthday in an invalid format,
         # we'll get a ParserError here which will break the bot
         try:
-            target_datetime = dateutil.parser.parse(birthday)
             now = datetime.datetime.now()
+            target_datetime = dateutil.parser.parse(birthday).replace(year=now.year)
             return target_datetime.date() == now.date()
         except Exception:
             return False

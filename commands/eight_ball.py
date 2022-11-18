@@ -6,7 +6,7 @@ import random
 
 from commands import ban
 from message_context import MessageContext
-from models import DiscordUser, GreedyStr
+from models import DiscordUser, GreedyStr, Time
 
 RANDOM_BAN_THRESHOLD = 0.05
 EIGHT_BALL_RESPONSES = [

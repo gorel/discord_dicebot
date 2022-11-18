@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import datetime
 import functools
 import logging
 import os
@@ -10,13 +11,13 @@ import sqlite3
 import time
 from typing import ClassVar, Dict, List, Optional, Set
 
+import dateutil.parser
 import discord
 import pytz
 
 from command_runner import CommandRunner
 from message_context import MessageContext
 from reaction_runner import ReactionRunner
-
 
 LONG_MESSAGE_CHAR_THRESHOLD = 700
 LONG_MESSAGE_RESPONSE = "https://user-images.githubusercontent.com/2358378/199403413-b1f903f3-998e-481c-9172-8b323cf746f4.png"
@@ -26,11 +27,10 @@ LONG_MESSAGE_RESPONSE = "https://user-images.githubusercontent.com/2358378/19940
 @functools.lru_cache
 def get_valid_words() -> List[str]:
     words = []
-    with open(os.getenv("WORDS_FILE")) as f:
+    with open(os.getenv("WORDS_FILE", "")) as f:
         for line in f:
             words.append(line.strip())
     return words
-
 
 
 class ServerContext:
@@ -47,6 +47,7 @@ class ServerContext:
     _tz: str
     _roll_reminders: Set[int]
     _wordle: str
+    _birthdays: Dict[int, str]
 
     def __init__(self, filepath: pathlib.Path, guild_id: int) -> None:
         self.filepath = filepath
@@ -62,6 +63,7 @@ class ServerContext:
         self._turbo_ban_timing_threshold = 300
         self._roll_reminders = set()
         self._wordle = ""
+        self._birthdays = {}
 
     # Anything stateful *must* be stored as a property so we can always ensure
     # save is called when it gets updated
@@ -170,6 +172,22 @@ class ServerContext:
         self._turbo_ban_timing_threshold = value
         self.save()
 
+    @property
+    def birthdays(self) -> Dict[int, str]:
+        # Backwards compatibility
+        if getattr(self, "_birthdays", None) is None:
+            self._birthdays = {}
+        return self._birthdays
+
+    def add_birthday(self, discord_id: int, birthday: str) -> None:
+        self.birthdays[discord_id] = birthday
+
+    def is_today_birthday_of(self, discord_id: int) -> bool:
+        birthday = self.birthdays[discord_id]
+        target_datetime = dateutil.parser.parse(birthday)
+        now = datetime.datetime.now()
+        return target_datetime.date() == now.date()
+
     def add_roll_reminder(self, user_id: int) -> None:
         # Backwards compatibility
         if getattr(self, "_roll_reminders", None) is None:
@@ -244,6 +262,10 @@ class ServerContext:
             await message.add_reaction("🇲")
             await message.add_reaction("🇪")
 
+        # If it's the user's birthday, we give them a balloon
+        if self.is_today_birthday_of(ctx.discord_id):
+            await message.add_reaction("🎈")
+
         # Special handling for !help
         if message.content.startswith("!help"):
             if " " in message.content:
@@ -262,7 +284,7 @@ class ServerContext:
                     end = message.content.index(" ")
                 func = message.content[1:end]
                 helptext = self.helptext(runner, func)
-                logging.exception("Failed to call command")
+                logging.exception(f"Failed to call command: {e}")
                 await ctx.channel.send(helptext)
         elif len(message.content) > LONG_MESSAGE_CHAR_THRESHOLD:
             await ctx.channel.send(LONG_MESSAGE_RESPONSE)
@@ -328,7 +350,7 @@ class ServerContext:
                     end = message.content.index(" ")
                 func = message.content[1:end]
                 helptext = self.helptext(runner, func)
-                logging.exception("Failed to call command")
+                logging.exception(f"Failed to call command: {e}")
                 await ctx.channel.send(helptext)
 
     @staticmethod

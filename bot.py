@@ -15,18 +15,17 @@ import asyncio
 import logging
 import os
 import pathlib
+import sqlite3
 import sys
 
 import discord
 import docopt
 import dotenv
 import schema
-import sqlite3
 
 import db_helper
 from colored_log_formatter import ColoredLogFormatter
 from server_manager import ServerManager
-
 
 DEFAULT_DB_FILENAME = "discord_bot.sqlite"
 DEFAULT_SERVER_MANAGER_FILENAME = "server_manager.pkl"
@@ -61,7 +60,9 @@ class Client(discord.Client):
         await mgr.handle_message(self, message, self.db_conn)
 
     async def on_reaction_add(
-        self, reaction: discord.Reaction, user: discord.User,
+        self,
+        reaction: discord.Reaction,
+        user: discord.User,
     ) -> None:
         if user == self.user:
             # Don't let the bot listen to reactions from itself
@@ -78,11 +79,11 @@ def main() -> None:
     server_manager_filename = pathlib.Path(
         os.getenv("SERVER_MANAGER_FILENAME") or DEFAULT_SERVER_MANAGER_FILENAME
     )
-    discord_token = os.getenv("DISCORD_TOKEN")
+    discord_token = os.getenv("DISCORD_TOKEN", "")
 
     # Validate cmdline args
     s = schema.Schema({"--help": bool, "--test": bool})
-    args = s.validate(docopt.docopt(__doc__))
+    args = s.validate(docopt.docopt(__doc__ or ""))
 
     # Set up stderr logging
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -92,7 +93,7 @@ def main() -> None:
 
     # Ensure DB setup is complete
     logging.info("Setting up db connection and tables")
-    conn = db_helper.db_connect(db_filename)
+    conn = db_helper.db_connect(str(db_filename))
     db_helper.create_all(conn)
 
     # And start the client

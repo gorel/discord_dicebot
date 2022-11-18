@@ -3,5 +3,6 @@ discord.py[voice]~=1.7.3
 docopt~=0.6.2
 ffmpeg-python~=0.2.0
 schema~=0.7.4
+python-dateutil~=2.8
 python-dotenv~=0.19.0
 pytz~=2021.1

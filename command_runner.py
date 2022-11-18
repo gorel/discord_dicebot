@@ -1,43 +1,16 @@
 #!/usr/bin/env python3
 
 import logging
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    get_type_hints,
-)
+from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
+                    TypeVar, get_type_hints)
 
-from commands import (
-    audio,
-    ban,
-    clear_stats,
-    eight_ball,
-    fileatask,
-    giffer,
-    macro,
-    myrandom,
-    remindme,
-    rename,
-    reset_roll,
-    roll,
-    roll_remind,
-    scoreboard,
-    set_ban_reaction_threshold,
-    set_turbo_ban_timing_threshold,
-    set_msg,
-    set_timeout,
-    timezone,
-    wordle,
-)
+from commands import (audio, ban, birthday, clear_stats, eight_ball, fileatask,
+                      giffer, macro, myrandom, remindme, rename, reset_roll,
+                      roll, roll_remind, scoreboard,
+                      set_ban_reaction_threshold, set_msg, set_timeout,
+                      set_turbo_ban_timing_threshold, timezone, wordle)
 from message_context import MessageContext
 from models import BotParam, GreedyStr
-
 
 CommandFunc = Callable[..., Awaitable[None]]
 T = TypeVar("T")
@@ -86,6 +59,8 @@ DEFAULT_REGISTERED_COMMANDS = [
     audio.audio,
     # File an issue on GitHub
     fileatask.fileatask,
+    # Remember your birthday
+    birthday.birthday,
 ]
 
 
@@ -101,9 +76,10 @@ class CommandRunner:
     def is_botparam_type(t: Any) -> bool:
         if hasattr(t, "__origin__"):
             return issubclass(t.__origin__, BotParam)
+        return False
 
     @staticmethod
-    def typify(typ: Type[T], value: str) -> Any:
+    def typify(typ: Type[T], value: str) -> T:
         from_str_callable = getattr(typ, "from_str", None)
         if callable(from_str_callable):
             return from_str_callable(value)
@@ -174,18 +150,19 @@ class CommandRunner:
         if ctx.message.content[0] != "!":
             raise ValueError("Called CommandRunner without leading `!`")
         message_no_exclaim = ctx.message.content[1:]
-        message_no_spaces = message_no_exclaim.strip()  #Removing excess whitespaces
+        message_no_spaces = message_no_exclaim.strip()  # Removing excess whitespaces
         argv = message_no_spaces.split(" ")
         funcname, args = argv[0].lower(), argv[1:]
 
         # Now try to call the referenced method
+        args_str = ""
         try:
             func = self.cmds[funcname]
             prepared_args = CommandRunner.typify_all(func, args)
             args_str = ", ".join(args)
             logging.info(f"Calling {funcname}(ctx, {args_str}) successfully")
             await func(ctx, **prepared_args)
-        except KeyError as ke:
+        except KeyError:
             logging.error(f"Could not find function {funcname}")
             raise
         except Exception as e:

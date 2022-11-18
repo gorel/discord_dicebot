@@ -2,6 +2,7 @@
 
 import asyncio
 import logging
+import os
 import pathlib
 import pickle
 import sqlite3
@@ -10,7 +11,6 @@ from typing import Dict
 import discord
 
 from server_context import ServerContext
-
 
 SERVER_DIRECTORY = pathlib.Path("./server_contexts/")
 
@@ -25,6 +25,11 @@ class ServerManager:
         self.server_files = {}
         self.servers = {}
         SERVER_DIRECTORY.mkdir(parents=True, exist_ok=True)
+        for filename in os.listdir(SERVER_DIRECTORY):
+            self.server_files[int(filename)] = SERVER_DIRECTORY / filename
+            self.servers[int(filename)] = ServerContext.load(
+                SERVER_DIRECTORY / filename
+            )
 
     def get_ctx(self, guild_id: int) -> ServerContext:
         return self.servers[guild_id]

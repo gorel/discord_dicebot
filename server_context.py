@@ -143,7 +143,7 @@ class ServerContext:
     @tz.setter
     def tz(self, value: str) -> None:
         # We let this potentially fail on purpose to bubble up the error
-        tz = pytz.timezone(value)
+        pytz.timezone(value)
         self._tz = value
         self.save()
 
@@ -181,6 +181,7 @@ class ServerContext:
 
     def add_birthday(self, discord_id: int, birthday: str) -> None:
         self.birthdays[discord_id] = birthday
+        self.save()
 
     def is_today_birthday_of(self, discord_id: int) -> bool:
         birthday = self.birthdays.get(discord_id)
@@ -266,6 +267,7 @@ class ServerContext:
 
         # If it's the user's birthday, we give them a balloon
         if self.is_today_birthday_of(ctx.discord_id):
+            logging.info("Someone's having a birthday! Let's send a balloon.")
             await message.add_reaction("🎈")
 
         # Special handling for !help

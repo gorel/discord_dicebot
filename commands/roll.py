@@ -108,7 +108,7 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             reference_msg=ctx.message,
             target=DiscordUser(ctx.discord_id),
             # max penalty of 1 week
-            num_hours=max(gambling_penalty**2, 168),
+            num_hours=min(gambling_penalty**2, 168),
         )
 
     # If the user has roll reminders set up, await that now

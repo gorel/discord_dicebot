@@ -90,3 +90,24 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
         count = record["ban_count"]
         msg += f"\t- {user.name} has been banned {count} times\n"
     await ctx.channel.send(msg)
+
+
+async def turboban(
+    ctx: MessageContext,
+    reference_msg: MessageContext,
+    target: DiscordUser,
+    num_hours: int = 5,
+) -> None:
+    emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
+    turbo = ["T_", "U_", "R_", "B_", "O_"]
+    turbo_str = "".join(emojis[s] for s in turbo)
+    banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
+    banned_str = "".join(emojis[s] for s in banned)
+    turbo_ban_msg = f"{turbo_str} {banned_str}"
+    await reference_msg.channel.send(turbo_ban_msg, reference=reference_msg)
+    await ban(
+        ctx,
+        target=target,
+        timer=Time(f"{num_hours}hr"),
+        ban_as_bot=True,
+    )

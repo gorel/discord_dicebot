@@ -9,10 +9,10 @@ import time
 import db_helper
 from commands import ban, roll_remind, timezone
 from message_context import MessageContext
-from models import DiscordUser, Time
+from models import DiscordUser, GreedyStr, Time
 
 
-async def roll(ctx: MessageContext) -> None:
+async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
     """Roll a die for the server based on the current roll"""
     guild_id = ctx.server_ctx.guild_id
     next_roll = ctx.server_ctx.current_roll
@@ -40,34 +40,75 @@ async def roll(ctx: MessageContext) -> None:
 
     logging.info(f"Next roll in server({guild_id}) for {username} is {next_roll}")
 
-    # Finally, actually roll the die
-    roll = random.randint(1, next_roll)
-    db_helper.record_roll(ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll)
-    await ctx.channel.send(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
-    logging.info(f"{username} rolled a {roll} (d{next_roll})")
+    try:
+        logging.info(f"num rolls: {num_rolls_str}")
+        rolls_remaining = int(float(num_rolls_str))
+    except ValueError:
+        rolls_remaining = 1
 
-    if roll == 1:
-        await ctx.channel.send("Lol, you suck")
-        ban_time = Time(f"{next_roll}hr")
+    gambling_penalty = max(rolls_remaining - 1, 0)
+
+    if rolls_remaining <= 0:
+        await ctx.channel.send("How... dumb are you?")
+        ban_time = Time(f"{next_roll + gambling_penalty}hr")
         await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
-    elif roll == next_roll - 1:
-        s = ctx.server_ctx.critical_failure_msg
-        if s != "":
-            await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
-        else:
-            await ctx.channel.send(
-                f"<@{ctx.discord_id}>: gets to rename the chat channel!"
-            )
-    elif roll == next_roll:
-        # Increment the current roll
-        ctx.server_ctx.current_roll = next_roll + 1
-        logging.info(f"Next roll in server({guild_id}) is now {next_roll + 1}")
+        return
 
-        s = ctx.server_ctx.critical_success_msg
-        if s != "":
-            await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
+    if rolls_remaining > next_roll > 1:
+        await ctx.channel.send(
+            "The National Problem Gambling Helpline (1-800-522-4700) is available 24/7 and is 100% confidential. This hotline connects callers to local health and government organizations that can assist with their gambling addiction."
+        )
+        return
+
+    no_match = True
+    while rolls_remaining and no_match:
+        logging.info(f"rolls_remaining: {rolls_remaining}, no_match: {no_match}")
+        # optimistically hope for a good roll
+        no_match = False
+        rolls_remaining -= 1
+
+        # Finally, actually roll the die
+        roll = random.randint(1, next_roll)
+        db_helper.record_roll(
+            ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll
+        )
+        await ctx.channel.send(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
+        logging.info(f"{username} rolled a {roll} (d{next_roll})")
+
+        if roll == 1:
+            await ctx.channel.send("Lol, you suck")
+            ban_time = Time(f"{next_roll + gambling_penalty}hr")
+            await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+        elif roll == next_roll - 1:
+            s = ctx.server_ctx.critical_failure_msg
+            if s != "":
+                await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
+            else:
+                await ctx.channel.send(
+                    f"<@{ctx.discord_id}>: gets to rename the chat channel!"
+                )
+        elif roll == next_roll:
+            # Increment the current roll
+            ctx.server_ctx.current_roll = next_roll + 1
+            logging.info(f"Next roll in server({guild_id}) is now {next_roll + 1}")
+
+            s = ctx.server_ctx.critical_success_msg
+            if s != "":
+                await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
+            else:
+                await ctx.channel.send(
+                    f"<@{ctx.discord_id}>: gets to rename the server!"
+                )
         else:
-            await ctx.channel.send(f"<@{ctx.discord_id}>: gets to rename the server!")
+            no_match = True
+
+    if no_match and gambling_penalty:
+        await ban.turboban(
+            ctx,
+            reference_msg=ctx.message,
+            target=DiscordUser(ctx.discord_id),
+            num_hours=gambling_penalty**2,
+        )
 
     # If the user has roll reminders set up, await that now
     # I'm not sure why, but we need to reload here

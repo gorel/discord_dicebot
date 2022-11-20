@@ -65,18 +65,10 @@ async def handle_ban_reaction(
     turbo_ban = elapsed.total_seconds() <= ctx.server_ctx.turbo_ban_timing_threshold
 
     if turbo_ban:
-        emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
-        turbo = ["T_", "U_", "R_", "B_", "O_"]
-        turbo_str = "".join(emojis[s] for s in turbo)
-        banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
-        banned_str = "".join(emojis[s] for s in banned)
-        turbo_ban_msg = f"{turbo_str} {banned_str}"
-        await reaction.message.channel.send(turbo_ban_msg, reference=reaction.message)
-        await ban.ban(
+        await ban.turboban(
             ctx,
+            reference_msg=reaction.message,
             target=DiscordUser(reaction.message.author.id),
-            timer=Time("5hr"),
-            ban_as_bot=True,
         )
         return HandlerStatus(Status.Success)
 

@@ -72,6 +72,7 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
         db_helper.record_roll(
             ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll
         )
+        # TODO: Batch all these messages so the bot doesn't get rate limited
         await ctx.channel.send(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
         logging.info(f"{username} rolled a {roll} (d{next_roll})")
 

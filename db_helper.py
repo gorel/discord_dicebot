@@ -3,8 +3,7 @@
 import datetime
 import sqlite3
 import time
-from typing import Any, Dict, Optional
-
+from typing import Any, Dict, List, Optional
 
 STARTING_ROLL_VALUE = 6
 
@@ -203,7 +202,9 @@ def record_rename_used_winner(
 def record_rename_used_loser(
     conn: sqlite3.Connection, guild_id: int, discord_id: int, roll: int
 ) -> None:
-    sql = UPDATE_RENAME_USED_SQL.format(identifier=ROLLS_TABLENAME, roll_target="1")
+    sql = UPDATE_RENAME_USED_SQL.format(
+        identifier=ROLLS_TABLENAME, roll_target="target_roll - 1"
+    )
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id, roll))
     conn.commit()
@@ -211,7 +212,7 @@ def record_rename_used_loser(
 
 def get_last_roll_time(
     conn: sqlite3.Connection, guild_id: int, discord_id: int
-) -> Optional[str]:
+) -> Optional[datetime.datetime]:
     sql = SELECT_LAST_ROLL_TIME_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id, discord_id))
@@ -224,7 +225,7 @@ def get_last_roll_time(
 
 
 # TODO: Load into a real model
-def get_all_stats(conn: sqlite3.Connection, guild_id: int) -> Dict[str, Any]:
+def get_all_stats(conn: sqlite3.Connection, guild_id: int) -> List[Dict[str, Any]]:
     sql = SELECT_ALL_AGGREGATED_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql, (guild_id,))

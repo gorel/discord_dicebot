@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import datetime
 import functools
 import logging
@@ -13,6 +14,7 @@ from typing import ClassVar, Dict, List, Optional, Set
 
 import dateutil.parser
 import discord
+import pytube
 import pytz
 
 from command_runner import CommandRunner
@@ -21,6 +23,7 @@ from reaction_runner import ReactionRunner
 
 LONG_MESSAGE_CHAR_THRESHOLD = 700
 LONG_MESSAGE_RESPONSE = "https://user-images.githubusercontent.com/2358378/199403413-b1f903f3-998e-481c-9172-8b323cf746f4.png"
+VIDEO_LENGTH_COMPLAINT_THRESHOLD_MINUTES = 10
 
 
 # TODO: Really belongs in the wordle file
@@ -275,6 +278,31 @@ class ServerContext:
         if self.is_today_birthday_of(ctx.discord_id):
             logging.info("Someone's having a birthday! Let's send a balloon.")
             await message.add_reaction("🎈")
+
+        # Easter egg for YouTube videos
+        for embed in message.embeds:
+            if embed.url is None:
+                continue
+            logging.info(f"Found embed url: {embed.url}")
+            if "youtube.com" in embed.url.lower() or "youtu.be" in embed.url.lower():
+                video_length_mins = 0
+                try:
+                    video = pytube.YouTube(embed.url)
+                    video_length_mins = video.length // 60
+                except Exception as e:
+                    logging.warning(
+                        f"Failed to get YouTube info for `{embed.url}`: {e}"
+                    )
+                    continue
+
+                if video_length_mins > VIDEO_LENGTH_COMPLAINT_THRESHOLD_MINUTES:
+                    await ctx.channel.send(
+                        f"{video_length_mins} minutes?", reference=message
+                    )
+                    await asyncio.sleep(1)
+                    await ctx.channel.send("Bro, I don't have time to watch this")
+                    # Only run this once
+                    break
 
         # Special handling for !help
         if message.content.startswith("!help"):

@@ -11,6 +11,8 @@ from commands import ban, roll_remind, timezone
 from message_context import MessageContext
 from models import DiscordUser, GreedyStr, Time
 
+MAX_NUM_ROLLS = 10
+
 
 async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
     """Roll a die for the server based on the current roll"""
@@ -59,6 +61,13 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             "The National Problem Gambling Helpline (1-800-522-4700) is available 24/7 and is 100% confidential. This hotline connects callers to local health and government organizations that can assist with their gambling addiction."
         )
         return
+
+    if rolls_remaining > MAX_NUM_ROLLS:
+        await ctx.channel.send(
+            f"You all keep spamming this, so I'm setting the max to {MAX_NUM_ROLLS}\n"
+            "This is why we can't have nice things."
+        )
+        rolls_remaining = MAX_NUM_ROLLS
 
     no_match = True
     while rolls_remaining and no_match:

@@ -15,6 +15,7 @@ import discord
 import pytz
 
 from message_context import MessageContext
+from on_message_handlers.ban_handler import BanHandler
 from on_message_handlers.birthday_handler import BirthdayHandler
 from on_message_handlers.command_handler import CommandHandler
 from on_message_handlers.leeroy_handler import LeeRoyHandler
@@ -245,6 +246,7 @@ class ServerContext:
         handlers = [
             # NOTE: Explicitly run the LogMessageHandler first
             LogMessageHandler(),
+            BanHandler(),
             BirthdayHandler(),
             CommandHandler(),
             LeeRoyHandler(),

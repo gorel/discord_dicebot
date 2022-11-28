@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
+import time
+
 import discord
 
+from commands import ban
 from message_context import MessageContext
+from models import DiscordUser
 from on_reaction_handlers.abstract_reaction_handler import \
     AbstractReactionHandler
 
@@ -23,3 +27,12 @@ class KekwReactionHandler(AbstractReactionHandler):
         await reaction.message.channel.send(
             emojis[reaction.emoji.name.lower()], reference=reaction.message
         )
+
+        # If the user is banned, unban them early
+        current_ban = ctx.server_ctx.bans.get(user.id, -1)
+        if current_ban > time.time():
+            await ctx.channel.send(
+                "That's good stuff, I'm unbanning you early.",
+                reference=reaction.message,
+            )
+            await ban.unban(ctx, DiscordUser(user.id))

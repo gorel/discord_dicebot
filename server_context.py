@@ -164,6 +164,11 @@ class ServerContext:
         self.save()
 
     @property
+    def reaction_threshold(self) -> int:
+        # Lazy implementation -- we used to only support the ban reaction
+        return self.ban_reaction_threshold
+
+    @property
     def turbo_ban_timing_threshold(self) -> int:
         # Backwards compatibility
         if getattr(self, "_turbo_ban_timing_threshold", None) is None:

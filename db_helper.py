@@ -9,7 +9,7 @@ STARTING_ROLL_VALUE = 6
 
 
 ROLLS_TABLENAME = "rolls"
-BANNED_MSG_TABLENAME = "banned_messages"
+REACTED_MSG_TABLENAME = "reacted_messages"
 BANNED_PEOPLE_TABLENAME = "banned_people"
 
 #########
@@ -81,39 +81,42 @@ GROUP BY discord_id
 """
 
 
-###################
-# Banned messages #
-###################
-BANNED_MESSAGES_CREATE_SQL = """
+####################
+# Reacted messages #
+####################
+REACTED_MESSAGES_CREATE_SQL = """
 CREATE TABLE IF NOT EXISTS {identifier} (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id INTEGER NOT NULL,
     msg_id INTEGER NOT NULL,
-    unixtime INTEGER NOT NULL
+    unixtime INTEGER NOT NULL,
+    reaction_id INTEGER NOT NULL
 );
 """
 
 
-INSERT_BANNED_MSG_SQL = """
-INSERT INTO {identifier} (guild_id, msg_id, unixtime)
-    VALUES (?, ?, ?);
+INSERT_REACTED_MSG_SQL = """
+INSERT INTO {identifier} (guild_id, msg_id, unixtime, reaction_id)
+    VALUES (?, ?, ?, ?);
 """
 
 
-SELECT_BANNED_MSG_SQL = """
+SELECT_REACTED_MSG_SQL = """
 SELECT
     id, guild_id, msg_id, unixtime
 FROM {identifier}
 WHERE guild_id = ?
   AND msg_id = ?
+  AND reaction_id = ?
 """
 
-SELECT_BANNED_MSG_TIME_SQL = """
+SELECT_REACTED_MSG_TIME_SQL = """
 SELECT
     unixtime
 FROM {identifier}
 WHERE guild_id = ?
   AND msg_id = ?
+  AND reaction_id = ?
 ORDER BY unixtime
 """
 
@@ -161,8 +164,8 @@ def create_all(conn: sqlite3.Connection) -> None:
     sql = ROLLS_SQL.format(identifier=ROLLS_TABLENAME)
     cur = conn.cursor()
     cur.execute(sql)
-    # Create the banned messages table
-    sql = BANNED_MESSAGES_CREATE_SQL.format(identifier=BANNED_MSG_TABLENAME)
+    # Create the reacted messages table
+    sql = REACTED_MESSAGES_CREATE_SQL.format(identifier=REACTED_MSG_TABLENAME)
     cur.execute(sql)
     # Create the banned people table
     sql = BANNED_PEOPLE_CREATE_SQL.format(identifier=BANNED_PEOPLE_TABLENAME)
@@ -171,7 +174,7 @@ def create_all(conn: sqlite3.Connection) -> None:
 
 
 def clear_all(conn: sqlite3.Connection, guild_id: int) -> None:
-    for tbl in [ROLLS_TABLENAME, BANNED_MSG_TABLENAME, BANNED_PEOPLE_TABLENAME]:
+    for tbl in [ROLLS_TABLENAME, REACTED_MSG_TABLENAME, BANNED_PEOPLE_TABLENAME]:
         sql = DELETE_ALL_SQL.format(identifier=tbl)
         cur = conn.cursor()
         cur.execute(sql, (guild_id,))
@@ -262,19 +265,21 @@ def get_last_loser(conn: sqlite3.Connection, guild_id: int) -> Dict[str, Any]:
     return {"discord_id": discord_id, "roll": roll, "rename_used": rename_used}
 
 
-def record_banned_message(conn: sqlite3.Connection, guild_id: int, msg_id: int) -> None:
-    sql = INSERT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
+def record_reacted_message(
+    conn: sqlite3.Connection, guild_id: int, msg_id: int, reaction_id: int
+) -> None:
+    sql = INSERT_REACTED_MSG_SQL.format(identifier=REACTED_MSG_TABLENAME)
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, msg_id, int(time.time())))
+    cur.execute(sql, (guild_id, msg_id, int(time.time()), reaction_id))
     conn.commit()
 
 
-def has_message_been_banned(
-    conn: sqlite3.Connection, guild_id: int, msg_id: int
+def has_message_been_reacted(
+    conn: sqlite3.Connection, guild_id: int, msg_id: int, reaction_id: int
 ) -> bool:
-    sql = SELECT_BANNED_MSG_SQL.format(identifier=BANNED_MSG_TABLENAME)
+    sql = SELECT_REACTED_MSG_SQL.format(identifier=REACTED_MSG_TABLENAME)
     cur = conn.cursor()
-    cur.execute(sql, (guild_id, msg_id))
+    cur.execute(sql, (guild_id, msg_id, reaction_id))
     return cur.fetchone() is not None
 
 

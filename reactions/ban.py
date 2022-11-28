@@ -17,11 +17,14 @@ async def handle_ban_reaction(
     user: discord.User,
     ctx: MessageContext,
 ) -> HandlerStatus:
-    is_ban_emoji = not isinstance(reaction.emoji, str) and reaction.emoji.name == "BAN"
+    is_ban_emoji = (
+        not isinstance(reaction.emoji, str) and reaction.emoji.name.lower() == "ban"
+    )
     is_april_fools = datetime.datetime.today().date() == datetime.date(2022, 4, 1)
 
     # Special feature for people trying to ban the bot itself
     if is_ban_emoji and ctx.client.user.id == ctx.message.author.id:
+        # TODO: If it reaches the ban threshold, unban *everyone* in this server
         my_name = ctx.client.user.name
         await reaction.message.channel.send(
             f"Who *dares* try to ban the mighty {my_name}?!"
@@ -48,16 +51,16 @@ async def handle_ban_reaction(
         return HandlerStatus(Status.Invalid)
 
     # Check if this message has been banned before
-    banned_before = db_helper.has_message_been_banned(
-        ctx.db_conn, reaction.message.guild.id, reaction.message.id
+    banned_before = db_helper.has_message_been_reacted(
+        ctx.db_conn, reaction.message.guild.id, reaction.message.id, reaction.emoji.id
     )
     if banned_before:
         logging.warning("New ban reaction on message but it was banned before.")
         return HandlerStatus(Status.Invalid)
 
     # We need to record that this message has now been banned
-    db_helper.record_banned_message(
-        ctx.db_conn, reaction.message.guild.id, reaction.message.id
+    db_helper.record_reacted_message(
+        ctx.db_conn, reaction.message.guild.id, reaction.message.id, reaction.emoji.id
     )
 
     # Check if the user was turbo banned

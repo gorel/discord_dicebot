@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
 import functools
 import logging
@@ -9,21 +8,21 @@ import pathlib
 import pickle
 import random
 import sqlite3
-import time
-from typing import ClassVar, Dict, List, Optional, Set
+from typing import ClassVar, Dict, List, Set
 
 import dateutil.parser
 import discord
-import pytube
 import pytz
 
-from command_runner import CommandRunner
 from message_context import MessageContext
+from on_message_handlers.birthday_handler import BirthdayHandler
+from on_message_handlers.command_handler import CommandHandler
+from on_message_handlers.log_message_handler import (LogMessageHandler,
+                                                     LogMessageHandlerSource)
+from on_message_handlers.long_message_handler import LongMessageHandler
+from on_message_handlers.shame_handler import ShameHandler
+from on_message_handlers.youtube_handler import YoutubeHandler
 from reaction_runner import ReactionRunner
-
-LONG_MESSAGE_CHAR_THRESHOLD = 700
-LONG_MESSAGE_RESPONSE = "https://user-images.githubusercontent.com/2358378/199403413-b1f903f3-998e-481c-9172-8b323cf746f4.png"
-VIDEO_LENGTH_COMPLAINT_THRESHOLD_MINUTES = 10
 
 
 # TODO: Really belongs in the wordle file
@@ -238,94 +237,24 @@ class ServerContext:
         message: discord.Message,
         db_conn: sqlite3.Connection,
     ) -> None:
-        # TODO: Allow disabling of logging all messages?
-        # Don't propagate messages since this is used specifically for logging
-        # user messages, which can get spammy
-        message_logger = logging.getLogger("messages")
-        message_logger.propagate = False
-
-        # Only add the handler *once*
-        if len(message_logger.handlers) == 0:
-            hdl = logging.StreamHandler()
-            hdl.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
-            message_logger.addHandler(hdl)
-
-        guild_name = message.guild.name
-        username = message.author.name
-        # Check the message length is > 0 to ignore logging image-only messages
-        if len(message.content) > 0:
-            message_logger.info(f"{guild_name} | {username}: {message.content}")
-
         ctx = MessageContext(
             server_ctx=self, client=client, message=message, db_conn=db_conn
         )
 
-        runner = CommandRunner()
+        handlers = [
+            # NOTE: Explicitly run the LogMessageHandler first
+            LogMessageHandler(),
+            BirthdayHandler(),
+            CommandHandler(),
+            LongMessageHandler(),
+            ShameHandler(),
+            YoutubeHandler(),
+        ]
 
-        # TODO: Create a way to hook in generic message handlers
-        # instead of all the custom handling logic below hap-hazardly thrown in
-
-        # If the user is banned, we react SHAME
-        if self.bans.get(ctx.discord_id, -1) > time.time():
-            logging.warning(f"{ctx.discord_id} is banned! Shame them.")
-            await message.add_reaction("🇸")
-            await message.add_reaction("🇭")
-            await message.add_reaction("🇦")
-            await message.add_reaction("🇲")
-            await message.add_reaction("🇪")
-
-        # If it's the user's birthday, we give them a balloon
-        if self.is_today_birthday_of(ctx.discord_id):
-            logging.info("Someone's having a birthday! Let's send a balloon.")
-            await message.add_reaction("🎈")
-
-        # Easter egg for YouTube videos
-        for embed in message.embeds:
-            if embed.url is None:
-                continue
-            logging.info(f"Found embed url: {embed.url}")
-            if "youtube.com" in embed.url.lower() or "youtu.be" in embed.url.lower():
-                video_length_mins = 0
-                try:
-                    video = pytube.YouTube(embed.url)
-                    video_length_mins = video.length // 60
-                except Exception as e:
-                    logging.warning(
-                        f"Failed to get YouTube info for `{embed.url}`: {e}"
-                    )
-                    continue
-
-                if video_length_mins > VIDEO_LENGTH_COMPLAINT_THRESHOLD_MINUTES:
-                    await ctx.channel.send(
-                        f"{video_length_mins} minutes?", reference=message
-                    )
-                    await asyncio.sleep(1)
-                    await ctx.channel.send("Bro, I don't have time to watch this")
-                    # Only run this once
-                    break
-
-        # Special handling for !help
-        if message.content.startswith("!help"):
-            if " " in message.content:
-                func = message.content.split(" ")[1]
-                text = self.helptext(runner, func)
-            else:
-                text = self.helptext(runner)
-            await ctx.channel.send(text)
-        elif message.content.startswith("!"):
-            # Defer to the command runner
-            try:
-                await runner.call(ctx)
-            except Exception as e:
-                end = len(message.content)
-                if " " in message.content:
-                    end = message.content.index(" ")
-                func = message.content[1:end]
-                helptext = self.helptext(runner, func)
-                logging.exception(f"Failed to call command: {e}")
-                await ctx.channel.send(helptext)
-        elif len(message.content) > LONG_MESSAGE_CHAR_THRESHOLD:
-            await ctx.channel.send(LONG_MESSAGE_RESPONSE)
+        for handler in handlers:
+            if await handler.should_handle_no_throw(ctx):
+                logging.info(f"Running handler: {handler.__class__.__name__}")
+                await handler.handle_no_throw(ctx)
 
     async def handle_reaction_add(
         self,
@@ -346,72 +275,19 @@ class ServerContext:
         message: discord.Message,
         db_conn: sqlite3.Connection,
     ) -> None:
-        # TODO: Only allow certain commands?
-        # TODO: Allow disabling of logging all messages?
-        # Don't propagate messages since this is used specifically for logging
-        # user messages, which can get spammy
-        message_logger = logging.getLogger("messages")
-        message_logger.propagate = False
-
-        # Only add the handler *once*
-        if len(message_logger.handlers) == 0:
-            hdl = logging.StreamHandler()
-            hdl.setFormatter(logging.Formatter("[%(asctime)s] %(message)s"))
-            message_logger.addHandler(hdl)
-
-        username = message.author.name
-        # Check the message length is > 0 to ignore logging image-only messages
-        if len(message.content) > 0:
-            message_logger.info(f"DM from {username}: {message.content}")
-
         ctx = MessageContext(
             server_ctx=self, client=client, message=message, db_conn=db_conn
         )
 
-        runner = CommandRunner()
+        handlers = [
+            # NOTE: Explicitly run the LogMessageHandler first
+            LogMessageHandler(source=LogMessageHandlerSource.DM),
+            CommandHandler(),
+        ]
 
-        # Special handling for !help
-        if message.content.startswith("!help"):
-            if " " in message.content:
-                func = message.content.split(" ")[1]
-                text = self.helptext(runner, func)
-            else:
-                text = self.helptext(runner)
-            await ctx.channel.send(text)
-        elif message.content.startswith("!"):
-            # Defer to the command runner
-            try:
-                await runner.call(ctx)
-            except Exception as e:
-                end = len(message.content)
-                if " " in message.content:
-                    end = message.content.index(" ")
-                func = message.content[1:end]
-                helptext = self.helptext(runner, func)
-                logging.exception(f"Failed to call command: {e}")
-                await ctx.channel.send(helptext)
-
-    @staticmethod
-    def helptext(runner: CommandRunner, cmd: Optional[str] = None) -> str:
-        if cmd is not None:
-            # Looking for a specific kind of help
-            if cmd in runner.cmds:
-                cmd_text = runner.helptext(runner.cmds[cmd])
-            else:
-                cmd_text = f"Could not find command '{cmd}'"
-            return cmd_text
-        else:
-            # Print help on *all* commands
-            cmds = [
-                # Each line should be relatively short
-                runner.helptext(cmd, limit=120)
-                for cmd in runner.cmds.values()
-            ]
-            cmd_text = "**Commands:**\n"
-            for cmd in cmds:
-                cmd_text += f"\t{cmd}\n"
-
-        return cmd_text
+        for handler in handlers:
+            if await handler.should_handle_no_throw(ctx):
+                await handler.handle_no_throw(ctx)
 
     def save(self) -> None:
         # When saving, get the *current state* and just update it

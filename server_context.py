@@ -17,6 +17,7 @@ import pytz
 from message_context import MessageContext
 from on_message_handlers.birthday_handler import BirthdayHandler
 from on_message_handlers.command_handler import CommandHandler
+from on_message_handlers.leeroy_handler import LeeRoyHandler
 from on_message_handlers.log_message_handler import (LogMessageHandler,
                                                      LogMessageHandlerSource)
 from on_message_handlers.long_message_handler import LongMessageHandler
@@ -246,6 +247,7 @@ class ServerContext:
             LogMessageHandler(),
             BirthdayHandler(),
             CommandHandler(),
+            LeeRoyHandler(),
             LongMessageHandler(),
             ShameHandler(),
             YoutubeHandler(),

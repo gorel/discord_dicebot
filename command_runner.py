@@ -6,8 +6,8 @@ from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
 
 from commands import (audio, ban, birthday, clear_stats, eight_ball, fileatask,
                       giffer, macro, myrandom, remindme, rename, reset_roll,
-                      roll, roll_remind, scoreboard,
-                      set_ban_reaction_threshold, set_msg, set_timeout,
+                      roll, roll_remind, scoreboard, set_msg,
+                      set_reaction_threshold, set_timeout,
                       set_turbo_ban_timing_threshold, timezone, wordle)
 from message_context import MessageContext
 from models import BotParam, GreedyStr
@@ -22,7 +22,7 @@ DEFAULT_REGISTERED_COMMANDS = [
     # Scoreboard commands
     scoreboard.scoreboard,
     # Set various server properties
-    set_ban_reaction_threshold.set_ban_reaction_threshold,
+    set_reaction_threshold.set_reaction_threshold,
     set_turbo_ban_timing_threshold.set_turbo_ban_timing_threshold,
     set_msg.set_msg,
     set_timeout.set_timeout,

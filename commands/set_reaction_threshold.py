@@ -4,8 +4,8 @@ import command
 from message_context import MessageContext
 
 
-async def set_ban_reaction_threshold(ctx: MessageContext, threshold: int) -> None:
-    """Set the ban reaction threshold (how many reactions before a ban occurs) for this server"""
+async def set_reaction_threshold(ctx: MessageContext, threshold: int) -> None:
+    """Set the reaction threshold (how many reactions before a reaction-reaction occurs) for this server"""
     if command.has_diceboss_role(ctx.message.author):
         ctx.server_ctx.ban_reaction_threshold = threshold
         await ctx.channel.send(

@@ -15,6 +15,7 @@ import discord
 import pytz
 
 from message_context import MessageContext
+# on_message handlers
 from on_message_handlers.ban_handler import BanHandler
 from on_message_handlers.birthday_handler import BirthdayHandler
 from on_message_handlers.command_handler import CommandHandler
@@ -24,7 +25,9 @@ from on_message_handlers.log_message_handler import (LogMessageHandler,
 from on_message_handlers.long_message_handler import LongMessageHandler
 from on_message_handlers.shame_handler import ShameHandler
 from on_message_handlers.youtube_handler import YoutubeHandler
-from reaction_runner import ReactionRunner
+# on_reaction handlers
+from on_reaction_handlers.ban_handler import BanReactionHandler
+from on_reaction_handlers.kekw_handler import KekwReactionHandler
 
 
 # TODO: Really belongs in the wordle file
@@ -275,8 +278,14 @@ class ServerContext:
         ctx = MessageContext(
             server_ctx=self, client=client, message=reaction.message, db_conn=db_conn
         )
-        runner = ReactionRunner()
-        await runner.handle_reaction(reaction, user, ctx)
+
+        handlers = [BanReactionHandler(), KekwReactionHandler()]
+        for handler in handlers:
+            await handler.handle_and_record_no_throw(
+                reaction,
+                user,
+                ctx,
+            )
 
     async def handle_dm(
         self,

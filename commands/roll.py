@@ -70,6 +70,7 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
         rolls_remaining = MAX_NUM_ROLLS
 
     no_match = True
+    roll_results_strings = []
     while rolls_remaining and no_match:
         logging.info(f"rolls_remaining: {rolls_remaining}, no_match: {no_match}")
         # optimistically hope for a good roll
@@ -81,15 +82,19 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
         db_helper.record_roll(
             ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll
         )
-        # TODO: Batch all these messages so the bot doesn't get rate limited
-        await ctx.channel.send(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
+        # We batch all the roll messages so the bot doesn't get rate limited
+        roll_results_strings.append(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
         logging.info(f"{username} rolled a {roll} (d{next_roll})")
 
         if roll == 1:
+            batched_rolls_message = "\n".join(roll_results_strings)
+            await ctx.channel.send(batched_rolls_message)
             await ctx.channel.send("Lol, you suck")
             ban_time = Time(f"{next_roll + gambling_penalty}hr")
             await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
         elif roll == next_roll - 1:
+            batched_rolls_message = "\n".join(roll_results_strings)
+            await ctx.channel.send(batched_rolls_message)
             s = ctx.server_ctx.critical_failure_msg
             if s != "":
                 await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
@@ -102,6 +107,9 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             ctx.server_ctx.current_roll = next_roll + 1
             logging.info(f"Next roll in server({guild_id}) is now {next_roll + 1}")
 
+            batched_rolls_message = "\n".join(roll_results_strings)
+            await ctx.channel.send(batched_rolls_message)
+
             s = ctx.server_ctx.critical_success_msg
             if s != "":
                 await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
@@ -113,6 +121,8 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             no_match = True
 
     if no_match and gambling_penalty:
+        batched_rolls_message = "\n".join(roll_results_strings)
+        await ctx.channel.send(batched_rolls_message)
         await ban.turboban(
             ctx,
             reference_msg=ctx.message,

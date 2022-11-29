@@ -15,16 +15,17 @@ import asyncio
 import logging
 import os
 import pathlib
-import sqlite3
 import sys
 
 import discord
 import docopt
 import dotenv
 import schema
+from sqlalchemy.ext.asyncio import (AsyncEngine, async_sessionmaker,
+                                    create_async_engine)
 
-import db_helper
 from colored_log_formatter import ColoredLogFormatter
+from db_models import Base
 from server_manager import ServerManager
 
 DEFAULT_DB_FILENAME = "discord_bot.sqlite"
@@ -34,15 +35,14 @@ DEFAULT_SERVER_MANAGER_FILENAME = "server_manager.pkl"
 class Client(discord.Client):
     def __init__(
         self,
-        db_conn: sqlite3.Connection,
+        engine: AsyncEngine,
         mgr_path: pathlib.Path,
         is_test: bool = False,
     ):
         super().__init__()
-        self.lock = asyncio.Lock()
-        self.db_conn = db_conn
         self.mgr_path = mgr_path
         self.is_test = is_test
+        self.sessionmaker = async_sessionmaker(engine)
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:
@@ -56,8 +56,9 @@ class Client(discord.Client):
             else:
                 return
 
-        mgr = ServerManager.try_load(self.lock, self.mgr_path)
-        await mgr.handle_message(self, message, self.db_conn)
+        async with self.sessionmaker() as session:
+            mgr = ServerManager(session)
+            await mgr.handle_message(self, message)
 
     async def on_reaction_add(
         self,
@@ -68,14 +69,15 @@ class Client(discord.Client):
             # Don't let the bot listen to reactions from itself
             return
 
-        mgr = ServerManager.try_load(self.lock, self.mgr_path)
-        await mgr.handle_reaction_add(self, reaction, user, self.db_conn)
+        async with self.sessionmaker() as session:
+            mgr = ServerManager(session)
+            await mgr.handle_reaction_add(self, reaction, user)
 
 
-def main() -> None:
+async def main() -> None:
     # Load environment
     dotenv.load_dotenv(".env")
-    db_filename = pathlib.Path(os.getenv("DB_FILENAME") or DEFAULT_DB_FILENAME)
+    db_filename = os.getenv("DB_FILENAME", DEFAULT_DB_FILENAME)
     server_manager_filename = pathlib.Path(
         os.getenv("SERVER_MANAGER_FILENAME") or DEFAULT_SERVER_MANAGER_FILENAME
     )
@@ -93,14 +95,16 @@ def main() -> None:
 
     # Ensure DB setup is complete
     logging.info("Setting up db connection and tables")
-    conn = db_helper.db_connect(str(db_filename))
-    db_helper.create_all(conn)
+    engine = create_async_engine(str(db_filename))
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     # And start the client
     logging.info("Running client")
-    client = Client(conn, server_manager_filename, is_test=args["--test"])
+    client = Client(engine, server_manager_filename, is_test=args["--test"])
     client.run(discord_token)
+    await engine.dispose()
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

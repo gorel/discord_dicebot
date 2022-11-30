@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-import command
-from message_context import MessageContext
+import simple_utils
+from data_infra.message_context import MessageContext
 
 
 async def set_timeout(ctx: MessageContext, hours: int) -> None:
     """Set the roll timeout (how often you can roll) for this server"""
-    if command.has_diceboss_role(ctx.message.author):
-        ctx.server_ctx.roll_timeout_hours = hours
+    if simple_utils.is_admin(ctx.message.author):
+        ctx.guild.roll_timeout = hours
+        await ctx.session.commit()
         await ctx.channel.send(
             f"<@{ctx.discord_id}> set the roll timeout to {hours} hours"
         )
     else:
-        insult = command.get_witty_insult()
-        await ctx.channel.send(
-            f"You're not a diceboss.\nDon't try that shit again, {insult}."
-        )
+        await ctx.channel.send("You're not an admin.\nThis incident will be recorded.")

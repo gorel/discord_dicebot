@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
+import datetime
 import logging
-import time
 
-from message_context import MessageContext
+from data_infra.db_models import Ban
+from data_infra.message_context import MessageContext
 from on_message_handlers.abstract_handler import AbstractHandler
 
 
@@ -14,7 +15,13 @@ class ShameHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.server_ctx.bans.get(ctx.discord_id, -1) > time.time()
+        latest_ban = await Ban.get_latest_unvoided_ban(
+            ctx.session, ctx.guild, ctx.author
+        )
+        if latest_ban is None:
+            return False
+        else:
+            return latest_ban.banned_until > datetime.datetime.now()
 
     async def handle(
         self,

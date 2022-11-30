@@ -3,7 +3,7 @@
 import logging
 import re
 
-from message_context import MessageContext
+from data_infra.message_context import MessageContext
 from on_message_handlers.abstract_handler import AbstractHandler
 
 
@@ -27,10 +27,10 @@ class BanHandler(AbstractHandler):
         # This should only ever be called from a guild context
         assert guild is not None
 
-        server_emojis = {e.name.lower(): e for e in guild.emojis}
+        guild_emojis = {e.name.lower(): e for e in guild.emojis}
         all_emojis = {e.name.lower(): e for e in ctx.client.emojis}
-        if "ban" in server_emojis.keys():
-            await ctx.message.add_reaction(server_emojis["ban"])
+        if "ban" in guild_emojis.keys():
+            await ctx.message.add_reaction(guild_emojis["ban"])
         elif "ban" in all_emojis.keys():
             await ctx.message.add_reaction(all_emojis["ban"])
         else:

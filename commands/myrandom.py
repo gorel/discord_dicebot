@@ -3,8 +3,9 @@
 import logging
 import random
 
-from message_context import MessageContext
-from models import GreedyStr
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
+
 
 async def choice(ctx: MessageContext, items: GreedyStr) -> None:
     """Get a random choice from a list of items"""

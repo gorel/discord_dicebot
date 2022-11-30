@@ -5,12 +5,13 @@ import time
 
 import pytz
 
-import command
-from message_context import MessageContext
+import simple_utils
+from data_infra.message_context import MessageContext
 
 
 def _localize_pretty(
-    now_localized: datetime.datetime, target_localized: datetime.datetime,
+    now_localized: datetime.datetime,
+    target_localized: datetime.datetime,
 ) -> str:
     delta = target_localized - now_localized
     td0 = datetime.timedelta(0)
@@ -80,14 +81,14 @@ def localize(unixtime: int, tz: str) -> str:
 
 
 async def set_tz(ctx: MessageContext, tz: str) -> None:
-    if command.has_diceboss_role(ctx.message.author):
+    if simple_utils.is_admin(ctx.message.author):
         try:
-            ctx.server_ctx.tz = tz
+            # Just ensure that pytz recognizes this as a valid timezone
+            pytz.timezone(tz)
+            ctx.guild.timezone = tz
+            await ctx.session.commit()
             await ctx.channel.send(f"Set this server's timezone to '{tz}'")
-        except Exception as e:
+        except pytz.UnknownTimeZoneError:
             await ctx.channel.send(f"Unknown timezone '{tz}'")
     else:
-        insult = command.get_witty_insult()
-        await ctx.channel.send(
-            f"You're not a diceboss.\nDon't try that shit again, {insult}."
-        )
+        await ctx.channel.send("You're not an admin.\nThis incident will be recorded.")

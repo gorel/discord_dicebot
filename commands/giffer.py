@@ -1,16 +1,14 @@
 #!/usr/bin/env python3
 
-import json
 import logging
 import os
 import random
-import requests
 from typing import List, Optional
 
 import aiohttp
 
-from message_context import MessageContext
-from models import GreedyStr
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
 
 
 class TenorGifRetriever:

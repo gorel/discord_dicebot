@@ -1,46 +1,46 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
 import logging
 import random
 import time
 
-import db_helper
-from commands import ban, roll_remind, timezone
-from message_context import MessageContext
-from models import DiscordUser, GreedyStr, Time
+from commands import ban, timezone
+from data_infra.db_models import Roll
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
+from data_infra.time import Time
 
 MAX_NUM_ROLLS = 10
 
 
 async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
     """Roll a die for the server based on the current roll"""
-    guild_id = ctx.server_ctx.guild_id
-    next_roll = ctx.server_ctx.current_roll
-    username = ctx.message.author.name
+    next_roll = ctx.guild.current_roll
 
-    last_roll_time = db_helper.get_last_roll_time(ctx.db_conn, guild_id, ctx.discord_id)
+    last_roll = await Roll.get_last_roll(ctx.session, ctx.guild, ctx.author)
     now = datetime.datetime.now()
 
-    if last_roll_time is not None:
-        last_roll_unixtime = int(time.mktime(last_roll_time.timetuple()))
-        last_roll_str = timezone.localize(last_roll_unixtime, ctx.server_ctx.tz)
-        logging.info(f"{ctx.discord_id} last rolled {last_roll_str}")
+    if last_roll is not None:
+        last_roll_unixtime = int(time.mktime(last_roll.rolled_at.timetuple()))
+        last_roll_str = timezone.localize(last_roll_unixtime, ctx.guild.timezone)
+        logging.info(f"{ctx.author_id} last rolled {last_roll_str}")
 
-        last_roll_delta = int((now - last_roll_time).total_seconds() // 3600)
-        timeout = ctx.server_ctx.roll_timeout_hours
+        last_roll_delta = int((now - last_roll.rolled_at).total_seconds() // 3600)
+        timeout = ctx.guild.roll_timeout
         if last_roll_delta < timeout:
             await ctx.channel.send(
-                f"<@{ctx.discord_id}> last rolled {last_roll_str}.\n"
+                f"<@{ctx.author_id}> last rolled {last_roll_str}.\n"
                 f"This server only allows rolling once every {timeout} hours.\n"
             )
             ban_time = Time("1hr")
-            await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+            await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
             # Bail early - don't allow rolling
             return
 
-    logging.info(f"Next roll in server({guild_id}) for {username} is {next_roll}")
+    logging.info(
+        f"Next roll in guild({ctx.guild_id}) for {ctx.author.name} is {next_roll}"
+    )
 
     try:
         logging.info(f"num rolls: {num_rolls_str}")
@@ -53,12 +53,15 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
     if rolls_remaining <= 0:
         await ctx.channel.send("How... dumb are you?")
         ban_time = Time(f"{next_roll + gambling_penalty}hr")
-        await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+        await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
         return
 
     if rolls_remaining > next_roll > 1:
         await ctx.channel.send(
-            "The National Problem Gambling Helpline (1-800-522-4700) is available 24/7 and is 100% confidential. This hotline connects callers to local health and government organizations that can assist with their gambling addiction."
+            "The National Problem Gambling Helpline (1-800-522-4700) "
+            "is available 24/7 and is 100% confidential. "
+            "This hotline connects callers to local health and government "
+            "organizations that can assist with their gambling addiction."
         )
         return
 
@@ -80,12 +83,18 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
 
         # Finally, actually roll the die
         roll = random.randint(1, next_roll)
-        db_helper.record_roll(
-            ctx.db_conn, guild_id, ctx.message.author.id, roll, next_roll
+        roll_obj = Roll(
+            guild_id=ctx.guild_id,
+            discord_user_id=ctx.author_id,
+            actual_roll=roll,
+            target_roll=next_roll,
         )
+        await ctx.session.add(roll_obj)
+        await ctx.session.commit()
+
         # We batch all the roll messages so the bot doesn't get rate limited
         roll_results_strings.append(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
-        logging.info(f"{username} rolled a {roll} (d{next_roll})")
+        logging.info(f"{ctx.author.name} rolled a {roll} (d{next_roll})")
 
         if roll == 1:
             batched_rolls_message = "\n".join(roll_results_strings)
@@ -93,33 +102,36 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             sent_message = True
             await ctx.channel.send("Lol, you suck")
             ban_time = Time(f"{next_roll + gambling_penalty}hr")
-            await ban.ban(ctx, DiscordUser(ctx.discord_id), ban_time, ban_as_bot=True)
+            await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
         elif roll == next_roll - 1:
             batched_rolls_message = "\n".join(roll_results_strings)
             await ctx.channel.send(batched_rolls_message)
             sent_message = True
-            s = ctx.server_ctx.critical_failure_msg
-            if s != "":
-                await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
+            if ctx.guild.allow_renaming:
+                await ctx.channel.send(
+                    f"<@{ctx.author_id}>: gets to rename the chat channel!"
+                )
             else:
                 await ctx.channel.send(
-                    f"<@{ctx.discord_id}>: gets to rename the chat channel!"
+                    f"<@{ctx.author_id}>: {ctx.guild.critical_failure_message}"
                 )
         elif roll == next_roll:
             # Increment the current roll
-            ctx.server_ctx.current_roll = next_roll + 1
-            logging.info(f"Next roll in server({guild_id}) is now {next_roll + 1}")
+            ctx.guild.current_roll = next_roll + 1
+            await ctx.session.commit()
+            logging.info(f"Next roll in guild({ctx.guild_id}) is now {next_roll + 1}")
 
             batched_rolls_message = "\n".join(roll_results_strings)
             await ctx.channel.send(batched_rolls_message)
             sent_message = True
 
-            s = ctx.server_ctx.critical_success_msg
-            if s != "":
-                await ctx.channel.send(f"<@{ctx.discord_id}>: {s}")
+            if ctx.guild.allow_renaming:
+                await ctx.channel.send(
+                    f"<@{ctx.author_id}>: gets to rename the server!"
+                )
             else:
                 await ctx.channel.send(
-                    f"<@{ctx.discord_id}>: gets to rename the server!"
+                    f"<@{ctx.author_id}>: {ctx.guild.critical_success_msg}"
                 )
         else:
             no_match = True
@@ -133,17 +145,7 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
         await ban.turboban(
             ctx,
             reference_msg=ctx.message,
-            target=DiscordUser(ctx.discord_id),
+            target=ctx.author,
             # max penalty of 1 week
             num_hours=min(gambling_penalty**2, 168),
         )
-
-    # If the user has roll reminders set up, await that now
-    # I'm not sure why, but we need to reload here
-    ctx.server_ctx.reload()
-    roll_timeout = ctx.server_ctx.roll_timeout_hours
-    user_id = ctx.discord_id
-    if roll_timeout > 0 and ctx.server_ctx.should_remind(user_id):
-        logging.info(f"Sleeping {roll_timeout} hours then reminding {user_id} to roll")
-        await asyncio.sleep(roll_timeout * 3600)
-        await roll_remind.send_roll_reminder(ctx, ctx.message.author)

@@ -4,13 +4,13 @@ import asyncio
 import logging
 import os
 import random
-import time
 
 import requests
 
 from commands import ban
-from message_context import MessageContext
-from models import DiscordUser, GreedyStr, Time
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
+from data_infra.time import Time
 
 ISSUES_URL = "https://api.github.com/repos/gorel/discord_dicebot/issues"
 SUCCESS_CODE = 201
@@ -44,7 +44,7 @@ async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:
     await asyncio.sleep(3)
     await ban.ban(
         ctx,
-        target=DiscordUser(ctx.message.author.id),
+        target=ctx.author,
         timer=Time("1hr"),
         ban_as_bot=True,
     )
@@ -66,7 +66,7 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
             ctx,
             "This is a bad idea and you should feel bad.",
         )
-    elif ctx.server_ctx.bans.get(ctx.message.author.id, -1) > time.time():
+    elif ctx.author.is_currently_banned(ctx.session, ctx.guild_id):
         await ctx.channel.send("Your opinion does not matter.", reference=ctx.message)
     else:
         await ctx.channel.send(

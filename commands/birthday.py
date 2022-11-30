@@ -2,8 +2,8 @@
 
 import dateutil.parser
 
-from message_context import MessageContext
-from models import GreedyStr
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
 
 
 async def birthday(ctx: MessageContext, birthday: GreedyStr) -> None:
@@ -13,7 +13,6 @@ async def birthday(ctx: MessageContext, birthday: GreedyStr) -> None:
     except dateutil.parser.ParserError:
         await ctx.channel.send("I have no idea when that is. Try again.")
     else:
-        ctx.server_ctx.add_birthday(ctx.discord_id, birthday)
+        ctx.author.birthday = birthday
+        await ctx.session.commit()
         await ctx.channel.send("Okay, I'll remember your birthday for later!")
-        # Need to reload since we've saved a birthday now
-        ctx.server_ctx.reload()

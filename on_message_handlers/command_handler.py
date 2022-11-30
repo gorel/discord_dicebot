@@ -3,8 +3,8 @@
 import logging
 from typing import Optional
 
-from command_runner import CommandRunner
-from message_context import MessageContext
+from commands.command_runner import CommandRunner
+from data_infra.message_context import MessageContext
 from on_message_handlers.abstract_handler import AbstractHandler
 
 

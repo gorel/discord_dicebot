@@ -3,10 +3,8 @@
 import logging
 from abc import ABC, abstractmethod
 
-import discord
-
-import db_helper
-from message_context import MessageContext
+from data_infra.db_models import ReactedMessage
+from data_infra.message_context import MessageContext
 
 
 class AbstractReactionHandler(ABC):
@@ -17,67 +15,57 @@ class AbstractReactionHandler(ABC):
 
     async def should_handle(
         self,
-        reaction: discord.Reaction,
-        user: discord.User,
         ctx: MessageContext,
     ) -> bool:
         is_proper_emoji = (
-            not isinstance(reaction.emoji, str)
-            and reaction.emoji.name.lower() == self.reaction_name
+            not isinstance(ctx.reaction.emoji, str)
+            and ctx.reaction.emoji.name.lower() == self.reaction_name
         )
         if not is_proper_emoji:
             return False
 
         # Pyre doesn't realize this can't be a string now
-        assert not isinstance(reaction.emoji, str)
+        assert not isinstance(ctx.reaction.emoji, str)
 
         # Check if this message has been reacted before
-        reacted_before = db_helper.has_message_been_reacted(
-            ctx.db_conn,
-            reaction.message.guild.id,
-            reaction.message.id,
-            reaction.emoji.id,
+        previous_reaction_record = await ReactedMessage.get_by_msg_and_reaction_id(
+            ctx.session, ctx.reaction.message.id, ctx.reaction.emoji.id
         )
-        if reacted_before:
+        if previous_reaction_record is not None:
             logging.warning("New reaction on message but it was reacted before.")
             return False
 
         # Only handle if we've hit the reaction threshold
-        return reaction.count == ctx.server_ctx.reaction_threshold
+        return ctx.reaction.count == ctx.guild.reaction_threshold
 
     @abstractmethod
     async def handle(
         self,
-        reaction: discord.Reaction,
-        user: discord.User,
         ctx: MessageContext,
     ) -> None:
         pass
 
     async def record_handled(
         self,
-        reaction: discord.Reaction,
-        user: discord.User,
         ctx: MessageContext,
     ) -> None:
         # TODO: Replace with aiosqlite
-        db_helper.record_reacted_message(
-            ctx.db_conn,
-            reaction.message.guild.id,
-            reaction.message.id,
-            reaction.emoji.id,
+        reaction_record = ReactedMessage(
+            guild_id=ctx.guild.id,
+            msg_id=ctx.reaction.message.id,
+            reaction_id=ctx.reaction.emoji.id,
         )
+        await ctx.session.add(reaction_record)
+        await ctx.session.commit()
 
     async def handle_and_record_no_throw(
         self,
-        reaction: discord.Reaction,
-        user: discord.User,
         ctx: MessageContext,
     ) -> None:
         try:
-            if await self.should_handle(reaction, user, ctx):
-                await self.handle(reaction, user, ctx)
-                await self.record_handled(reaction, user, ctx)
+            if await self.should_handle(ctx):
+                await self.handle(ctx)
+                await self.record_handled(ctx)
         except Exception as e:
             logging.exception(
                 f"Exception raised in handle_and_record for {self.__class__.__name__}: {e}"

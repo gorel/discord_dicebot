@@ -1,12 +1,12 @@
 #!/urs/bin/env python3
 
 import asyncio
-import logging
 import random
 
 from commands import ban
-from message_context import MessageContext
-from models import DiscordUser, GreedyStr, Time
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
+from data_infra.time import Time
 
 RANDOM_BAN_THRESHOLD = 0.05
 EIGHT_BALL_RESPONSES = [
@@ -43,7 +43,7 @@ async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
         await asyncio.sleep(3)
         await ban.ban(
             ctx,
-            target=DiscordUser(ctx.message.author.id),
+            target=ctx.author,
             timer=Time("1hr"),
             ban_as_bot=True,
         )

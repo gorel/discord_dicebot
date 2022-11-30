@@ -3,7 +3,7 @@
 import logging
 from enum import Enum, auto
 
-from message_context import MessageContext
+from data_infra.message_context import MessageContext
 from on_message_handlers.abstract_handler import AbstractHandler
 
 

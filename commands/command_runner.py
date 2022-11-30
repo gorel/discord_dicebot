@@ -4,13 +4,14 @@ import logging
 from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
                     TypeVar, get_type_hints)
 
-from commands import (audio, ban, birthday, clear_stats, eight_ball, fileatask,
+from commands import (ban, birthday, clear_stats, eight_ball, fileatask,
                       giffer, macro, myrandom, remindme, rename, reset_roll,
                       roll, roll_remind, scoreboard, set_msg,
                       set_reaction_threshold, set_timeout,
-                      set_turbo_ban_timing_threshold, timezone, wordle)
-from message_context import MessageContext
-from models import BotParam, GreedyStr
+                      set_turbo_ban_timing_threshold, timezone)
+from data_infra.bot_param import BotParam
+from data_infra.greedy_str import GreedyStr
+from data_infra.message_context import MessageContext
 
 CommandFunc = Callable[..., Awaitable[None]]
 T = TypeVar("T")
@@ -53,10 +54,6 @@ DEFAULT_REGISTERED_COMMANDS = [
     giffer.gif,
     # Random choices
     myrandom.choice,
-    # Play wordle
-    wordle.wordle,
-    # Play audio
-    audio.audio,
     # File an issue on GitHub
     fileatask.fileatask,
     # Remember your birthday
@@ -145,7 +142,6 @@ class CommandRunner:
         return typed_args
 
     async def call(self, ctx: MessageContext) -> None:
-        ctx.server_ctx.reload()
         # Split args to prepare for dynamic dispatch
         if ctx.message.content[0] != "!":
             raise ValueError("Called CommandRunner without leading `!`")
@@ -169,7 +165,7 @@ class CommandRunner:
             # TODO: Log helpful message to message.guild
             logging.error(f"Failed to call function: {funcname}(ctx, {args_str})")
             logging.error(f"{type(e)}: {e}")
-            # Reraise to let server_context provide help content
+            # Reraise to let server context provide help content
             raise
 
     @staticmethod

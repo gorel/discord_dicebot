@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from message_context import MessageContext
+from data_infra.message_context import MessageContext
 
 
 class AbstractHandler(ABC):

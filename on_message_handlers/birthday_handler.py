@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 
-from message_context import MessageContext
+from data_infra.message_context import MessageContext
 from on_message_handlers.abstract_handler import AbstractHandler
 
 
@@ -12,7 +12,7 @@ class BirthdayHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.server_ctx.is_today_birthday_of(ctx.discord_id)
+        return ctx.author.is_today_birthday_of_user(ctx.guild.timezone)
 
     async def handle(
         self,

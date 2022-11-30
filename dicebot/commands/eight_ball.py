@@ -5,6 +5,7 @@ import random
 
 from dicebot.commands import ban
 from dicebot.data.message_context import MessageContext
+from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.time import Time
 
@@ -45,7 +46,8 @@ async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
             ctx,
             target=ctx.author,
             timer=Time("1hr"),
-            ban_as_bot=True,
+            ban_as_bot=BotParam(True),
+            reason=BotParam("Unlucky eight ball"),
         )
     else:
         response = random.choice(EIGHT_BALL_RESPONSES)

@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import pytz
 
 from dicebot.data.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -12,7 +13,7 @@ class BirthdayHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.author.is_today_birthday_of_user(ctx.guild.timezone)
+        return ctx.author.is_today_birthday_of_user(pytz.timezone(ctx.guild.timezone))
 
     async def handle(
         self,

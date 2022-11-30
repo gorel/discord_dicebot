@@ -16,7 +16,11 @@ class KekwReactionHandler(AbstractReactionHandler):
         self,
         ctx: MessageContext,
     ) -> None:
+        # Appease pyright
+        assert ctx.reaction is not None
+        assert ctx.reactor is not None
         assert not isinstance(ctx.reaction.emoji, str)
+
         # This is the easiest way to pull the same kekw emoji
         emojis = {e.name.lower(): f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
         await ctx.reaction.message.channel.send(
@@ -29,5 +33,5 @@ class KekwReactionHandler(AbstractReactionHandler):
                 "That's good stuff, I'm unbanning you early.",
                 reference=ctx.reaction.message,
             )
-            discord_user = await DiscordUser.get_or_create(ctx.reactor.id)
+            discord_user = await DiscordUser.get_or_create(ctx.session, ctx.reactor.id)
             await ban.unban(ctx, discord_user)

@@ -17,6 +17,7 @@ class AbstractReactionHandler(ABC):
         self,
         ctx: MessageContext,
     ) -> bool:
+        assert ctx.reaction is not None
         is_proper_emoji = (
             not isinstance(ctx.reaction.emoji, str)
             and ctx.reaction.emoji.name.lower() == self.reaction_name
@@ -24,7 +25,7 @@ class AbstractReactionHandler(ABC):
         if not is_proper_emoji:
             return False
 
-        # Pyre doesn't realize this can't be a string now
+        # pyright doesn't realize this can't be a string now
         assert not isinstance(ctx.reaction.emoji, str)
 
         # Check if this message has been reacted before
@@ -49,6 +50,8 @@ class AbstractReactionHandler(ABC):
         self,
         ctx: MessageContext,
     ) -> None:
+        assert ctx.reaction is not None
+
         # TODO: Replace with aiosqlite
         reaction_record = ReactedMessage(
             guild_id=ctx.guild.id,

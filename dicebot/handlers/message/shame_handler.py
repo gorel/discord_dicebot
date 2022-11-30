@@ -13,7 +13,7 @@ class ShameHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.author.is_currently_banned(ctx.session, ctx.guild)
+        return await ctx.author.is_currently_banned(ctx.session, ctx.guild)
 
     async def handle(
         self,

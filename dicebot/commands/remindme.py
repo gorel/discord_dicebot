@@ -10,8 +10,10 @@ from dicebot.data.types.time import Time
 
 async def remindme(ctx: MessageContext, timer: Time, text: GreedyStr) -> None:
     """Set a reminder for yourself"""
+    text_str = text.unwrap()
     # TODO: Allow specifying a certain date instead
     await ctx.channel.send(f"Okay, <@{ctx.author_id}>, I'll remind you in {timer}")
     logging.info(f"Will now sleep for {timer.seconds} seconds for reminder")
+    # TODO: Put into a background queue
     await asyncio.sleep(timer.seconds)
-    await ctx.channel.send(f"Reminder for <@{ctx.author_id}>: {text}")
+    await ctx.channel.send(f"Reminder for <@{ctx.author_id}>: {text_str}")

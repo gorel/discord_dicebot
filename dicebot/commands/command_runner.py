@@ -121,7 +121,7 @@ class CommandRunner:
             n = len(parameters) - 1
             args, glob = args[:n], args[n:]
             greedy_arg = " ".join(glob)
-            args.append(greedy_arg)
+            args.append(GreedyStr(greedy_arg))
 
         # TODO: This is *maybe* a good idea, but if we want to support default
         # arguments, I think it could cause some additional headaches. For now,

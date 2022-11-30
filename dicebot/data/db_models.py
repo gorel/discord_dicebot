@@ -7,7 +7,8 @@ from enum import IntEnum, auto
 from typing import Annotated, Optional
 
 import discord
-from sqlalchemy import Column, ForeignKey, Table, desc, func, select, update
+from sqlalchemy import (Column, ForeignKey, Table, desc, func, select, text,
+                        update)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import (Mapped, declarative_base, mapped_column,
                             relationship)
@@ -26,7 +27,7 @@ DEFAULT_GUILD_TZ = "US/Pacific"
 int_pk = Annotated[int, mapped_column(primary_key=True)]
 int_pk_natural = Annotated[int, mapped_column(primary_key=True, autoincrement=False)]
 int_ix = Annotated[int, mapped_column(index=True)]
-timestamp = Annotated[
+timestamp_now = Annotated[
     datetime.datetime,
     mapped_column(nullable=False, server_default=func.CURRENT_TIMESTAMP()),
 ]
@@ -45,9 +46,11 @@ guild_feature_assoc = Table(
 class DiscordUser(Base):
     __tablename__ = "discord_user"
 
+    # Columns
     id: Mapped[int_pk_natural]
-    birthday: Mapped[Optional[timestamp]]
+    birthday: Mapped[Optional[datetime.datetime]]
 
+    # Methods
     def is_today_birthday_of_user(self, guild_tz: datetime.tzinfo) -> bool:
         if self.birthday is None:
             return False
@@ -57,9 +60,7 @@ class DiscordUser(Base):
         return target_datetime.date() == now.date()
 
     async def is_currently_banned(self, session: AsyncSession, guild: Guild) -> bool:
-        latest_ban = await Ban.get_latest_unvoided_ban(
-            session, guild.id, self.discord_id
-        )
+        latest_ban = await Ban.get_latest_unvoided_ban(session, guild, self)
         return (
             latest_ban is not None and latest_ban.banned_until > datetime.datetime.now()
         )
@@ -90,6 +91,7 @@ class DiscordUser(Base):
 class Guild(Base):
     __tablename__ = "guild"
 
+    # Columns
     id: Mapped[int_pk_natural]
     is_dm: Mapped[bool_f]
     current_roll: Mapped[int] = mapped_column(default=DEFAULT_START_ROLL)
@@ -102,23 +104,22 @@ class Guild(Base):
     )
     timezone: Mapped[str] = mapped_column(default=DEFAULT_GUILD_TZ)
     allow_renaming: Mapped[bool_f]
-    enabled_features: Mapped[list[Feature]] = relationship(
-        secondary=guild_feature_assoc
-    )
     reaction_threshold: Mapped[int] = mapped_column(default=DEFAULT_REACTION_THRESHOLD)
     turboban_threshold: Mapped[int] = mapped_column(
         default=DEFAULT_TURBOBAN_THRESHOLD_SECS
     )
 
+    # Relationships
+    features: Mapped[list[Feature]] = relationship(
+        secondary=guild_feature_assoc, lazy="selectin"
+    )
+
+    # Methods
     async def unban(self, session: AsyncSession, target: DiscordUser) -> None:
         await Ban.unban(session, self, target)
 
     async def get_macro(self, session: AsyncSession, key: str) -> Optional[Macro]:
-        # TODO: Probably a better way to do this with declarative ORM style
-        # TODO: Or at least make a method within *Macro* that we call here
-        # like unban above
-        res = await session.scalars(select(Macro).filter_by(guild_id=self.id, key=key))
-        return res.one_or_none()
+        return await Macro.get(session, self, key)
 
     async def add_macro(
         self, session: AsyncSession, key: str, value: str, author: DiscordUser
@@ -138,7 +139,7 @@ class Guild(Base):
             discord_user_id=author.id,
             rename_type=Rename.Type.CHAT,
         )
-        await session.add(rename)
+        session.add(rename)
 
     async def add_guild_rename(
         self, session: AsyncSession, author: DiscordUser
@@ -148,7 +149,7 @@ class Guild(Base):
             discord_user_id=author.id,
             rename_type=Rename.Type.GUILD,
         )
-        await session.add(rename)
+        session.add(rename)
 
     async def roll_scoreboard_str(
         self,
@@ -170,7 +171,7 @@ class Guild(Base):
             )
             .filter_by(guild_id=self.id)
             .group_by(Roll.discord_user_id)
-            .order_by("wins", "losses", "ones", "attempts")
+            .order_by(text("wins"), text("losses"), text("ones"), text("attempts"))
         )
 
         msg = "**Stats:**\n"
@@ -193,7 +194,7 @@ class Guild(Base):
             select(Ban, func.count(Ban.guild_id).label("ban_count"))
             .filter_by(guild_id=self.id)
             .group_by(Ban.discord_user_id)
-            .order_by(desc("ban_count"))
+            .order_by(desc(text("ban_count")))
         )
 
         msg = "**Ban stats:**\n"
@@ -223,25 +224,37 @@ class Guild(Base):
 class Macro(Base):
     __tablename__ = "macro"
 
+    # Columns
     id: Mapped[int_pk]
-    guild_id: Mapped[int_pk] = mapped_column(ForeignKey("guild.id"))
-    added_by: Mapped[int_pk] = mapped_column(ForeignKey("discord_user.id"))
+    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
+    added_by: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
     key: Mapped[str]
     value: Mapped[str]
 
-    author: Mapped[DiscordUser] = relationship("DiscordUser")
+    # Relationships
+    author: Mapped[DiscordUser] = relationship("DiscordUser", lazy="selectin")
+
+    # Methods
+    @classmethod
+    async def get(
+        cls, session: AsyncSession, guild: Guild, key: str
+    ) -> Optional[Macro]:
+        res = await session.scalars(select(Macro).filter_by(guild_id=guild.id, key=key))
+        return res.one_or_none()
 
 
 class Roll(Base):
     __tablename__ = "roll"
 
+    # Columns
     id: Mapped[int_pk]
-    guild_id: Mapped[int_pk] = mapped_column(ForeignKey("guild.id"))
-    discord_user_id: Mapped[int_pk] = mapped_column(ForeignKey("discord_user.id"))
+    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
+    discord_user_id: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
     actual_roll: Mapped[int]
     target_roll: Mapped[int]
-    rolled_at: Mapped[timestamp]
+    rolled_at: Mapped[timestamp_now]
 
+    # Methods
     @classmethod
     async def get_last_roll(
         cls, session: AsyncSession, guild: Guild, discord_user: DiscordUser
@@ -261,12 +274,14 @@ class Rename(Base):
 
     __tablename__ = "rename"
 
+    # Columns
     id: Mapped[int_pk]
-    guild_id: Mapped[int_pk] = mapped_column(ForeignKey("guild.id"))
-    discord_user_id: Mapped[int_pk] = mapped_column(ForeignKey("discord_user.id"))
+    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
+    discord_user_id: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
     rename_type: Mapped[int]
     rename_used: Mapped[bool_f]
 
+    # Methods
     @classmethod
     async def get_last_winner(
         cls, session: AsyncSession, guild: Guild
@@ -287,25 +302,40 @@ class Rename(Base):
 
 
 class Feature(Base):
+    # TODO: Use enums to define features and load them on setup/create_all
     __tablename__ = "feature"
 
+    # Columns
     id: Mapped[int_pk]
     feature_name: Mapped[str]
+
+    # Methods
+    @classmethod
+    async def get_or_create(cls, session: AsyncSession, feature_name: str) -> Feature:
+        res = await session.scalars(select(cls).filter_by(feature_name=feature_name))
+        res = res.one_or_none()
+        if res is None:
+            res = cls(feature_name=feature_name)
+            session.add(res)
+            await session.commit()
+        return res
 
 
 class Ban(Base):
     __tablename__ = "ban"
 
+    # Columns
     id: Mapped[int_pk]
-    guild_id: Mapped[int_pk] = mapped_column(ForeignKey("guild.id"))
-    bannee_id: Mapped[int_pk] = mapped_column(ForeignKey("discord_user.id"))
-    banner_id: Mapped[int_pk] = mapped_column(ForeignKey("discord_user.id"))
+    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
+    bannee_id: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
+    banner_id: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
     reason: Mapped[str]
-    banned_at: Mapped[timestamp]
-    banned_until: Mapped[timestamp]
+    banned_at: Mapped[timestamp_now]
+    banned_until: Mapped[datetime.datetime]
     voided: Mapped[bool_f]
-    voided_early_at: Mapped[Optional[timestamp]]
+    voided_early_at: Mapped[Optional[datetime.datetime]]
 
+    # Methods
     @classmethod
     async def get_latest_unvoided_ban(
         cls, session: AsyncSession, guild: Guild, bannee: DiscordUser
@@ -332,12 +362,14 @@ class Ban(Base):
 class ReactedMessage(Base):
     __tablename__ = "reacted_message"
 
+    # Columns
     id: Mapped[int_pk]
-    guild_id: Mapped[int_pk] = mapped_column(ForeignKey("guild.id"))
+    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
     msg_id: Mapped[int_ix]
-    reacted_at: Mapped[timestamp]
+    reacted_at: Mapped[timestamp_now]
     reaction_id: Mapped[int]
 
+    # Methods
     @classmethod
     async def get_by_msg_and_reaction_id(
         cls, session: AsyncSession, msg_id: int, reaction_id: int

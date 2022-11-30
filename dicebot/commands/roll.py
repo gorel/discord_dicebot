@@ -8,14 +8,16 @@ import time
 from dicebot.commands import ban, timezone
 from dicebot.data.db_models import Roll
 from dicebot.data.message_context import MessageContext
+from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.time import Time
 
 MAX_NUM_ROLLS = 10
 
 
-async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
+async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     """Roll a die for the server based on the current roll"""
+    num_rolls_str = num_rolls.unwrap()
     next_roll = ctx.guild.current_roll
     name = ctx.message.author.name
 
@@ -35,7 +37,13 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
                 f"This server only allows rolling once every {timeout} hours.\n"
             )
             ban_time = Time("1hr")
-            await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
+            await ban.ban(
+                ctx,
+                ctx.author,
+                ban_time,
+                ban_as_bot=BotParam(True),
+                reason=BotParam("Rolled too often"),
+            )
             # Bail early - don't allow rolling
             return
 
@@ -52,7 +60,13 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
     if rolls_remaining <= 0:
         await ctx.channel.send("How... dumb are you?")
         ban_time = Time(f"{next_roll + gambling_penalty}hr")
-        await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
+        await ban.ban(
+            ctx,
+            ctx.author,
+            ban_time,
+            ban_as_bot=BotParam(True),
+            reason=BotParam("Tried to roll a negative"),
+        )
         return
 
     if rolls_remaining > next_roll > 1:
@@ -101,7 +115,13 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             sent_message = True
             await ctx.channel.send("Lol, you suck")
             ban_time = Time(f"{next_roll + gambling_penalty}hr")
-            await ban.ban(ctx, ctx.author, ban_time, ban_as_bot=True)
+            await ban.ban(
+                ctx,
+                ctx.author,
+                ban_time,
+                ban_as_bot=BotParam(True),
+                reason=BotParam("Rolled a 1"),
+            )
         elif roll == next_roll - 1:
             batched_rolls_message = "\n".join(roll_results_strings)
             await ctx.channel.send(batched_rolls_message)
@@ -151,4 +171,5 @@ async def roll(ctx: MessageContext, num_rolls_str: GreedyStr) -> None:
             target=ctx.author,
             # max penalty of 1 week
             num_hours=min(gambling_penalty**2, 168),
+            reason=BotParam("Gambled and lost"),
         )

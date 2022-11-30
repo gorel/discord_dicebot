@@ -7,13 +7,14 @@ from dicebot.data.types.greedy_str import GreedyStr
 
 async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
     """Add a new macro to the server"""
+    value_str = value.unwrap()
     macro = await ctx.guild.get_macro(ctx.session, name)
     if macro is not None and macro.author != ctx.author:
         await ctx.channel.send(
             "Macro already exists for {name}.\n"
             "Delete it first if you want to record a new macro."
         )
-    await ctx.guild.add_macro(ctx.session, name, value, ctx.author)
+    await ctx.guild.add_macro(ctx.session, name, value_str, ctx.author)
     await ctx.session.commit()
     await ctx.channel.send(f"Set macro for {name}")
 

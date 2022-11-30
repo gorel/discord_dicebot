@@ -11,3 +11,9 @@ class BotParam(Generic[T]):
     usage helptext. This is useful for bot-only arguments such as changing
     the actor to be the bot itself instead of the original message sender.
     """
+
+    def __init__(self, value: T) -> None:
+        self.value = value
+
+    def unwrap(self) -> T:
+        return self.value

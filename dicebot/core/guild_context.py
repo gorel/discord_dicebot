@@ -68,7 +68,9 @@ class GuildContext:
         reaction: discord.Reaction,
         user: discord.User,
     ) -> None:
-        author = await DiscordUser.get_or_create(self.session, message.author.id)
+        author = await DiscordUser.get_or_create(
+            self.session, reaction.message.author.id
+        )
         reactor = await DiscordUser.get_or_create(self.session, user.id)
         ctx = MessageContext(
             client=self.client,

@@ -36,8 +36,9 @@ class TenorGifRetriever:
 
 async def gif(ctx: MessageContext, q: GreedyStr) -> None:
     """Retrieve a random GIF from Tenor when searching the query string"""
+    q_str = q.unwrap()
     retriever = TenorGifRetriever()
-    urls = await retriever.get(q)
+    urls = await retriever.get(q_str)
     if len(urls) == 0:
         logging.warning(f"Could not find any GIFs for query {q}")
         await ctx.channel.send("Could not find any GIFs for that query :(")

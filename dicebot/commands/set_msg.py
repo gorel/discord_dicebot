@@ -12,14 +12,15 @@ async def set_msg(
     msg: GreedyStr,
 ) -> None:
     """Set the win/loss message in this server for critical success or failure"""
+    msg_str = msg.unwrap()
     if dicebot.simple_utils.is_admin(ctx.message.author):
         if win_or_lose is SetMessageSubcommand.WIN:
-            ctx.guild.critical_success_msg = msg
+            ctx.guild.critical_success_msg = msg_str
             await ctx.session.commit()
-            await ctx.channel.send(f"Set the win message to '{msg}'")
+            await ctx.channel.send(f"Set the win message to '{msg_str}'")
         else:
-            ctx.guild.critical_failure_msg = msg
+            ctx.guild.critical_failure_msg = msg_str
             await ctx.session.commit()
-            await ctx.channel.send(f"Set the lose message to '{msg}'")
+            await ctx.channel.send(f"Set the lose message to '{msg_str}'")
     else:
         await ctx.channel.send(f"You're not an admin.\nThis incident will be recorded.")

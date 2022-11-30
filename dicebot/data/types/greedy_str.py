@@ -7,3 +7,9 @@ class GreedyStr(str):
     of the arguments when parsing a command. Uses type hinting for some
     weird reflection stuff that kind of feels hacky and sketchy.
     """
+
+    def __init__(self, s: str) -> None:
+        self.s = s
+
+    def unwrap(self) -> str:
+        return self.s

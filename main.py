@@ -18,7 +18,7 @@ DEFAULT_DB_URI = "sqlite+aiosqlite:///:memory:"
 
 
 def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser("Discord dicebot")
+    parser = argparse.ArgumentParser()
     parser.add_argument(
         "-t", "--test", action="store_true", help="Start the bot in test mode"
     )
@@ -41,6 +41,7 @@ async def main(argv: Optional[List[str]] = None) -> None:
     dotenv.load_dotenv(args.env_file)
     db_uri = os.getenv("DB_URI", DEFAULT_DB_URI)
     discord_token = os.getenv("DISCORD_TOKEN", "")
+    test_guild_id = int(os.getenv("TEST_GUILD_ID", 0)) or None
 
     # Set up stderr logging
     logging.basicConfig(stream=sys.stderr, level=logging.INFO)
@@ -56,7 +57,7 @@ async def main(argv: Optional[List[str]] = None) -> None:
 
     # And start the client
     logging.info("Running client")
-    client = Client(engine, is_test=args.test)
+    client = Client(engine, is_test=args.test, test_guild_id=test_guild_id)
     await client.start(discord_token)
     await engine.dispose()
 

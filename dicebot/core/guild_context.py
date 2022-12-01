@@ -61,7 +61,7 @@ class GuildContext:
 
         for handler in handlers:
             if await handler.should_handle_no_throw(ctx):
-                logging.info(f"Running handler: {handler.__class__.__name__}")
+                logging.debug(f"Running handler: {handler.__class__.__name__}")
                 await handler.handle_no_throw(ctx)
 
     async def handle_reaction_add(

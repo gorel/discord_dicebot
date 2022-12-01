@@ -2,10 +2,12 @@
 
 import dateutil.parser
 
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 
 
+@register_command
 async def birthday(ctx: MessageContext, birthday: GreedyStr) -> None:
     """Remember a user's birthday so we can wish them a happy birthday later"""
     try:

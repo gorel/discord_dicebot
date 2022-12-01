@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
 from dicebot.commands.admin import requires_admin
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.set_message_subcommand import SetMessageSubcommand
 
 
+@register_command
 @requires_admin
 async def set_msg(
     ctx: MessageContext,

@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import datetime
-from typing import Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
+from dicebot.data.db.ban import Ban
 from dicebot.data.db.base import Base
-from dicebot.data.db.guild import Guild
+
+if TYPE_CHECKING:
+    from dicebot.data.db.guild import Guild
+
 
 # Special types to make the ORM models prettier
 int_pk_natural = Annotated[int, mapped_column(primary_key=True, autoincrement=False)]
@@ -37,6 +41,12 @@ class User(Base):
     def as_mention(self) -> str:
         """Returns a representation that can be sent to a channel and will act as a mention"""
         return f"<@{self.id}>"
+
+    async def is_currently_banned(self, session: AsyncSession, guild: Guild) -> bool:
+        latest_ban = await Ban.get_latest_unvoided_ban(session, guild, self)
+        return (
+            latest_ban is not None and latest_ban.banned_until > datetime.datetime.now()
+        )
 
     @classmethod
     async def get_or_create(cls, session: AsyncSession, discord_id: int) -> User:

@@ -3,7 +3,7 @@
 import logging
 from typing import Optional
 
-from dicebot.commands.command_runner import CommandRunner
+from dicebot.core.command_runner import CommandRunner
 from dicebot.data.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
@@ -13,6 +13,9 @@ class CommandHandler(AbstractHandler):
 
     def __init__(self) -> None:
         self.runner = CommandRunner()
+        logging.info("-------- REGISTERED COMMANDS --------")
+        logging.info("\n" + "\n".join(coro_name for coro_name in self.runner.cmds))
+        logging.info("-------- REGISTERED COMMANDS --------")
 
     async def should_handle(
         self,
@@ -24,6 +27,8 @@ class CommandHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
+        # TODO: Help text is too long... need to make it shorter
+        # Maybe even throw it online somewhere as a URL?
         if ctx.message.content.startswith("!help"):
             if " " in ctx.message.content:
                 func = ctx.message.content.split(" ")[1]

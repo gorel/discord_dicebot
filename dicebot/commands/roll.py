@@ -6,6 +6,7 @@ import random
 import time
 
 from dicebot.commands import ban, timezone
+from dicebot.core.register_command import register_command
 from dicebot.data.db.roll import Roll
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
@@ -15,6 +16,7 @@ from dicebot.data.types.time import Time
 MAX_NUM_ROLLS = 10
 
 
+@register_command
 async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     """Roll a die for the server based on the current roll"""
     num_rolls_str = num_rolls.unwrap()

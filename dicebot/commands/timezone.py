@@ -6,6 +6,7 @@ import time
 import pytz
 
 from dicebot.commands.admin import requires_admin
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 
 
@@ -80,6 +81,7 @@ def localize(unixtime: int, tz: str) -> str:
     return _localize_pretty(now_localized, target_localized)
 
 
+@register_command
 @requires_admin
 async def set_tz(ctx: MessageContext, tz: str) -> None:
     try:

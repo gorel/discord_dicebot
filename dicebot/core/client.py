@@ -18,7 +18,10 @@ class Client(discord.Client):
         is_test: bool = False,
         test_guild_id: Optional[int] = None,
     ):
-        super().__init__()
+        intents = discord.Intents.default()
+        intents.members = True
+
+        super().__init__(intents=intents)
         self.is_test = is_test
         self.test_guild_id = test_guild_id
         # mypy insists that we annotate the sessionmaker

@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional
 
 from sqlalchemy import ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dicebot.data.db.base import Base
-from dicebot.data.db.guild import Guild
-from dicebot.data.db.user import User
+
+if TYPE_CHECKING:
+    from dicebot.data.db.guild import Guild
+    from dicebot.data.db.user import User
 
 # Special types to make the ORM models prettier
 int_pk = Annotated[int, mapped_column(primary_key=True)]

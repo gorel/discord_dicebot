@@ -7,6 +7,7 @@ from typing import List, Optional
 
 import aiohttp
 
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 
@@ -34,6 +35,7 @@ class TenorGifRetriever:
             return []
 
 
+@register_command
 async def gif(ctx: MessageContext, q: GreedyStr) -> None:
     """Retrieve a random GIF from Tenor when searching the query string"""
     q_str = q.unwrap()

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from dicebot.commands.admin import requires_admin
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 
 
+@register_command
 @requires_admin
 async def set_turbo_ban_timing_threshold(ctx: MessageContext, threshold: int) -> None:
     """Set the turbo ban timing threshold (maximum number of seconds before a turbo banned is issued) for this server"""

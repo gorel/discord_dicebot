@@ -2,6 +2,7 @@
 
 import functools
 
+from dicebot.core.register_command import register_command
 from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 
@@ -21,6 +22,7 @@ def requires_admin(coro):
     return wrapper
 
 
+@register_command
 @requires_admin
 async def add_admin(
     ctx: MessageContext,
@@ -34,6 +36,7 @@ async def add_admin(
     )
 
 
+@register_command
 @requires_admin
 async def remove_admin(
     ctx: MessageContext,

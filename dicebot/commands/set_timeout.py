@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 from dicebot.commands.admin import requires_admin
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 
 
+@register_command
 @requires_admin
 async def set_timeout(ctx: MessageContext, hours: int) -> None:
     """Set the roll timeout (how often you can roll) for this server"""

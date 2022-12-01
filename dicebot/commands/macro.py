@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
+from dicebot.core.register_command import register_command
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 
 
+@register_command
 async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
     """Add a new macro to the server"""
     value_str = value.unwrap()
@@ -18,6 +20,7 @@ async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
     await ctx.channel.send(f"Set macro for {name}")
 
 
+@register_command
 async def macro_del(ctx: MessageContext, name: str) -> None:
     """Delete a macro from the server"""
     macro = await ctx.guild.get_macro(ctx.session, name)
@@ -31,6 +34,7 @@ async def macro_del(ctx: MessageContext, name: str) -> None:
         await ctx.channel.send(f"There's no macro defined for {name}.")
 
 
+@register_command
 async def m(ctx: MessageContext, name: str) -> None:
     """Retrieve the value for a saved macro in this server"""
     macro = await ctx.guild.get_macro(ctx.session, name)

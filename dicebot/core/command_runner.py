@@ -4,11 +4,8 @@ import logging
 from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
                     TypeVar, get_type_hints)
 
-from dicebot.commands import (ban, birthday, clear_stats, eight_ball,
-                              fileatask, giffer, macro, myrandom, remindme,
-                              rename, reset_roll, roll, scoreboard, set_msg,
-                              set_reaction_threshold, set_timeout,
-                              set_turbo_ban_timing_threshold, timezone)
+from dicebot.core.import_witchcraft import import_submodules
+from dicebot.core.register_command import REGISTERED_COMMANDS
 from dicebot.data.db.base import Base
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
@@ -17,51 +14,15 @@ from dicebot.data.types.greedy_str import GreedyStr
 CommandFunc = Callable[..., Awaitable[None]]
 T = TypeVar("T")
 
-
-DEFAULT_REGISTERED_COMMANDS = [
-    # Basic roll commands
-    roll.roll,
-    # Scoreboard commands
-    scoreboard.scoreboard,
-    # Set various server properties
-    set_reaction_threshold.set_reaction_threshold,
-    set_turbo_ban_timing_threshold.set_turbo_ban_timing_threshold,
-    set_msg.set_msg,
-    set_timeout.set_timeout,
-    # Server/chat renaming commands
-    rename.rename,
-    # Reset roll commands
-    reset_roll.reset_roll,
-    # Clear stats commands
-    clear_stats.clear_stats,
-    # Reminder commands
-    remindme.remindme,
-    # Ban commands
-    ban.ban,
-    ban.unban,
-    ban.ban_leaderboard,
-    # Macro commands
-    macro.macro_add,
-    macro.macro_del,
-    macro.m,
-    # Timezone settings
-    timezone.set_tz,
-    # Magic eight ball
-    eight_ball.eight_ball,
-    # Get random gifs
-    giffer.gif,
-    # Random choices
-    myrandom.choice,
-    # File an issue on GitHub
-    fileatask.fileatask,
-    # Remember your birthday
-    birthday.birthday,
-]
+# This is how we trick Python into loading *all* of the registered commands
+# from the commands/ subdir. Is there a better way to do this? Probably.
+# But I couldn't figure it out.
+import_submodules("dicebot.commands")
 
 
 class CommandRunner:
     def __init__(self, cmds: Optional[List[CommandFunc]] = None) -> None:
-        cmds = cmds or DEFAULT_REGISTERED_COMMANDS
+        cmds = cmds or REGISTERED_COMMANDS
         self.cmds = {cmd.__name__: cmd for cmd in cmds}
 
     def register(self, cmd: CommandFunc) -> None:

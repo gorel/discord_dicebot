@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+from dicebot.core.register_command import register_command
 from dicebot.data.db.rename import Rename
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 
 
+@register_command
 async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
     """Rename either the server or chat channel (must be the most recent winner)"""
     new_name_str = new_name.unwrap()

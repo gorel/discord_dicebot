@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
 from enum import Enum, auto
 
 
@@ -8,7 +10,7 @@ class SetMessageSubcommand(Enum):
     LOSE = auto()
 
     @classmethod
-    def from_str(cls, s: str) -> "SetMessageSubcommand":
+    def from_str(cls, s: str) -> SetMessageSubcommand:
         s_stripped = s.strip().lower()
         if s_stripped == "win":
             return SetMessageSubcommand.WIN

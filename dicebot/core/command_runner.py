@@ -7,7 +7,7 @@ from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS
 from dicebot.data.db.base import Base
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 

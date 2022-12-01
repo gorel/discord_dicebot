@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 
 
 class AbstractHandler(ABC):

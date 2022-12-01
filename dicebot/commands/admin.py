@@ -4,7 +4,7 @@ import functools
 
 from dicebot.core.register_command import register_command
 from dicebot.data.db.user import User
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 
 
 def requires_admin(coro):

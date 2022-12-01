@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 # on_message handlers
 from dicebot.handlers.message.ban_handler import BanHandler
 from dicebot.handlers.message.birthday_handler import BirthdayHandler

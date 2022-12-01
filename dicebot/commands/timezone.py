@@ -7,7 +7,7 @@ import pytz
 
 from dicebot.commands.admin import requires_admin
 from dicebot.core.register_command import register_command
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 
 
 def _localize_pretty(

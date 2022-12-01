@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 
+from __future__ import annotations
+
+import os
 from typing import Optional
 
 import discord
-from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from dicebot.app import app_sessionmaker
 from dicebot.core.server_manager import ServerManager
 
 TEST_PREFIX = "tt "
@@ -13,7 +17,7 @@ TEST_PREFIX = "tt "
 class Client(discord.Client):
     def __init__(
         self,
-        sessionmaker: async_sessionmaker[AsyncEngine],
+        sessionmaker: async_sessionmaker[AsyncSession],
         test_guild_id: Optional[int] = None,
     ):
         intents = discord.Intents.default()
@@ -61,3 +65,14 @@ class Client(discord.Client):
         async with self.sessionmaker() as session:
             mgr = ServerManager(session)
             await mgr.handle_reaction_add(self, reaction, user)
+
+    @classmethod
+    async def get_and_login(cls) -> Client:
+        """Helper method to get the app default client"""
+
+        test_guild_id = int(os.getenv("TEST_GUILD_ID", 0)) or None
+        discord_token = os.getenv("DISCORD_TOKEN", "")
+
+        res = cls(app_sessionmaker, test_guild_id=test_guild_id)
+        await res.login(discord_token)
+        return res

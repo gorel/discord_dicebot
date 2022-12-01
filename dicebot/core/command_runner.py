@@ -16,9 +16,9 @@ from typing import (
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS
 from dicebot.data.db.base import Base
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
 
 CommandFunc = Callable[..., Awaitable[None]]
 T = TypeVar("T")
@@ -62,7 +62,7 @@ class CommandRunner:
             return await load_from_cmd_str_callable(ctx, value)
         elif callable(str_constructor_callable):
             # Assume typ takes a string constructor
-            return str_constructor_callable(value)
+            return typ(value)
         else:
             raise TypeError(f"No known way to typify the type {typ.__name__}")
 
@@ -118,7 +118,7 @@ class CommandRunner:
 
         # Make sure *all* arguments are kwargs now
         typed_args = {
-            k: CommandRunner.typify(ctx, types[k], v)
+            k: await CommandRunner.typify(ctx, types[k], v)
             # TODO: We implicitly rely on ctx being the first param here,
             # which isn't good style... it could break a function
             for k, v in zip(parameters, args)

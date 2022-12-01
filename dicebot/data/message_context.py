@@ -8,17 +8,17 @@ from typing import Optional
 import discord
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dicebot.data.db_models import DiscordUser, Guild
+from dicebot.data.db_models import User, Guild
 
 
 @dataclass
 class MessageContext:
     client: discord.Client
     session: AsyncSession
-    author: DiscordUser
+    author: User
     guild: Guild
     message: discord.Message
-    reactor: Optional[DiscordUser]
+    reactor: Optional[User]
     reaction: Optional[discord.Reaction]
 
     @property

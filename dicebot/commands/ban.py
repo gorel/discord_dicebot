@@ -7,7 +7,7 @@ import time
 from typing import Optional
 
 from dicebot.commands import timezone
-from dicebot.data.db_models import Ban, DiscordUser
+from dicebot.data.db_models import Ban, User
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.time import Time
@@ -15,7 +15,7 @@ from dicebot.data.types.time import Time
 
 async def ban(
     ctx: MessageContext,
-    target: DiscordUser,
+    target: User,
     timer: Time,
     ban_as_bot: BotParam[bool] = BotParam(False),
     reason: BotParam[str] = BotParam(""),
@@ -72,7 +72,7 @@ async def ban(
         await ctx.channel.send(f"<@{target.id}>: you have been unbanned.")
 
 
-async def unban(ctx: MessageContext, target: DiscordUser) -> None:
+async def unban(ctx: MessageContext, target: User) -> None:
     """Unban a user immediately"""
     await ctx.guild.unban(ctx.session, target)
     await ctx.session.commit()
@@ -92,7 +92,7 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
 async def turboban(
     ctx: MessageContext,
     reference_msg: MessageContext,
-    target: DiscordUser,
+    target: User,
     num_hours: int = 5,
     reason: Optional[BotParam[str]] = None,
 ) -> None:

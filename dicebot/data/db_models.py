@@ -50,7 +50,7 @@ user_guild_admin_assoc = Table(
 )
 
 
-class DiscordUser(Base):
+class User(Base):
     __tablename__ = "discord_user"
 
     # Columns
@@ -74,7 +74,7 @@ class DiscordUser(Base):
         return f"<@{self.id}>"
 
     @classmethod
-    async def get_or_create(cls, session: AsyncSession, discord_id: int) -> DiscordUser:
+    async def get_or_create(cls, session: AsyncSession, discord_id: int) -> User:
         res = await session.get(cls, discord_id)
         if res is None:
             res = cls(id=discord_id)
@@ -119,7 +119,7 @@ class Guild(Base):
     )
 
     # Relationships
-    admins: Mapped[list[DiscordUser]] = relationship(
+    admins: Mapped[list[User]] = relationship(
         secondary=user_guild_admin_assoc, lazy="selectin"
     )
     features: Mapped[list[Feature]] = relationship(
@@ -127,14 +127,14 @@ class Guild(Base):
     )
 
     # Methods
-    async def unban(self, session: AsyncSession, target: DiscordUser) -> None:
+    async def unban(self, session: AsyncSession, target: User) -> None:
         await Ban.unban(session, self, target)
 
     async def get_macro(self, session: AsyncSession, key: str) -> Optional[Macro]:
         return await Macro.get(session, self, key)
 
     async def add_macro(
-        self, session: AsyncSession, key: str, value: str, author: DiscordUser
+        self, session: AsyncSession, key: str, value: str, author: User
     ) -> None:
         old_macro = await self.get_macro(session, key)
         if old_macro is None:
@@ -145,7 +145,7 @@ class Guild(Base):
         else:
             old_macro.value = value
 
-    async def add_chat_rename(self, session: AsyncSession, author: DiscordUser) -> None:
+    async def add_chat_rename(self, session: AsyncSession, author: User) -> None:
         rename = Rename(
             guild_id=self.id,
             discord_user_id=author.id,
@@ -154,7 +154,7 @@ class Guild(Base):
         session.add(rename)
 
     async def add_guild_rename(
-        self, session: AsyncSession, author: DiscordUser
+        self, session: AsyncSession, author: User
     ) -> None:
         rename = Rename(
             guild_id=self.id,
@@ -229,7 +229,7 @@ class Guild(Base):
         if res is None:
             res = cls(id=guild_id, is_dm=is_dm)
             # Add the new guild owner as the only admin
-            owner = await DiscordUser.get_or_create(session, owner_id)
+            owner = await User.get_or_create(session, owner_id)
             res.admins.append(owner)
             session.add(res)
             await session.commit()
@@ -247,7 +247,7 @@ class Macro(Base):
     value: Mapped[str]
 
     # Relationships
-    author: Mapped[DiscordUser] = relationship("DiscordUser", lazy="selectin")
+    author: Mapped[User] = relationship("User", lazy="selectin")
 
     # Methods
     @classmethod
@@ -272,7 +272,7 @@ class Roll(Base):
     # Methods
     @classmethod
     async def get_last_roll(
-        cls, session: AsyncSession, guild: Guild, discord_user: DiscordUser
+        cls, session: AsyncSession, guild: Guild, discord_user: User
     ) -> Optional[Roll]:
         res = await session.scalars(
             select(cls)
@@ -353,7 +353,7 @@ class Ban(Base):
     # Methods
     @classmethod
     async def get_latest_unvoided_ban(
-        cls, session: AsyncSession, guild: Guild, bannee: DiscordUser
+        cls, session: AsyncSession, guild: Guild, bannee: User
     ) -> Optional[Ban]:
         res = await session.scalars(
             select(cls, func.max(cls.banned_until)).filter_by(
@@ -364,7 +364,7 @@ class Ban(Base):
 
     @classmethod
     async def unban(
-        cls, session: AsyncSession, guild: Guild, bannee: DiscordUser
+        cls, session: AsyncSession, guild: Guild, bannee: User
     ) -> None:
         await session.scalars(
             update(cls)

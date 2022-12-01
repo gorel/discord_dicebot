@@ -4,7 +4,7 @@ import asyncio
 import datetime
 
 from dicebot.commands import ban
-from dicebot.data.db_models import DiscordUser
+from dicebot.data.db_models import User
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.time import Time
@@ -33,7 +33,7 @@ class BanReactionHandler(AbstractReactionHandler):
             await ctx.reaction.message.channel.send(
                 f"Who *dares* try to ban the mighty {my_name}?!"
             )
-            discord_user = await DiscordUser.get_or_create(ctx.session, ctx.reactor.id)
+            discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
             await ban.ban(
                 ctx,
                 target=discord_user,
@@ -47,7 +47,7 @@ class BanReactionHandler(AbstractReactionHandler):
         elapsed = datetime.datetime.now() - ctx.reaction.message.created_at
         turbo_ban = elapsed.total_seconds() <= ctx.guild.turboban_threshold
 
-        discord_user = await DiscordUser.get_or_create(
+        discord_user = await User.get_or_create(
             ctx.session, ctx.reaction.message.author.id
         )
         if turbo_ban:

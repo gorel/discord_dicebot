@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dicebot.commands import ban
-from dicebot.data.db_models import DiscordUser
+from dicebot.data.db_models import User
 from dicebot.data.message_context import MessageContext
 from dicebot.handlers.reaction.abstract_reaction_handler import \
     AbstractReactionHandler
@@ -33,5 +33,5 @@ class KekwReactionHandler(AbstractReactionHandler):
                 "That's good stuff, I'm unbanning you early.",
                 reference=ctx.reaction.message,
             )
-            discord_user = await DiscordUser.get_or_create(ctx.session, ctx.reactor.id)
+            discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
             await ban.unban(ctx, discord_user)

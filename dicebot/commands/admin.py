@@ -2,7 +2,7 @@
 
 import functools
 
-from dicebot.data.db_models import DiscordUser
+from dicebot.data.db_models import User
 from dicebot.data.message_context import MessageContext
 
 
@@ -24,7 +24,7 @@ def requires_admin(coro):
 @requires_admin
 async def add_admin(
     ctx: MessageContext,
-    target: DiscordUser,
+    target: User,
 ) -> None:
     ctx.guild.admins.append(target)
     await ctx.session.commit()
@@ -37,7 +37,7 @@ async def add_admin(
 @requires_admin
 async def remove_admin(
     ctx: MessageContext,
-    target: DiscordUser,
+    target: User,
 ) -> None:
     if len(ctx.guild.admins) == 1:
         ctx.channel.send(

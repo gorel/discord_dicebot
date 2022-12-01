@@ -3,7 +3,8 @@
 from typing import Optional
 
 import discord
-from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
+from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
+                                    async_sessionmaker)
 
 from dicebot.core.server_manager import ServerManager
 
@@ -20,7 +21,10 @@ class Client(discord.Client):
         super().__init__()
         self.is_test = is_test
         self.test_guild_id = test_guild_id
-        self.sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
+        # mypy insists that we annotate the sessionmaker
+        self.sessionmaker: async_sessionmaker[AsyncSession] = async_sessionmaker(
+            engine, expire_on_commit=False
+        )
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:

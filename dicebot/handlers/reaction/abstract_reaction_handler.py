@@ -52,7 +52,6 @@ class AbstractReactionHandler(ABC):
     ) -> None:
         assert ctx.reaction is not None
 
-        # TODO: Replace with aiosqlite
         reaction_record = ReactedMessage(
             guild_id=ctx.guild.id,
             msg_id=ctx.reaction.message.id,

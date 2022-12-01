@@ -82,14 +82,19 @@ class CommandRunner:
         from_str_callable = getattr(typ, "from_str", None)
         # Intended for db types
         load_from_cmd_str_callable = getattr(typ, "load_from_cmd_str", None)
+        # For everything else
+        # we use this instead of typ(value) because it appeases mypy
+        str_constructor_callable = getattr(typ, "__init__", None)
 
         if callable(from_str_callable):
             return from_str_callable(value)
         elif isinstance(typ, Base) and callable(load_from_cmd_str_callable):
             return await load_from_cmd_str_callable(ctx, value)
-        else:
+        elif callable(str_constructor_callable):
             # Assume typ takes a string constructor
-            return typ(value)
+            return str_constructor_callable(value)
+        else:
+            raise TypeError(f"No known way to typify the type {typ.__name__}")
 
     @staticmethod
     async def typify_all(

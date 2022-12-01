@@ -1,27 +1,16 @@
 #!/usr/bin/env python3
 
 import logging
-from typing import (
-    Any,
-    Awaitable,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Type,
-    TypeVar,
-    get_type_hints,
-)
+from typing import Any, Awaitable, Callable, Dict, List, Optional, get_type_hints
 
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS
-from dicebot.data.db.base import Base
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
+from dicebot.data.types.protocols import typify_str
 
 CommandFunc = Callable[..., Awaitable[None]]
-T = TypeVar("T")
 
 # This is how we trick Python into loading *all* of the registered commands
 # from the commands/ subdir. Is there a better way to do this? Probably.
@@ -42,29 +31,6 @@ class CommandRunner:
         if hasattr(t, "__origin__"):
             return issubclass(t.__origin__, BotParam)
         return False
-
-    @staticmethod
-    async def typify(ctx: MessageContext, typ: Type[T], value: str) -> T:
-        # TODO: Could be more strict with the typification here
-        # Maybe by using Protocol...
-
-        # Intended for simple types
-        from_str_callable = getattr(typ, "from_str", None)
-        # Intended for db types
-        load_from_cmd_str_callable = getattr(typ, "load_from_cmd_str", None)
-        # For everything else
-        # we use this instead of typ(value) because it appeases mypy
-        str_constructor_callable = getattr(typ, "__init__", None)
-
-        if callable(from_str_callable):
-            return from_str_callable(value)
-        elif isinstance(typ, Base) and callable(load_from_cmd_str_callable):
-            return await load_from_cmd_str_callable(ctx, value)
-        elif callable(str_constructor_callable):
-            # Assume typ takes a string constructor
-            return typ(value)
-        else:
-            raise TypeError(f"No known way to typify the type {typ.__name__}")
 
     @staticmethod
     async def typify_all(
@@ -118,7 +84,7 @@ class CommandRunner:
 
         # Make sure *all* arguments are kwargs now
         typed_args = {
-            k: await CommandRunner.typify(ctx, types[k], v)
+            k: await typify_str(ctx, types[k], v)
             # TODO: We implicitly rely on ctx being the first param here,
             # which isn't good style... it could break a function
             for k, v in zip(parameters, args)

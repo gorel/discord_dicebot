@@ -4,7 +4,7 @@ import os
 
 import dotenv
 from celery import Celery
-from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from dicebot.app.defaults import (
     DEFAULT_BROKER_URL,
@@ -25,7 +25,9 @@ discord_token = os.getenv("DISCORD_TOKEN", "")
 
 engine = create_async_engine(__db_uri)
 
-app_sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
+app_sessionmaker: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    engine, expire_on_commit=False
+)
 
 celery_app = Celery(
     "dicebot",

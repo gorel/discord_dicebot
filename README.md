@@ -29,3 +29,14 @@ Environment settings (put these in your `.env` file)
 - `TEST_GUILD_ID`: If set, it will ignore any other guilds
 - `CELERY_BROKER_URL`: The broker Celery will use to send/receive messages
 - `CELERY_RESULT_BACKEND`: The backend Celery will use to persist results
+
+---
+
+# Contributing
+
+```
+# Assuming you've already set up the venv as before
+pip install -r dev_requirements.txt
+# Need to run once to populate the cache
+yes | mypy dicebot --install-types 2>&1 >/dev/null
+```

@@ -5,13 +5,13 @@ import logging
 import os
 import random
 
-import requests
+import aiohttp
 
 from dicebot.commands import ban
 from dicebot.core.register_command import register_command
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 
 ISSUES_URL = "https://api.github.com/repos/gorel/discord_dicebot/issues"
@@ -25,17 +25,22 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
     headers = {"accept": "application/vnd.github+json"}
     user = os.getenv("GITHUB_USER", "")
     password = os.getenv("GITHUB_PASS", "")
-    r = requests.post(
-        ISSUES_URL, json={"title": title}, headers=headers, auth=(user, password)
-    )
-    if r.status_code == SUCCESS_CODE:
-        response_url = r.json()["html_url"]
-        await ctx.channel.send(f"Your suggestion has been noted: {response_url}")
-    else:
-        logging.error(f"Request to GitHub failed: {r.json()}")
-        await ctx.channel.send(
-            "Something went wrong submitting the issue to GitHub (status_code = {r.status_code})"
-        )
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            ISSUES_URL, json={"title": title}, headers=headers, auth=(user, password)
+        ) as r:
+            json_resp = await r.json()
+            if r.status == SUCCESS_CODE:
+                response_url = json_resp["html_url"]
+                await ctx.channel.send(
+                    f"Your suggestion has been noted: {response_url}"
+                )
+            else:
+                logging.error(f"Request to GitHub failed: {json_resp}")
+                await ctx.channel.send(
+                    f"Something went wrong submitting the issue to GitHub (status_code = {r.status})"
+                )
 
 
 async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:

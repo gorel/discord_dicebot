@@ -8,8 +8,7 @@ from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.time import Time
-from dicebot.handlers.reaction.abstract_reaction_handler import \
-    AbstractReactionHandler
+from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReactionHandler
 
 
 class BanReactionHandler(AbstractReactionHandler):

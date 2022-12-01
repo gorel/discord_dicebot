@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 
 import logging
-from typing import (Any, Awaitable, Callable, Dict, List, Optional, Type,
-                    TypeVar, get_type_hints)
+from typing import (
+    Any,
+    Awaitable,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    get_type_hints,
+)
 
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS

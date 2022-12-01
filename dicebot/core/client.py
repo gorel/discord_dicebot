@@ -3,7 +3,7 @@
 from typing import Optional
 
 import discord
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker
 
 from dicebot.core.server_manager import ServerManager
 
@@ -13,20 +13,17 @@ TEST_PREFIX = "tt "
 class Client(discord.Client):
     def __init__(
         self,
-        engine: AsyncEngine,
-        is_test: bool = False,
+        sessionmaker: async_sessionmaker[AsyncEngine],
         test_guild_id: Optional[int] = None,
     ):
         intents = discord.Intents.default()
         intents.members = True
 
         super().__init__(intents=intents)
-        self.is_test = is_test
+        self.is_test = test_guild_id is not None
         self.test_guild_id = test_guild_id
         # mypy insists that we annotate the sessionmaker
-        self.sessionmaker: async_sessionmaker[AsyncSession] = async_sessionmaker(
-            engine, expire_on_commit=False
-        )
+        self.sessionmaker = sessionmaker
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:

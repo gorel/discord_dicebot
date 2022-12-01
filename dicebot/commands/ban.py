@@ -10,9 +10,10 @@ from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.user import User
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
+from dicebot.tasks.unban import unban as unban_task
 
 
 @register_command
@@ -64,6 +65,10 @@ async def ban(
     # Tell them they're unbanned 1 second late to ensure any weird delays
     # will still make the logic sound
     # TODO: Put in a message queue instead
+
+    unban_task.apply_async(
+        (ctx.channel.id, ctx.guild_id, target.id), countdown=timer.seconds + 1
+    )
     await asyncio.sleep(timer.seconds + 1)
     logging.info(f"Check if {target.id} is still banned")
 

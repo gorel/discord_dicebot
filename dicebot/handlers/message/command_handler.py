@@ -13,9 +13,6 @@ class CommandHandler(AbstractHandler):
 
     def __init__(self) -> None:
         self.runner = CommandRunner()
-        logging.info("-------- REGISTERED COMMANDS --------")
-        logging.info("\n" + "\n".join(coro_name for coro_name in self.runner.cmds))
-        logging.info("-------- REGISTERED COMMANDS --------")
 
     async def should_handle(
         self,

@@ -2,12 +2,11 @@
 
 import asyncio
 import datetime
-import os
 
 import discord
 
 # TODO: Put this initialization in a common folder
-from dicebot.app.common import async_sessionmaker, celery_app, client
+from dicebot.app import app_sessionmaker, celery_app
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
@@ -20,12 +19,16 @@ def unban(channel_id: int, guild_id: int, target_id: int) -> None:
 
 
 async def unban_async(channel_id: int, guild_id: int, target_id: int) -> None:
-    discord_token = os.getenv("DISCORD_TOKEN", "")
-    await client.login(discord_token)
+    # To avoid circular imports, we put this import here
+    # Unfortunately how the tasks are setup, we can't import Client at the top level
+    from dicebot.core.client import Client
+
+    client = await Client.get_and_login()
+
     channel = await client.fetch_channel(channel_id)
     assert isinstance(channel, discord.TextChannel)
 
-    async with async_sessionmaker() as session:
+    async with app_sessionmaker() as session:
         guild = await Guild.get_or_none(session, guild_id)
         target = await User.get_or_none(session, target_id)
 

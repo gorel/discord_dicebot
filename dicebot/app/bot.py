@@ -2,10 +2,11 @@
 
 import asyncio
 import logging
-import os
 import sys
 
-from dicebot.app.common import client, create_all, engine
+from dicebot.app import engine
+from dicebot.core.client import Client
+from dicebot.data.db.base import Base
 from dicebot.logging.colored_log_formatter import ColoredLogFormatter
 
 
@@ -19,12 +20,13 @@ async def main() -> None:
     # Ensure DB setup is complete
     logging.info("Setting up db connection and tables")
     # TODO - Should this *always* run?
-    await create_all()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     # And start the client
     logging.info("Running client")
-    discord_token = os.getenv("DISCORD_TOKEN", "")
-    await client.start(discord_token)
+    client = await Client.get_and_login()
+    await client.connect()
     await engine.dispose()
 
 

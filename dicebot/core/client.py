@@ -3,8 +3,7 @@
 from typing import Optional
 
 import discord
-from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
-                                    async_sessionmaker)
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from dicebot.core.server_manager import ServerManager
 

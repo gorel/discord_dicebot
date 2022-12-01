@@ -8,16 +8,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
+
 # on_message handlers
 from dicebot.handlers.message.ban_handler import BanHandler
 from dicebot.handlers.message.birthday_handler import BirthdayHandler
 from dicebot.handlers.message.command_handler import CommandHandler
 from dicebot.handlers.message.leeroy_handler import LeeRoyHandler
 from dicebot.handlers.message.log_message_handler import (
-    LogMessageHandler, LogMessageHandlerSource)
+    LogMessageHandler,
+    LogMessageHandlerSource,
+)
 from dicebot.handlers.message.long_message_handler import LongMessageHandler
 from dicebot.handlers.message.shame_handler import ShameHandler
 from dicebot.handlers.message.youtube_handler import YoutubeHandler
+
 # on_reaction handlers
 from dicebot.handlers.reaction.ban_handler import BanReactionHandler
 from dicebot.handlers.reaction.kekw_handler import KekwReactionHandler

@@ -5,8 +5,7 @@ from __future__ import annotations
 from typing import Annotated, Optional
 
 import discord
-from sqlalchemy import (Column, ForeignKey, Table, delete, desc, func, select,
-                        text)
+from sqlalchemy import Column, ForeignKey, Table, delete, desc, func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 

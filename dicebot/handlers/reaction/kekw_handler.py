@@ -3,8 +3,7 @@
 from dicebot.commands import ban
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
-from dicebot.handlers.reaction.abstract_reaction_handler import \
-    AbstractReactionHandler
+from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReactionHandler
 
 
 class KekwReactionHandler(AbstractReactionHandler):

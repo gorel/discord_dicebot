@@ -6,7 +6,6 @@ import logging
 import time
 from typing import Optional
 
-import dicebot.simple_utils
 from dicebot.commands import timezone
 from dicebot.data.db_models import Ban, DiscordUser
 from dicebot.data.message_context import MessageContext
@@ -70,11 +69,7 @@ async def ban(
     # We check the bantime was in the past since we slept 1 more second
     current_ban = await Ban.get_latest_unvoided_ban(ctx.session, ctx.guild, target)
     if current_ban is not None and current_ban.banned_until < datetime.datetime.now():
-        insult = dicebot.simple_utils.get_witty_insult()
-        await ctx.channel.send(
-            f"<@{target.id}>: you have been unbanned.\n"
-            f"I hope you learned your lesson, *{insult}*."
-        )
+        await ctx.channel.send(f"<@{target.id}>: you have been unbanned.")
 
 
 async def unban(ctx: MessageContext, target: DiscordUser) -> None:

@@ -41,6 +41,13 @@ guild_feature_assoc = Table(
     Column("guild_id", ForeignKey("guild.id")),
     Column("feature_id", ForeignKey("feature.id")),
 )
+# Many-to-many assoc to link users to the guilds in which they are admins
+user_guild_admin_assoc = Table(
+    "user_guild_admin_assoc",
+    Base.metadata,
+    Column("discord_user_id", ForeignKey("discord_user.id")),
+    Column("guild_id", ForeignKey("guild.id")),
+)
 
 
 class DiscordUser(Base):
@@ -59,11 +66,12 @@ class DiscordUser(Base):
         target_datetime = self.birthday.replace(year=now.year)
         return target_datetime.date() == now.date()
 
-    async def is_currently_banned(self, session: AsyncSession, guild: Guild) -> bool:
-        latest_ban = await Ban.get_latest_unvoided_ban(session, guild, self)
-        return (
-            latest_ban is not None and latest_ban.banned_until > datetime.datetime.now()
-        )
+    def is_admin_of(self, guild: Guild) -> bool:
+        return self in guild.admins
+
+    def as_mention(self) -> str:
+        """Returns a representation that can be sent to a channel and will act as a mention"""
+        return f"<@{self.id}>"
 
     @classmethod
     async def get_or_create(cls, session: AsyncSession, discord_id: int) -> DiscordUser:
@@ -75,17 +83,18 @@ class DiscordUser(Base):
         return res
 
     @classmethod
-    def get_id_from_mention(cls, s: str) -> int:
-        if len(s) > 0 and s[0] == "<" and s[-1] == ">":
-            s = s[1:-1]
-        if len(s) > 0 and s[0:2] == "@!":
-            s = s[2:]
-        elif len(s) > 0 and s[0] == "@":
+    async def load_from_cmd_str(cls, session: AsyncSession, cmd_str: str) -> int:
+        if len(cmd_str) > 0 and cmd_str[0] == "<" and cmd_str[-1] == ">":
+            cmd_str = cmd_str[1:-1]
+        if len(cmd_str) > 0 and cmd_str[0:2] == "@!":
+            cmd_str = cmd_str[2:]
+        elif len(cmd_str) > 0 and cmd_str[0] == "@":
             # Sometimes there's a leading @ but no ! -- I don't know why
             # I think it has to do with whether the user data has been
             # loaded by the client already
-            s = s[1:]
-        return int(s)
+            cmd_str = cmd_str[1:]
+        discord_id = int(cmd_str)
+        return await cls.get_or_create(session, discord_id)
 
 
 class Guild(Base):
@@ -110,6 +119,9 @@ class Guild(Base):
     )
 
     # Relationships
+    admins: Mapped[list[DiscordUser]] = relationship(
+        secondary=user_guild_admin_assoc, lazy="selectin"
+    )
     features: Mapped[list[Feature]] = relationship(
         secondary=guild_feature_assoc, lazy="selectin"
     )
@@ -211,11 +223,14 @@ class Guild(Base):
 
     @classmethod
     async def get_or_create(
-        cls, session: AsyncSession, guild_id: int, is_dm: bool
+        cls, session: AsyncSession, guild_id: int, owner_id: int, is_dm: bool
     ) -> Guild:
         res = await session.get(cls, guild_id)
         if res is None:
             res = cls(id=guild_id, is_dm=is_dm)
+            # Add the new guild owner as the only admin
+            owner = await DiscordUser.get_or_create(session, owner_id)
+            res.admins.append(owner)
             session.add(res)
             await session.commit()
         return res

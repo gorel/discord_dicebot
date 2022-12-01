@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import dicebot.simple_utils
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 
@@ -29,8 +28,7 @@ async def macro_del(ctx: MessageContext, name: str) -> None:
             f"Warning: <@{ctx.author_id}> deleted the macro for {name}\n"
         )
     else:
-        insult = dicebot.simple_utils.get_witty_insult()
-        await ctx.channel.send(f"There's no macro defined for {name}, {insult}.")
+        await ctx.channel.send(f"There's no macro defined for {name}.")
 
 
 async def m(ctx: MessageContext, name: str) -> None:
@@ -39,5 +37,4 @@ async def m(ctx: MessageContext, name: str) -> None:
     if macro is not None:
         await ctx.channel.send(macro.value)
     else:
-        insult = dicebot.simple_utils.get_witty_insult()
-        await ctx.channel.send(f"There's no macro defined for {name}, {insult}.")
+        await ctx.channel.send(f"There's no macro defined for {name}.")

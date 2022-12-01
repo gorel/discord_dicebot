@@ -9,6 +9,7 @@ from dicebot.commands import (ban, birthday, clear_stats, eight_ball,
                               rename, reset_roll, roll, scoreboard, set_msg,
                               set_reaction_threshold, set_timeout,
                               set_turbo_ban_timing_threshold, timezone)
+from dicebot.data.db_models import Base
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
@@ -73,16 +74,27 @@ class CommandRunner:
         return False
 
     @staticmethod
-    def typify(typ: Type[T], value: str) -> T:
+    async def typify(ctx: MessageContext, typ: Type[T], value: str) -> T:
+        # TODO: Could be more strict with the typification here
+        # Maybe by using Protocol...
+
+        # Intended for simple types
         from_str_callable = getattr(typ, "from_str", None)
+        # Intended for db types
+        load_from_cmd_str_callable = getattr(typ, "load_from_cmd_str", None)
+
         if callable(from_str_callable):
             return from_str_callable(value)
+        elif isinstance(typ, Base) and callable(load_from_cmd_str_callable):
+            return await load_from_cmd_str_callable(ctx, value)
         else:
             # Assume typ takes a string constructor
             return typ(value)
 
     @staticmethod
-    def typify_all(f: CommandFunc, args: List[str]) -> Dict[str, Any]:
+    async def typify_all(
+        ctx: MessageContext, f: CommandFunc, args: List[str]
+    ) -> Dict[str, Any]:
         types = get_type_hints(f)
 
         # Validate that this is a function taking a MessageContext
@@ -131,7 +143,7 @@ class CommandRunner:
 
         # Make sure *all* arguments are kwargs now
         typed_args = {
-            k: CommandRunner.typify(types[k], v)
+            k: CommandRunner.typify(ctx, types[k], v)
             # TODO: We implicitly rely on ctx being the first param here,
             # which isn't good style... it could break a function
             for k, v in zip(parameters, args)
@@ -151,7 +163,7 @@ class CommandRunner:
         args_str = ""
         try:
             func = self.cmds[funcname]
-            prepared_args = CommandRunner.typify_all(func, args)
+            prepared_args = await CommandRunner.typify_all(ctx, func, args)
             args_str = ", ".join(args)
             logging.info(f"Calling {funcname}(ctx, {args_str}) successfully")
             await func(ctx, **prepared_args)

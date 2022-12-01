@@ -17,14 +17,21 @@ class ServerManager:
         message: discord.Message,
     ) -> None:
         if isinstance(message.channel, discord.DMChannel):
+            # For a DM, the person who sent it is the owner
             guild = await Guild.get_or_create(
-                self.session, message.channel.id, is_dm=True
+                session=self.session,
+                guild_id=message.channel.id,
+                owner_id=message.author.id,
+                is_dm=True,
             )
             ctx = GuildContext(client, guild, self.session)
             await ctx.handle_dm(message)
         else:
             guild = await Guild.get_or_create(
-                self.session, message.channel.guild.id, is_dm=False
+                session=self.session,
+                guild_id=message.channel.guild.id,
+                owner_id=message.channel.guild.owner.id,
+                is_dm=False,
             )
             ctx = GuildContext(client, guild, self.session)
             await ctx.handle_message(message)
@@ -36,12 +43,19 @@ class ServerManager:
         user: discord.User,
     ) -> None:
         if isinstance(reaction.message.channel, discord.DMChannel):
+            # For a DM, the person who sent it is the owner
             guild = await Guild.get_or_create(
-                self.session, reaction.message.channel.id, is_dm=True
+                session=self.session,
+                guild_id=reaction.message.channel.id,
+                owner_id=reaction.message.author.id,
+                is_dm=True,
             )
         else:
             guild = await Guild.get_or_create(
-                self.session, reaction.message.channel.guild.id, is_dm=False
+                session=self.session,
+                guild_id=reaction.message.channel.guild.id,
+                owner_id=reaction.message.channel.guild.owner.id,
+                is_dm=False,
             )
 
         ctx = GuildContext(client, guild, self.session)

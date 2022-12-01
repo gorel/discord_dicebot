@@ -12,3 +12,6 @@
 audio/
 server_contexts/
 venv/
+
+# I use this to jot down ideas sometimes but don't want to commit it
+notes.txt

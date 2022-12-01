@@ -5,7 +5,7 @@ import time
 
 import pytz
 
-import dicebot.simple_utils
+from dicebot.commands.admin import requires_admin
 from dicebot.data.message_context import MessageContext
 
 
@@ -80,15 +80,13 @@ def localize(unixtime: int, tz: str) -> str:
     return _localize_pretty(now_localized, target_localized)
 
 
+@requires_admin
 async def set_tz(ctx: MessageContext, tz: str) -> None:
-    if dicebot.simple_utils.is_admin(ctx.message.author):
-        try:
-            # Just ensure that pytz recognizes this as a valid timezone
-            pytz.timezone(tz)
-            ctx.guild.timezone = tz
-            await ctx.session.commit()
-            await ctx.channel.send(f"Set this server's timezone to '{tz}'")
-        except pytz.UnknownTimeZoneError:
-            await ctx.channel.send(f"Unknown timezone '{tz}'")
-    else:
-        await ctx.channel.send("You're not an admin.\nThis incident will be recorded.")
+    try:
+        # Just ensure that pytz recognizes this as a valid timezone
+        pytz.timezone(tz)
+        ctx.guild.timezone = tz
+        await ctx.session.commit()
+        await ctx.channel.send(f"Set this server's timezone to '{tz}'")
+    except pytz.UnknownTimeZoneError:
+        await ctx.channel.send(f"Unknown timezone '{tz}'")

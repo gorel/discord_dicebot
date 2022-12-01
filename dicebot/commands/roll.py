@@ -33,7 +33,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         timeout = ctx.guild.roll_timeout
         if last_roll_delta < timeout:
             await ctx.channel.send(
-                f"<@{ctx.author_id}> last rolled {last_roll_str}.\n"
+                f"{ctx.author.as_mention()} last rolled {last_roll_str}.\n"
                 f"This server only allows rolling once every {timeout} hours.\n"
             )
             ban_time = Time("1hr")
@@ -130,11 +130,11 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
                 await ctx.guild.add_chat_rename(ctx.session, ctx.author)
                 await ctx.session.commit()
                 await ctx.channel.send(
-                    f"<@{ctx.author_id}>: gets to rename the chat channel!"
+                    f"{ctx.author.as_mention()} gets to rename the chat channel!"
                 )
             else:
                 await ctx.channel.send(
-                    f"<@{ctx.author_id}>: {ctx.guild.critical_failure_message}"
+                    f"{ctx.author.as_mention()}: {ctx.guild.critical_failure_message}"
                 )
         elif roll == next_roll:
             # Increment the current roll
@@ -150,11 +150,11 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
                 await ctx.guild.add_guild_rename(ctx.session, ctx.author)
                 await ctx.session.commit()
                 await ctx.channel.send(
-                    f"<@{ctx.author_id}>: gets to rename the server!"
+                    f"{ctx.author.as_mention()}: gets to rename the server!"
                 )
             else:
                 await ctx.channel.send(
-                    f"<@{ctx.author_id}>: {ctx.guild.critical_success_msg}"
+                    f"{ctx.author.as_mention()}: {ctx.guild.critical_success_msg}"
                 )
         else:
             no_match = True

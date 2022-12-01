@@ -8,7 +8,7 @@ Setup:
 ```
 python3.10 -m venv venv
 source venv/bin/activate
-pip install -r pip_requirements.txt
+pip install -r requirements.txt
 ```
 
 Usage:
@@ -25,8 +25,8 @@ options:
 
 Environment settings (put these in your `.env` file)
 
-- `DISCORD_TOKEN`: your [Discord bot token](https://discord.com/developers/docs/topics/oauth2)
-- `TENOR_API_KEY`: a key for [tenor](https://tenor.com/gifapi/documentation)
+- `DISCORD_TOKEN`: Your [Discord bot token](https://discord.com/developers/docs/topics/oauth2)
+- `TENOR_API_KEY`: A key for [tenor](https://tenor.com/gifapi/documentation)
 - `GITHUB_USER`: Username for the GitHub account to use `!fileatask`
 - `GITHUB_PASS`: Password for the GitHub account to use `!fileatask`
 - `OWNER_DISCORD_ID`: The Discord ID of the owner (used for `!fileatask`)

@@ -1,12 +1,10 @@
 #!/usr/bin/env python3
 
-import asyncio
-import logging
-
 from dicebot.core.register_command import register_command
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
+from dicebot.tasks.remind import send_reminder
 
 
 @register_command
@@ -15,7 +13,6 @@ async def remindme(ctx: MessageContext, timer: Time, text: GreedyStr) -> None:
     text_str = text.unwrap()
     # TODO: Allow specifying a certain date instead
     await ctx.channel.send(f"Okay, <@{ctx.author_id}>, I'll remind you in {timer}")
-    logging.info(f"Will now sleep for {timer.seconds} seconds for reminder")
-    # TODO: Put into a background queue
-    await asyncio.sleep(timer.seconds)
-    await ctx.channel.send(f"Reminder for <@{ctx.author_id}>: {text_str}")
+    send_reminder.apply_async(
+        (ctx.channel.id, ctx.author_id, text_str), countdown=timer.seconds
+    )

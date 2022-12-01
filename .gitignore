@@ -6,6 +6,7 @@
 *.json
 .*.swp
 *.sqlite3
+*.rdb
 
 .mypy_cache/
 

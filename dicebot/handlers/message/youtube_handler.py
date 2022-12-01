@@ -5,7 +5,7 @@ import logging
 
 import pytube
 
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 YOUTUBE_TRIGGERS = ["youtube.com", "youtu.be"]

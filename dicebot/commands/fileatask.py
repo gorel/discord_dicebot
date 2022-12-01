@@ -9,7 +9,7 @@ import requests
 
 from dicebot.commands import ban
 from dicebot.core.register_command import register_command
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.time import Time

@@ -3,7 +3,7 @@
 import logging
 from enum import Enum, auto
 
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 

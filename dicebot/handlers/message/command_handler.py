@@ -4,7 +4,7 @@ import logging
 from typing import Optional
 
 from dicebot.core.command_runner import CommandRunner
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 

@@ -8,7 +8,7 @@ import time
 from dicebot.commands import ban, timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.roll import Roll
-from dicebot.data.message_context import MessageContext
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.time import Time

@@ -2,7 +2,7 @@
 
 import functools
 
-from dicebot.data.db_models import User
+from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 
 

@@ -3,7 +3,7 @@
 import logging
 from abc import ABC, abstractmethod
 
-from dicebot.data.db_models import ReactedMessage
+from dicebot.data.db.reacted_message import ReactedMessage
 from dicebot.data.message_context import MessageContext
 
 

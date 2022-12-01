@@ -6,7 +6,7 @@ import random
 import time
 
 from dicebot.commands import ban, timezone
-from dicebot.data.db_models import Roll
+from dicebot.data.db.roll import Roll
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr

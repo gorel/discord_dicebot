@@ -4,7 +4,7 @@ import asyncio
 import datetime
 
 from dicebot.commands import ban
-from dicebot.data.db_models import User
+from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.time import Time

@@ -4,7 +4,7 @@ import discord
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.core.guild_context import GuildContext
-from dicebot.data.db_models import Guild
+from dicebot.data.db.guild import Guild
 
 
 class ServerManager:

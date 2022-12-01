@@ -9,7 +9,7 @@ from dicebot.commands import (ban, birthday, clear_stats, eight_ball,
                               rename, reset_roll, roll, scoreboard, set_msg,
                               set_reaction_threshold, set_timeout,
                               set_turbo_ban_timing_threshold, timezone)
-from dicebot.data.db_models import Base
+from dicebot.data.db.base import Base
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr

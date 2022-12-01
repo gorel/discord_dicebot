@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from dicebot.data.db_models import Rename
+from dicebot.data.db.rename import Rename
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
 

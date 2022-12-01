@@ -5,7 +5,8 @@ import logging
 import discord
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dicebot.data.db_models import User, Guild
+from dicebot.data.db.guild import Guild
+from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 # on_message handlers
 from dicebot.handlers.message.ban_handler import BanHandler
@@ -68,9 +69,7 @@ class GuildContext:
         reaction: discord.Reaction,
         user: discord.User,
     ) -> None:
-        author = await User.get_or_create(
-            self.session, reaction.message.author.id
-        )
+        author = await User.get_or_create(self.session, reaction.message.author.id)
         reactor = await User.get_or_create(self.session, user.id)
         ctx = MessageContext(
             client=self.client,

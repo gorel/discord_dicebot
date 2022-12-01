@@ -7,7 +7,8 @@ import time
 from typing import Optional
 
 from dicebot.commands import timezone
-from dicebot.data.db_models import Ban, User
+from dicebot.data.db.ban import Ban
+from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.time import Time

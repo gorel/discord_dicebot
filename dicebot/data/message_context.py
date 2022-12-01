@@ -8,7 +8,8 @@ from typing import Optional
 import discord
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from dicebot.data.db_models import User, Guild
+from dicebot.data.db.guild import Guild
+from dicebot.data.db.user import User
 
 
 @dataclass

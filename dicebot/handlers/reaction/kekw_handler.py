@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from dicebot.commands import ban
-from dicebot.data.db_models import User
+from dicebot.data.db.user import User
 from dicebot.data.message_context import MessageContext
 from dicebot.handlers.reaction.abstract_reaction_handler import \
     AbstractReactionHandler

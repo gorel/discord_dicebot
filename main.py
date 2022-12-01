@@ -11,7 +11,7 @@ import dotenv
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from dicebot.core.client import Client
-from dicebot.data.db_models import Base
+from dicebot.data.db.base import Base
 from dicebot.logging.colored_log_formatter import ColoredLogFormatter
 
 DEFAULT_DB_URI = "sqlite+aiosqlite:///:memory:"

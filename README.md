@@ -30,6 +30,30 @@ Environment settings (put these in your `.env` file)
 - `CELERY_BROKER_URL`: The broker Celery will use to send/receive messages
 - `CELERY_RESULT_BACKEND`: The backend Celery will use to persist results
 
+## Running the IPython shell
+
+If you'd like an interactive Python shell where you can use the client directly, you'll need to first install the ipython
+packages.
+
+```
+# Assuming you've already set up the venv as before
+pip install -r ipython_requirements.txt
+```
+
+You can then run it like so:
+
+```
+# From project root directory
+$ python -m dicebot.app.ipython
+```
+
+By default, you'll have access to `prep` which is a function that can be used like `await` but in a synchronous context (behind the scenes,
+it's getting the `asyncio` event loop and `loop.run_until_complete`)
+
+```
+[1] prep(Client.fetch_guild(MY_GUILD_ID))
+```
+
 ---
 
 # Contributing

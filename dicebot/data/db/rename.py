@@ -53,3 +53,9 @@ class Rename(Base):
             select(cls).filter_by(rename_type=cls.Type.CHAT, guild_id=guild.id)
         )
         return res.one_or_none()
+
+    def __repr__(self) -> str:
+        return (
+            f"Rename({self.id=}, {self.guild_id=}, "
+            f"{self.discord_user_id=}, {self.rename_type=}, {self.rename_used=})"
+        )

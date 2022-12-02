@@ -12,6 +12,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from dicebot.data.db.base import Base
 
 # Special types to make the ORM models prettier
+bigint = Annotated[int, mapped_column(BigInteger)]
 bigint_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
 bigint_ix = Annotated[int, mapped_column(BigInteger, index=True)]
 timestamp_now = Annotated[
@@ -39,3 +40,9 @@ class ReactedMessage(Base):
             select(cls).filter_by(msg_id=msg_id, reaction_id=reaction_id)
         )
         return res.one_or_none()
+
+    def __repr__(self) -> str:
+        return (
+            f"ReactedMessage({self.id=}, {self.guild_id=}, "
+            f"{self.msg_id=}, {self.reacted_at=}, {self.reaction_id=})"
+        )

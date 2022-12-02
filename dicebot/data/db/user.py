@@ -79,3 +79,6 @@ class User(Base):
             cmd_str = cmd_str[1:]
         discord_id = int(cmd_str)
         return await cls.get_or_create(session, discord_id)
+
+    def __repr__(self) -> str:
+        return f"User({self.id=}, {self.birthday=})"

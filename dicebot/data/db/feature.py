@@ -32,3 +32,6 @@ class Feature(Base):
             session.add(res)
             await session.commit()
         return res
+
+    def __repr__(self) -> str:
+        return f"Feature({self.id=}, {self.feature_name=})"

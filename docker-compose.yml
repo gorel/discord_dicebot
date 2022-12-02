@@ -1,13 +1,14 @@
 version: "3.9"
+
 services:
   bot:
     build:
       context: .
-      dockerfile: ./compose/Dockerfile
+      dockerfile: ${APP_ROOT}/compose/Dockerfile
     image: dicebot
     command: /start-bot
     volumes:
-      - .:/app
+      - ${APP_ROOT}:/app
     env_file:
       - .env
     depends_on:
@@ -31,11 +32,11 @@ services:
   celery_worker:
     build:
       context: .
-      dockerfile: ./compose/Dockerfile
+      dockerfile: ${APP_ROOT}/compose/Dockerfile
     image: celery_worker
     command: /start-celeryworker
     volumes:
-      - .:/app
+      - ${APP_ROOT}:/app
     env_file:
       - .env
     depends_on:
@@ -46,11 +47,11 @@ services:
   celery_beat:
     build:
       context: .
-      dockerfile: ./compose/Dockerfile
+      dockerfile: ${APP_ROOT}/compose/Dockerfile
     image: celery_beat
     command: /start-celerybeat
     volumes:
-      - .:/app
+      - ${APP_ROOT}:/app
     env_file:
       - .env
     depends_on:

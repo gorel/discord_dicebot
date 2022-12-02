@@ -1,2 +1,0 @@
-# Required to run dicebot.app.ipython
-ipython~=8.7

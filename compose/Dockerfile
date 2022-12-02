@@ -2,11 +2,6 @@ FROM python:3.10
 
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get update && apt-get install -y \
-  # Clean up unused files
-  && apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false \
-  && rm -rf /var/lib/apt/lists/*
-
 # Install requirements here to ensure they get cached
 COPY requirements.txt /requirements.txt
 RUN pip install --no-cache-dir -r /requirements.txt

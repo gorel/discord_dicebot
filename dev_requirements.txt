@@ -1,2 +1,5 @@
+-r requirements.txt
 mypy
+# Required to run dicebot.app.ipython
+ipython~=8.7
 pyright

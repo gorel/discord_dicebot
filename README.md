@@ -33,11 +33,11 @@ Environment settings (put these in your `.env` file)
 ## Running the IPython shell
 
 If you'd like an interactive Python shell where you can use the client directly, you'll need to first install the ipython
-packages.
+packages. This requires installing the optional dev_requirements.txt.
 
 ```
 # Assuming you've already set up the venv as before
-pip install -r ipython_requirements.txt
+pip install -r dev_requirements.txt
 ```
 
 You can then run it like so:
@@ -47,8 +47,7 @@ You can then run it like so:
 $ python -m dicebot.app.ipython
 ```
 
-By default, you'll have access to `prep` which is a function that can be used like `await` but in a synchronous context (behind the scenes,
-it's getting the `asyncio` event loop and `loop.run_until_complete`)
+By default, you'll have access to `prep` which is a function that allows calling `async` functions in a synchronous context (behind the scenes, it's getting the `asyncio` event loop and calls `loop.run_until_complete`)
 
 ```
 [1] prep(Client.fetch_guild(MY_GUILD_ID))

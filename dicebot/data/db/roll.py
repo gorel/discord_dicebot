@@ -47,3 +47,10 @@ class Roll(Base):
             .order_by(cls.id.desc())
         )
         return res.one_or_none()
+
+    def __repr__(self) -> str:
+        return (
+            f"Roll({self.id=}, {self.guild_id=}, "
+            f"{self.discord_user_id=}, {self.actual_roll=}, "
+            f"{self.target_roll=}, {self.rolled_at=})"
+        )

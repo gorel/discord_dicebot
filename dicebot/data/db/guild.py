@@ -205,3 +205,6 @@ class Guild(Base):
     @classmethod
     async def get_or_none(cls, session: AsyncSession, guild_id: int) -> Optional[Guild]:
         return await session.get(cls, guild_id)
+
+    def __repr__(self) -> str:
+        return f"Guild({self.id=}, {self.is_dm=})"

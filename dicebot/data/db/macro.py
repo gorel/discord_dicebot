@@ -39,3 +39,6 @@ class Macro(Base):
     ) -> Optional[Macro]:
         res = await session.scalars(select(Macro).filter_by(guild_id=guild.id, key=key))
         return res.one_or_none()
+
+    def __repr__(self) -> str:
+        return f"Macro({self.id=}, {self.key=}, {self.value=})"

@@ -5,7 +5,17 @@ from __future__ import annotations
 from typing import Annotated, Optional
 
 import discord
-from sqlalchemy import Column, ForeignKey, Table, delete, desc, func, select, text
+from sqlalchemy import (
+    BigInteger,
+    Column,
+    ForeignKey,
+    Table,
+    delete,
+    desc,
+    func,
+    select,
+    text,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,7 +28,10 @@ from dicebot.data.db.roll import Roll
 from dicebot.data.db.user import User
 
 # Special types to make the ORM models prettier
-int_pk_natural = Annotated[int, mapped_column(primary_key=True, autoincrement=False)]
+bigint = Annotated[int, mapped_column(BigInteger)]
+bigint_pk_natural = Annotated[
+    int, mapped_column(BigInteger, primary_key=True, autoincrement=False)
+]
 bool_f = Annotated[bool, mapped_column(default=False)]
 
 DEFAULT_START_ROLL = 6
@@ -50,10 +63,10 @@ class Guild(Base):
     __tablename__ = "guild"
 
     # Columns
-    id: Mapped[int_pk_natural]
+    id: Mapped[bigint_pk_natural]
     is_dm: Mapped[bool_f]
-    current_roll: Mapped[int] = mapped_column(default=DEFAULT_START_ROLL)
-    roll_timeout: Mapped[int] = mapped_column(default=DEFAULT_ROLL_TIMEOUT_HOURS)
+    current_roll: Mapped[bigint] = mapped_column(default=DEFAULT_START_ROLL)
+    roll_timeout: Mapped[bigint] = mapped_column(default=DEFAULT_ROLL_TIMEOUT_HOURS)
     critical_success_msg: Mapped[str] = mapped_column(
         default=DEFAULT_CRITICAL_SUCCESS_MSG
     )
@@ -62,8 +75,10 @@ class Guild(Base):
     )
     timezone: Mapped[str] = mapped_column(default=DEFAULT_GUILD_TZ)
     allow_renaming: Mapped[bool_f]
-    reaction_threshold: Mapped[int] = mapped_column(default=DEFAULT_REACTION_THRESHOLD)
-    turboban_threshold: Mapped[int] = mapped_column(
+    reaction_threshold: Mapped[bigint] = mapped_column(
+        default=DEFAULT_REACTION_THRESHOLD
+    )
+    turboban_threshold: Mapped[bigint] = mapped_column(
         default=DEFAULT_TURBOBAN_THRESHOLD_SECS
     )
 
@@ -186,3 +201,7 @@ class Guild(Base):
             session.add(res)
             await session.commit()
         return res
+
+    @classmethod
+    async def get_or_none(cls, session: AsyncSession, guild_id: int) -> Optional[Guild]:
+        return await session.get(cls, guild_id)

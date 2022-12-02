@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from dicebot.data.types.message_context import MessageContext
 
 
@@ -32,10 +34,10 @@ class _StrCallProtocol(Protocol):
 class _LoadFromCmdStrProtocol(Protocol):
     @classmethod
     async def load_from_cmd_str(
-        cls, ctx: MessageContext, s: str
+        cls, session: AsyncSession, s: str
     ) -> _LoadFromCmdStrProtocol:
         """Class method that constructs itself from a string"""
-        return await cls.load_from_cmd_str(ctx, s)
+        return await cls.load_from_cmd_str(session, s)
 
 
 StrTypifiable = _FromStrProtocol | _StrCallProtocol | _LoadFromCmdStrProtocol
@@ -48,6 +50,6 @@ async def typify_str(
         # assert getattr(typ, "from_str", None) is not None
         return typ.from_str(value)
     elif isinstance(typ, _LoadFromCmdStrProtocol):
-        return await typ.load_from_cmd_str(ctx, value)
+        return await typ.load_from_cmd_str(ctx.session, value)
     elif isinstance(typ, _StrCallProtocol):
         return typ(value)

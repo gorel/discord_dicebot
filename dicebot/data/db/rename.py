@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from sqlalchemy import ForeignKey, select
+from sqlalchemy import BigInteger, ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -15,8 +15,9 @@ if TYPE_CHECKING:
     from dicebot.data.db.guild import Guild
 
 # Special types to make the ORM models prettier
-int_pk = Annotated[int, mapped_column(primary_key=True)]
-int_ix = Annotated[int, mapped_column(index=True)]
+bigint = Annotated[int, mapped_column(BigInteger)]
+bigint_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+bigint_ix = Annotated[int, mapped_column(BigInteger, index=True)]
 bool_f = Annotated[bool, mapped_column(default=False)]
 
 
@@ -28,10 +29,10 @@ class Rename(Base):
     __tablename__ = "rename"
 
     # Columns
-    id: Mapped[int_pk]
-    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
-    discord_user_id: Mapped[int_ix] = mapped_column(ForeignKey("discord_user.id"))
-    rename_type: Mapped[int]
+    id: Mapped[bigint_pk]
+    guild_id: Mapped[bigint_ix] = mapped_column(ForeignKey("guild.id"))
+    discord_user_id: Mapped[bigint_ix] = mapped_column(ForeignKey("discord_user.id"))
+    rename_type: Mapped[bigint]
     rename_used: Mapped[bool_f]
 
     # Methods

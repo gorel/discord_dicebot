@@ -5,13 +5,16 @@ from __future__ import annotations
 import datetime
 from typing import Annotated
 
-from sqlalchemy import func
+from sqlalchemy import BigInteger, func
 from sqlalchemy.orm import mapped_column
 
 # Special types to make the ORM models prettier
-int_pk = Annotated[int, mapped_column(primary_key=True)]
-int_pk_natural = Annotated[int, mapped_column(primary_key=True, autoincrement=False)]
-int_ix = Annotated[int, mapped_column(index=True)]
+bigint = Annotated[int, mapped_column(BigInteger)]
+bigint_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+bigint_pk_natural = Annotated[
+    int, mapped_column(BigInteger, primary_key=True, autoincrement=False)
+]
+bigint_ix = Annotated[int, mapped_column(BigInteger, index=True)]
 timestamp_now = Annotated[
     datetime.datetime,
     mapped_column(nullable=False, server_default=func.CURRENT_TIMESTAMP()),

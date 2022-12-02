@@ -62,22 +62,9 @@ async def ban(
         localized = timezone.localize(current_ban, ctx.guild.timezone)
         await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
 
-    # Tell them they're unbanned 1 second late to ensure any weird delays
-    # will still make the logic sound
-    # TODO: Put in a message queue instead
-
     unban_task.apply_async(
         (ctx.channel.id, ctx.guild_id, target.id), countdown=timer.seconds + 1
     )
-    await asyncio.sleep(timer.seconds + 1)
-    logging.info(f"Check if {target.id} is still banned")
-
-    # While we were sleeping, the target got banned for *even longer*
-    # Check that the bantime is in the past and not -1 (unbanned early)
-    # We check the bantime was in the past since we slept 1 more second
-    current_ban = await Ban.get_latest_unvoided_ban(ctx.session, ctx.guild, target)
-    if current_ban is not None and current_ban.banned_until < datetime.datetime.now():
-        await ctx.channel.send(f"<@{target.id}>: you have been unbanned.")
 
 
 @register_command

@@ -1,0 +1,62 @@
+version: "3.9"
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: ./compose/Dockerfile
+    image: dicebot
+    command: /start-bot
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: postgres:alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+
+  redis:
+    image: redis:alpine
+
+  celery_worker:
+    build:
+      context: .
+      dockerfile: ./compose/Dockerfile
+    image: celery_worker
+    command: /start-celeryworker
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+  # Not currently used
+  celery_beat:
+    build:
+      context: .
+      dockerfile: ./compose/Dockerfile
+    image: celery_beat
+    command: /start-celerybeat
+    volumes:
+      - .:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+
+volumes:
+  postgres_data:
+    driver: local

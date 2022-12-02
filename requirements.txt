@@ -1,8 +1,10 @@
 aiohttp[speedups]~=3.7
 aiosqlite~=0.17
+asyncpg~=0.27
 celery~=5.2
 # TODO: Upgrade to 2.0
 discord.py~=1.7
+psycopg2-binary~=2.9
 python-dateutil~=2.8
 python-dotenv~=0.21
 pytube~=12.1

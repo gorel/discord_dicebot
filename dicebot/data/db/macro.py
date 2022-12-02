@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from sqlalchemy import ForeignKey, select
+from sqlalchemy import BigInteger, ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -15,8 +15,8 @@ if TYPE_CHECKING:
     from dicebot.data.db.user import User
 
 # Special types to make the ORM models prettier
-int_pk = Annotated[int, mapped_column(primary_key=True)]
-int_ix = Annotated[int, mapped_column(index=True)]
+int_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+int_ix = Annotated[int, mapped_column(BigInteger, index=True)]
 
 
 class Macro(Base):

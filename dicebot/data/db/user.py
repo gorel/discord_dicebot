@@ -5,6 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import TYPE_CHECKING, Annotated, Optional
 
+from sqlalchemy import BigInteger
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -16,14 +17,16 @@ if TYPE_CHECKING:
 
 
 # Special types to make the ORM models prettier
-int_pk_natural = Annotated[int, mapped_column(primary_key=True, autoincrement=False)]
+bigint_pk_natural = Annotated[
+    int, mapped_column(BigInteger, primary_key=True, autoincrement=False)
+]
 
 
 class User(Base):
     __tablename__ = "discord_user"
 
     # Columns
-    id: Mapped[int_pk_natural]
+    id: Mapped[bigint_pk_natural]
     birthday: Mapped[Optional[datetime.datetime]]
 
     # Methods
@@ -56,6 +59,12 @@ class User(Base):
             session.add(res)
             await session.commit()
         return res
+
+    @classmethod
+    async def get_or_none(
+        cls, session: AsyncSession, discord_id: int
+    ) -> Optional[User]:
+        return await session.get(cls, discord_id)
 
     @classmethod
     async def load_from_cmd_str(cls, session: AsyncSession, cmd_str: str) -> int:

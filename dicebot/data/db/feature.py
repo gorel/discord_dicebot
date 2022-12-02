@@ -4,14 +4,14 @@ from __future__ import annotations
 
 from typing import Annotated
 
-from sqlalchemy import select
+from sqlalchemy import BigInteger, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 from dicebot.data.db.base import Base
 
 # Special types to make the ORM models prettier
-int_pk = Annotated[int, mapped_column(primary_key=True)]
+bigint_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
 
 
 class Feature(Base):
@@ -19,7 +19,7 @@ class Feature(Base):
     __tablename__ = "feature"
 
     # Columns
-    id: Mapped[int_pk]
+    id: Mapped[bigint_pk]
     feature_name: Mapped[str]
 
     # Methods

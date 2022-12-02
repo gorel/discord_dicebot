@@ -37,5 +37,11 @@ async def unban_async(channel_id: int, guild_id: int, target_id: int) -> None:
 
         current_ban = await Ban.get_latest_unvoided_ban(session, guild, target)
 
-    if current_ban is not None and current_ban.banned_until < datetime.datetime.now():
-        await channel.send(f"<@{target_id}>: You have been unbanned.")
+        if (
+            current_ban is not None
+            and current_ban.banned_until < datetime.datetime.now()
+        ):
+            await channel.send(f"<@{target_id}>: You have been unbanned.")
+            # Remember to set this ban as now being acknowledged!
+            current_ban.acknowledged = True
+            await session.commit()

@@ -5,15 +5,15 @@ from __future__ import annotations
 import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import ForeignKey, func, select
+from sqlalchemy import BigInteger, ForeignKey, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
 from dicebot.data.db.base import Base
 
 # Special types to make the ORM models prettier
-int_pk = Annotated[int, mapped_column(primary_key=True)]
-int_ix = Annotated[int, mapped_column(index=True)]
+bigint_pk = Annotated[int, mapped_column(BigInteger, primary_key=True)]
+bigint_ix = Annotated[int, mapped_column(BigInteger, index=True)]
 timestamp_now = Annotated[
     datetime.datetime,
     mapped_column(nullable=False, server_default=func.CURRENT_TIMESTAMP()),
@@ -24,11 +24,11 @@ class ReactedMessage(Base):
     __tablename__ = "reacted_message"
 
     # Columns
-    id: Mapped[int_pk]
-    guild_id: Mapped[int_ix] = mapped_column(ForeignKey("guild.id"))
-    msg_id: Mapped[int_ix]
+    id: Mapped[bigint_pk]
+    guild_id: Mapped[bigint_ix] = mapped_column(ForeignKey("guild.id"))
+    msg_id: Mapped[bigint_ix]
     reacted_at: Mapped[timestamp_now]
-    reaction_id: Mapped[int]
+    reaction_id: Mapped[bigint]
 
     # Methods
     @classmethod

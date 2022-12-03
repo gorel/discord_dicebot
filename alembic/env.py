@@ -21,9 +21,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-from dicebot.data.db.base import Base
-
-target_metadata = Base.metadata
+from dicebot.core.import_witchcraft import import_submodules
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
@@ -45,6 +43,11 @@ def run_migrations_offline() -> None:
     """
     dotenv.load_dotenv()
     url = os.getenv("DATABASE_URL", "")
+    # Unfortunately this is necessary given how
+    # the db directory layout works. This was the easiest fix I found
+    import_submodules("dicebot.data.db")
+    from dicebot.data.db.base import Base
+    target_metadata = Base.metadata
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -67,6 +70,11 @@ def run_migrations_online() -> None:
     url = os.getenv("DATABASE_URL", "")
     engine = create_engine(url)
 
+    # Unfortunately this is necessary given how
+    # the db directory layout works. This was the easiest fix I found
+    import_submodules("dicebot.data.db")
+    from dicebot.data.db.base import Base
+    target_metadata = Base.metadata
     with engine.connect() as connection:
         context.configure(
             connection=connection, target_metadata=target_metadata

@@ -5,8 +5,8 @@ from dicebot.core.register_command import register_command
 from dicebot.data.types.message_context import MessageContext
 
 
-@register_command
 @requires_admin
+@register_command
 async def set_reaction_threshold(ctx: MessageContext, threshold: int) -> None:
     """Set the reaction threshold (how many reactions before a reaction-reaction occurs) for this server"""
     ctx.guild.reaction_threshold = threshold

@@ -81,8 +81,8 @@ def localize(unixtime: int, tz: str) -> str:
     return _localize_pretty(now_localized, target_localized)
 
 
-@register_command
 @requires_admin
+@register_command
 async def set_tz(ctx: MessageContext, tz: str) -> None:
     try:
         # Just ensure that pytz recognizes this as a valid timezone

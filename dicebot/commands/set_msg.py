@@ -7,8 +7,8 @@ from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.set_message_subcommand import SetMessageSubcommand
 
 
-@register_command
 @requires_admin
+@register_command
 async def set_msg(
     ctx: MessageContext,
     win_or_lose: SetMessageSubcommand,

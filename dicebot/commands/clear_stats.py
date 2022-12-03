@@ -5,8 +5,8 @@ from dicebot.core.register_command import register_command
 from dicebot.data.types.message_context import MessageContext
 
 
-@register_command
 @requires_admin
+@register_command
 async def clear_stats(ctx: MessageContext) -> None:
     """Clear all stats in the server's roll record (PERMANENT)"""
     await ctx.guild.clear_stats(ctx.session)

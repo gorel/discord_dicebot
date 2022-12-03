@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
-import logging
 import time
 from typing import Optional
+
+import discord
 
 from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
@@ -88,7 +88,7 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
 
 async def turboban(
     ctx: MessageContext,
-    reference_msg: MessageContext,
+    reference_msg: discord.Message,
     target: User,
     num_hours: int = 5,
     reason: Optional[BotParam[str]] = None,

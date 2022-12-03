@@ -5,8 +5,8 @@ from dicebot.core.register_command import register_command
 from dicebot.data.types.message_context import MessageContext
 
 
-@register_command
 @requires_admin
+@register_command
 async def reset_roll(ctx: MessageContext, to: int) -> None:
     """Reset the next roll for this server to the given value"""
     ctx.guild.current_roll = to

@@ -14,7 +14,7 @@ def register_command(coro):
     REGISTERED_COMMANDS.append(coro)
 
     @functools.wraps(coro)
-    async def wrapper(*args, **kwargs):
+    async def wrapper(*args, **kwargs) -> None:
         return await coro(*args, **kwargs)
 
     return wrapper

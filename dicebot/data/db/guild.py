@@ -10,6 +10,7 @@ from sqlalchemy import (
     Column,
     ForeignKey,
     Table,
+    case,
     delete,
     desc,
     func,
@@ -131,16 +132,21 @@ class Guild(Base):
         session: AsyncSession,
     ) -> str:
         # TODO: Probably a better way to do this with declarative ORM style
-        records = await session.scalars(
+        records = await session.execute(
             select(
-                Roll,
-                func.count(func.IF(Roll.actual_roll == Roll.target_roll, 1, 0)).label(
-                    "wins"
-                ),
+                Roll.discord_user_id,
                 func.count(
-                    func.IF(Roll.actual_roll == Roll.target_roll - 1), 1, 0
-                ).label("losses"),
-                func.count(func.IF(Roll.actual_roll == 1, 1, 0)).label("ones"),
+                    case((Roll.actual_roll == Roll.target_roll, 1),
+                    else_=0)
+                    ).label("wins"),
+                func.count(
+                    case((Roll.actual_roll == Roll.target_roll - 1, 1),
+                    else_=0)
+                    ).label("losses"),
+                func.count(
+                    case((Roll.actual_roll == 1, 1),
+                    else_=0)
+                    ).label("ones"),
                 func.count(Roll.discord_user_id).label("attempts"),
             )
             .filter_by(guild_id=self.id)
@@ -150,12 +156,14 @@ class Guild(Base):
 
         msg = "**Stats:**\n"
         record_strs = []
+        # TODO: Put this in a nice table
         for record in records.all():
-            user = client.get_user(record.bannee_id)
+            user = client.get_user(record.discord_user_id)
             if not user:
-                user = await client.fetch_user(record.bannee_id)
+                user = await client.fetch_user(record.discord_user_id)
             record_strs.append(
-                f"\t- {user.name} {record.wins} W, {record.losses} L, {record.ones} ones ({record.attempts} rolls)"
+                f"\t- {user.name} {record.wins} wins, {record.losses} losses, "
+                f"{record.ones} critical losses (rolled 1), {record.attempts} total rolls"
             )
         msg += "\n".join(record_strs)
         return msg
@@ -164,10 +172,10 @@ class Guild(Base):
         self, client: discord.Client, session: AsyncSession
     ) -> str:
         # TODO: Probably a better way to do this with declarative ORM style
-        ban_records = await session.scalars(
-            select(Ban, func.count(Ban.guild_id).label("ban_count"))
+        ban_records = await session.execute(
+            select(Ban.bannee_id, func.count(Ban.bannee_id).label("ban_count"))
             .filter_by(guild_id=self.id)
-            .group_by(Ban.discord_user_id)
+            .group_by(Ban.bannee_id)
             .order_by(desc(text("ban_count")))
         )
 

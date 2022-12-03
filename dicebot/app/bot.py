@@ -17,12 +17,6 @@ async def main() -> None:
     handler = root_logger.handlers[0]
     handler.setFormatter(ColoredLogFormatter())
 
-    # Ensure DB setup is complete
-    logging.info("Setting up db connection and tables")
-    # TODO - Should this *always* run?
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-
     # And start the client
     logging.info("Running client")
     client = await Client.get_and_login()

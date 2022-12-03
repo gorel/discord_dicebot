@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from dicebot.app import app_sessionmaker
 from dicebot.core.server_manager import ServerManager
+from dicebot.data.db.user import User
 
 TEST_PREFIX = "tt "
 
@@ -66,6 +67,12 @@ class Client(discord.Client):
             mgr = ServerManager(session)
             await mgr.handle_reaction_add(self, reaction, user)
 
+    async def on_ready(self) -> None:
+        assert self.user is not None
+        # Ensure our bot is in the db
+        async with self.sessionmaker() as session:
+            await User.get_or_create(session, self.user.id)
+
     @classmethod
     async def get_and_login(cls) -> Client:
         """Helper method to get the app default client"""
@@ -75,4 +82,5 @@ class Client(discord.Client):
 
         res = cls(app_sessionmaker, test_guild_id=test_guild_id)
         await res.login(discord_token)
+
         return res

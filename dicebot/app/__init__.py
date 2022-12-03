@@ -15,7 +15,7 @@ from dicebot.app.defaults import (
 
 # Load environment
 dotenv.load_dotenv()
-__db_url = os.getenv("DATABASE_URL", DEFAULT_DATABASE_URL)
+__db_url = os.getenv("ASYNC_DATABASE_URL", DEFAULT_DATABASE_URL)
 __broker_url = os.getenv("CELERY_BROKER_URL", DEFAULT_BROKER_URL)
 __result_backend = os.getenv("CELERY_RESULT_BACKEND", DEFAULT_RESULT_BACKEND)
 

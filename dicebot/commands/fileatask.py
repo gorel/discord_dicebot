@@ -28,7 +28,7 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
 
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            ISSUES_URL, json={"title": title}, headers=headers, auth=(user, password)
+            ISSUES_URL, json={"title": title}, headers=headers, auth=aiohttp.BasicAuth(user, password)
         ) as r:
             json_resp = await r.json()
             if r.status == SUCCESS_CODE:

@@ -103,7 +103,7 @@ class Guild(Base):
         old_macro = await self.get_macro(session, key)
         if old_macro is None:
             new_macro = Macro(
-                guild_id=self.id, added_by=author.discord_id, key=key, value=value
+                guild_id=self.id, added_by=author.id, key=key, value=value
             )
             session.add(new_macro)
         else:
@@ -134,13 +134,13 @@ class Guild(Base):
         records = await session.scalars(
             select(
                 Roll,
-                func.count(func.IF(Roll.actual_roll == Roll.target_roll), 1, 0).label(
+                func.count(func.IF(Roll.actual_roll == Roll.target_roll, 1, 0)).label(
                     "wins"
                 ),
                 func.count(
                     func.IF(Roll.actual_roll == Roll.target_roll - 1), 1, 0
                 ).label("losses"),
-                func.count(func.IF(Roll.actual_roll == 1), 1, 0).label("ones"),
+                func.count(func.IF(Roll.actual_roll == 1, 1, 0)).label("ones"),
                 func.count(Roll.discord_user_id).label("attempts"),
             )
             .filter_by(guild_id=self.id)

@@ -6,7 +6,6 @@ import sys
 
 from dicebot.app import engine
 from dicebot.core.client import Client
-from dicebot.data.db.base import Base
 from dicebot.logging.colored_log_formatter import ColoredLogFormatter
 
 

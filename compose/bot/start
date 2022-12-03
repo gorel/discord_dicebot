@@ -4,4 +4,9 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+echo "Running db migrations"
+alembic revision --autogenerate -m "$(date)"
+alembic upgrade head
+
+echo "Starting bot"
 python -m dicebot.app.bot

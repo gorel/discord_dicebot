@@ -4,7 +4,7 @@ import asyncio
 import logging
 import sys
 
-from dicebot.app import engine, session
+from dicebot.app import engine
 from dicebot.core.client import Client
 from dicebot.data.db.user import User
 from dicebot.logging.colored_log_formatter import ColoredLogFormatter

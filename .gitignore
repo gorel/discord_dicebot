@@ -18,6 +18,7 @@ venv/
 celerybeat-schedule
 
 alembic/versions/
+manual_migrations/
 
 # I use this to jot down ideas sometimes but don't want to commit it
 notes.txt

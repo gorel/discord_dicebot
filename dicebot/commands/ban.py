@@ -36,6 +36,7 @@ async def ban(
             f"May God have mercy on your soul."
         )
         # Need to override banner's ID to denote "no real banner"
+        assert ctx.client.user is not None
         banner_id = ctx.client.user.id
     else:
         reason = BotParam("Because they didn't like you")

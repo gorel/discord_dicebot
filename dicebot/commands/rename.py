@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
 
+from discord import DMChannel
+
 from dicebot.core.register_command import register_command
 from dicebot.data.db.rename import Rename
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
+
+
+class RenameError(ValueError):
+    pass
 
 
 @register_command
@@ -18,6 +24,8 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
         and last_winner.discord_user_id == ctx.author_id
         and not last_winner.rename_used
     ):
+        if ctx.message.guild is None:
+            raise RenameError("Renaming isn't supported here")
         await ctx.channel.send(f"Setting server name to: {new_name_str}")
         await ctx.message.guild.edit(name=new_name_str, reason="Dice roll")
         last_winner.rename_used = True
@@ -27,6 +35,8 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
         and last_loser.discord_user_id == ctx.author_id
         and not last_loser.rename_used
     ):
+        if isinstance(ctx.channel, DMChannel):
+            raise RenameError("Renaming isn't supported here")
         await ctx.channel.send(f"Setting chat name to: {new_name_str}")
         await ctx.channel.edit(name=new_name_str, reason="Dice roll")
         last_loser.rename_used = True

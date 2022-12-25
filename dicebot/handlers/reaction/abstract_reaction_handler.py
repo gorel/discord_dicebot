@@ -21,9 +21,13 @@ class AbstractReactionHandler(ABC):
         is_proper_emoji = (
             not isinstance(ctx.reaction.emoji, str)
             and ctx.reaction.emoji.name.lower() == self.reaction_name
+            and ctx.reaction.emoji.id is not None
         )
         if not is_proper_emoji:
             return False
+        # Unfortunately pyright can't deduce these two facts
+        assert not isinstance(ctx.reaction.emoji, str)
+        assert ctx.reaction.emoji.id is not None
 
         # pyright doesn't realize this can't be a string now
         assert not isinstance(ctx.reaction.emoji, str)
@@ -51,6 +55,8 @@ class AbstractReactionHandler(ABC):
         ctx: MessageContext,
     ) -> None:
         assert ctx.reaction is not None
+        assert not isinstance(ctx.reaction.emoji, str)
+        assert ctx.reaction.emoji.id is not None
 
         reaction_record = ReactedMessage(
             guild_id=ctx.guild.id,
@@ -70,5 +76,6 @@ class AbstractReactionHandler(ABC):
                 await self.record_handled(ctx)
         except Exception as e:
             logging.exception(
-                f"Exception raised in handle_and_record for {self.__class__.__name__}: {e}"
+                "Exception raised in handle_and_record "
+                f"for {self.__class__.__name__}: {e}"
             )

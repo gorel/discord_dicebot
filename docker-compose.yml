@@ -44,19 +44,19 @@ services:
       - db
 
   # Not currently used
-  celery_beat:
-    build:
-      context: .
-      dockerfile: ${APP_ROOT}/compose/Dockerfile
-    image: celery_beat
-    command: /start-celerybeat
-    volumes:
-      - ${APP_ROOT}:/app
-    env_file:
-      - .env
-    depends_on:
-      - redis
-      - db
+  # celery_beat:
+  #   build:
+  #     context: .
+  #     dockerfile: ${APP_ROOT}/compose/Dockerfile
+  #   image: celery_beat
+  #   command: /start-celerybeat
+  #   volumes:
+  #     - ${APP_ROOT}:/app
+  #   env_file:
+  #     - .env
+  #   depends_on:
+  #     - redis
+  #     - db
 
 volumes:
   postgres_data:

@@ -43,6 +43,7 @@ class LogMessageHandler(AbstractHandler):
             message_logger.addHandler(hdl)
 
         if self.source is LogMessageHandlerSource.GUILD:
+            assert ctx.message.guild is not None
             guild_name = ctx.message.guild.name
             username = ctx.message.author.name
             message_logger.info(f"{guild_name} | {username}: {ctx.message.content}")

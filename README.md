@@ -7,8 +7,8 @@ Setup:
 
 ```
 # venv is optional but highly encouraged
-python3.10 -m venv venv
-source venv/bin/activate
+python3.10 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
@@ -32,34 +32,55 @@ Environment settings (put these in your `.env` file)
 
 ## Running the IPython shell
 
-If you'd like an interactive Python shell where you can use the client directly, you'll need to first install the ipython
-packages. This requires installing the optional dev_requirements.txt.
-
-```
-# Assuming you've already set up the venv as before
-pip install -r dev_requirements.txt
-```
-
-You can then run it like so:
+You can run an interactive Python shell where you can use the client directly like so:
 
 ```
 # From project root directory
 $ python -m dicebot.app.ipython
 ```
 
-By default, you'll have access to `prep` which is a function that allows calling `async` functions in a synchronous context (behind the scenes, it's getting the `asyncio` event loop and calls `loop.run_until_complete`)
+By default, you'll have access to `prep` which is a function that allows calling `async` functions in a synchronous context (behind the scenes, it's getting the `asyncio` event loop and calls `loop.run_until_complete`) as well as `client` which is the logged in `dicebot.core.client.Client` object.
 
 ```
 [1] prep(Client.fetch_guild(MY_GUILD_ID))
 ```
 
----
+## Using docker compose
 
-# Contributing
+This section is rather sparse because I don't fully know what I'm doing.
+As a result, I'll document what I can here below, but there are no promises on the quality of the content.
+
+### For debugging
+
+To run all services locally for debugging:
 
 ```
-# Assuming you've already set up the venv as before
-pip install -r dev_requirements.txt
-# Need to run once to populate the cache
-yes | mypy dicebot --install-types 2>&1 >/dev/null
+$ docker compose up
 ```
+
+### DB without other services
+
+If you want to run the db _without_ starting other services:
+
+```
+$ docker compose run db
+$ docker compose exec db /bin/bash
+# Inside the container -- assumes username of dicebot
+$ psql -U dicebot
+```
+
+**NOTE**: You can add more volumes when running `docker compose run` which can be useful to link
+something like `$(realpath migration.sql):/migration.sql` to later run raw SQL through Postgres.
+This was useful when first starting the new bot since I created the migration data from SQLite
+and ran `cat migration.sql | psql -1 -U dicebot`
+
+### Setting up for automation
+
+To run all services automatically as part of a daemonization job
+
+```
+$ ./setup-service.sh
+```
+
+You'll now have a new `systemctl` service called `docker-compose@dicebot`.
+To check the status, type `systemctl status docker-compose@dicebot`.

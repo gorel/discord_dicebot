@@ -3,8 +3,8 @@ aiosqlite~=0.17
 alembic~=1.8
 asyncpg~=0.27
 celery~=5.2
-# TODO: Upgrade to 2.0
-discord.py~=1.7
+discord.py~=2.1
+ipython~=8.7
 psycopg2-binary~=2.9
 python-dateutil~=2.8
 python-dotenv~=0.21
@@ -12,3 +12,7 @@ pytube~=12.1
 pytz~=2022.6
 redis~=3.5
 sqlalchemy~=2.0.0b3
+
+# For type checking
+mypy
+pyright

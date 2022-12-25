@@ -7,6 +7,10 @@ from dicebot.core.guild_context import GuildContext
 from dicebot.data.db.guild import Guild
 
 
+class UnsupportedChannelException(ValueError):
+    pass
+
+
 class ServerManager:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
@@ -27,6 +31,14 @@ class ServerManager:
             ctx = GuildContext(client, guild, self.session)
             await ctx.handle_dm(message)
         else:
+            if message.channel.guild is None:
+                raise UnsupportedChannelException(
+                    "The bot is not available in this kind of context"
+                )
+            if message.channel.guild.owner is None:
+                raise UnsupportedChannelException(
+                    "The bot is not available in guilds without an owner"
+                )
             guild = await Guild.get_or_create(
                 session=self.session,
                 guild_id=message.channel.guild.id,
@@ -51,6 +63,14 @@ class ServerManager:
                 is_dm=True,
             )
         else:
+            if reaction.message.channel.guild is None:
+                raise UnsupportedChannelException(
+                    "The bot is not available in this kind of context"
+                )
+            if reaction.message.channel.guild.owner is None:
+                raise UnsupportedChannelException(
+                    "The bot is not available in guilds without an owner"
+                )
             guild = await Guild.get_or_create(
                 session=self.session,
                 guild_id=reaction.message.channel.guild.id,

@@ -6,9 +6,19 @@
 *.json
 .*.swp
 *.sqlite3
+*.rdb
 
 .mypy_cache/
 
 audio/
 server_contexts/
 venv/
+.venv/
+
+celerybeat-schedule
+
+alembic/versions/
+manual_migrations/
+
+# I use this to jot down ideas sometimes but don't want to commit it
+notes.txt

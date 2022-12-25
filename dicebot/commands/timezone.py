@@ -69,6 +69,10 @@ def _localize_pretty(
 
 def localize(unixtime: int, tz: str) -> str:
     target_dt = datetime.datetime.utcfromtimestamp(unixtime)
+    return localize_dt(target_dt, tz)
+
+
+def localize_dt(target_dt: datetime.datetime, tz: str) -> str:
     target_utc = pytz.utc.localize(target_dt)
 
     now_dt = datetime.datetime.utcfromtimestamp(int(time.time()))

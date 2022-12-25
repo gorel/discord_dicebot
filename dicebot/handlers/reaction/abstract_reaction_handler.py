@@ -3,6 +3,8 @@
 import logging
 from abc import ABC, abstractmethod
 
+from discord import Reaction
+
 from dicebot.data.db.reacted_message import ReactedMessage
 from dicebot.data.types.message_context import MessageContext
 
@@ -13,18 +15,21 @@ class AbstractReactionHandler(ABC):
     def reaction_name(self) -> str:
         pass
 
-    async def should_handle(
+    def is_proper_emoji(self, reaction: Reaction) -> bool:
+        return (
+            not isinstance(reaction.emoji, str)
+            and reaction.emoji.name.lower() == self.reaction_name
+            and reaction.emoji.id is not None
+        )
+
+    async def should_handle_without_threshold_check(
         self,
         ctx: MessageContext,
     ) -> bool:
         assert ctx.reaction is not None
-        is_proper_emoji = (
-            not isinstance(ctx.reaction.emoji, str)
-            and ctx.reaction.emoji.name.lower() == self.reaction_name
-            and ctx.reaction.emoji.id is not None
-        )
-        if not is_proper_emoji:
+        if not self.is_proper_emoji(ctx.reaction):
             return False
+
         # Unfortunately pyright can't deduce these two facts
         assert not isinstance(ctx.reaction.emoji, str)
         assert ctx.reaction.emoji.id is not None
@@ -40,8 +45,21 @@ class AbstractReactionHandler(ABC):
             logging.warning("New reaction on message but it was reacted before.")
             return False
 
+        return True
+
+    def meets_threshold_check(self, ctx: MessageContext) -> bool:
+        if ctx.reaction is None:
+            return False
+
         # Only handle if we've hit the reaction threshold
         return ctx.reaction.count == ctx.guild.reaction_threshold
+
+    async def should_handle(
+        self,
+        ctx: MessageContext,
+    ) -> bool:
+        basic_criteron = await self.should_handle_without_threshold_check(ctx)
+        return basic_criteron and self.meets_threshold_check(ctx)
 
     @abstractmethod
     async def handle(

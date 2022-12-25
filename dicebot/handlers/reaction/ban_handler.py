@@ -16,6 +16,35 @@ class BanReactionHandler(AbstractReactionHandler):
     def reaction_name(self) -> str:
         return "ban"
 
+    async def should_handle(
+        self,
+        ctx: MessageContext,
+    ) -> bool:
+        if await self.should_handle_without_threshold_check(ctx):
+            # Appease pyright
+            assert ctx.reaction is not None
+            assert not isinstance(ctx.reaction.emoji, str)
+            assert ctx.client.user is not None
+            assert ctx.reactor is not None
+
+            # Special feature for people trying to ban the bot itself
+            if ctx.client.user.id == ctx.message.author.id:
+                # TODO: If it reaches the ban threshold, unban *everyone* in this guild
+                my_name = ctx.client.user.name
+                await ctx.reaction.message.channel.send(
+                    f"Who *dares* try to ban the mighty {my_name}?!"
+                )
+                discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
+                await ban.ban(
+                    ctx,
+                    target=discord_user,
+                    timer=Time("1hr"),
+                    ban_as_bot=BotParam(True),
+                )
+                # Exit early
+                return False
+        return self.meets_threshold_check(ctx)
+
     async def handle(
         self,
         ctx: MessageContext,
@@ -23,7 +52,6 @@ class BanReactionHandler(AbstractReactionHandler):
         # Appease pyright
         assert ctx.reaction is not None
         assert ctx.reactor is not None
-        assert not isinstance(ctx.reaction.emoji, str)
         assert ctx.client.user is not None
 
         # Special feature for people trying to ban the bot itself

@@ -23,11 +23,11 @@ class Client(discord.Client):
     ):
         intents = discord.Intents.default()
         intents.members = True
+        intents.message_content = True
 
         super().__init__(intents=intents)
         self.is_test = test_guild_id is not None
         self.test_guild_id = test_guild_id
-        # mypy insists that we annotate the sessionmaker
         self.sessionmaker = sessionmaker
 
     async def on_message(self, message: discord.Message) -> None:

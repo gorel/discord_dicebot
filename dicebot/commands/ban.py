@@ -60,7 +60,7 @@ async def ban(
 
     current_ban = await Ban.get_latest_unvoided_ban(ctx.session, ctx.guild, target)
     if current_ban is not None and current_ban.banned_until > ban.banned_until:
-        localized = timezone.localize(current_ban, ctx.guild.timezone)
+        localized = timezone.localize_dt(current_ban.banned_until, ctx.guild.timezone)
         await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
 
     unban_task.apply_async(

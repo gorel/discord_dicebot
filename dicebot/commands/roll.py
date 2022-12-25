@@ -27,8 +27,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     now = datetime.datetime.now()
 
     if last_roll is not None:
-        last_roll_unixtime = int(time.mktime(last_roll.rolled_at.timetuple()))
-        last_roll_str = timezone.localize(last_roll_unixtime, ctx.guild.timezone)
+        last_roll_str = timezone.localize_dt(last_roll.rolled_at, ctx.guild.timezone)
         logging.info(f"{ctx.author_id} last rolled {last_roll_str}")
 
         last_roll_delta = int((now - last_roll.rolled_at).total_seconds() // 3600)

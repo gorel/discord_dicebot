@@ -84,3 +84,14 @@ $ ./setup-service.sh
 
 You'll now have a new `systemctl` service called `docker-compose@dicebot`.
 To check the status, type `systemctl status docker-compose@dicebot`.
+
+Edit the `/etc/sudoers.d/$USER` file and include the following (replace $VARIABLES with real values):
+
+```
+%$USER ALL= NOPASSWD: /bin/systemctl start docker-compose@dicebot
+%$USER ALL= NOPASSWD: /bin/systemctl stop docker-compose@dicebot
+%$USER ALL= NOPASSWD: /bin/systemctl restart docker-compose@dicebot
+```
+
+From there, check out the `.github/workflows/deploy.yml` workflow to see how it works to automatically restart the
+service on the remote machine where `dicebot` is running.

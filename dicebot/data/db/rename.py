@@ -41,7 +41,9 @@ class Rename(Base):
         cls, session: AsyncSession, guild: Guild
     ) -> Optional[Rename]:
         res = await session.scalars(
-            select(cls).filter_by(rename_type=cls.Type.GUILD, guild_id=guild.id)
+            select(cls)
+            .filter_by(rename_type=cls.Type.GUILD, guild_id=guild.id)
+            .limit(1)
         )
         return res.one_or_none()
 
@@ -50,7 +52,7 @@ class Rename(Base):
         cls, session: AsyncSession, guild: Guild
     ) -> Optional[Rename]:
         res = await session.scalars(
-            select(cls).filter_by(rename_type=cls.Type.CHAT, guild_id=guild.id)
+            select(cls).filter_by(rename_type=cls.Type.CHAT, guild_id=guild.id).limit(1)
         )
         return res.one_or_none()
 

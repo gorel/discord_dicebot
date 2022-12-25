@@ -45,6 +45,7 @@ class Roll(Base):
             select(cls)
             .filter_by(guild_id=guild.id, discord_user_id=discord_user.id)
             .order_by(cls.id.desc())
+            .limit(1)
         )
         return res.one_or_none()
 

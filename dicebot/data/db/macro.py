@@ -37,7 +37,9 @@ class Macro(Base):
     async def get(
         cls, session: AsyncSession, guild: Guild, key: str
     ) -> Optional[Macro]:
-        res = await session.scalars(select(Macro).filter_by(guild_id=guild.id, key=key))
+        res = await session.scalars(
+            select(Macro).filter_by(guild_id=guild.id, key=key).limit(1)
+        )
         return res.one_or_none()
 
     def __repr__(self) -> str:

@@ -25,7 +25,9 @@ class Feature(Base):
     # Methods
     @classmethod
     async def get_or_create(cls, session: AsyncSession, feature_name: str) -> Feature:
-        query = await session.scalars(select(cls).filter_by(feature_name=feature_name))
+        query = await session.scalars(
+            select(cls).filter_by(feature_name=feature_name).limit(1)
+        )
         res = query.one_or_none()
         if res is None:
             res = cls(feature_name=feature_name)

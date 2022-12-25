@@ -37,7 +37,7 @@ class ReactedMessage(Base):
         cls, session: AsyncSession, msg_id: int, reaction_id: int
     ) -> Optional[ReactedMessage]:
         res = await session.scalars(
-            select(cls).filter_by(msg_id=msg_id, reaction_id=reaction_id)
+            select(cls).filter_by(msg_id=msg_id, reaction_id=reaction_id).limit(1)
         )
         return res.one_or_none()
 

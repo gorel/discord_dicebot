@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import re
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -16,7 +17,8 @@ class LeeRoyHandler(AbstractHandler):
     ) -> bool:
         bot_user = ctx.client.user
         bot_name = bot_user.name if bot_user is not None else DEFAULT_BOT_NAME
-        return bot_name.lower() in ctx.message.content.lower()
+        pattern = re.compile(f"\\w{bot_name}\\w", re.IGNORECASE)
+        return pattern.search(ctx.message.content) is not None
 
     async def handle(
         self,

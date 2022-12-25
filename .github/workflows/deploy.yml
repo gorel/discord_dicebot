@@ -5,7 +5,7 @@ on:
     branches: [master]
 
 jobs:
-  build:
+  update-bot:
     runs-on: ubuntu-latest
 
     steps:

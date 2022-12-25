@@ -19,6 +19,6 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script_stop: true
           script: |
-            cd /home/ubuntu/discord_dicebot/
+            cd /home/ubuntu/github/discord_dicebot/
             git pull
             sudo systemctl restart docker-compose@dicebot

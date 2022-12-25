@@ -19,6 +19,7 @@ class ServerManager:
         self,
         client: discord.Client,
         message: discord.Message,
+        is_test: bool,
     ) -> None:
         if isinstance(message.channel, discord.DMChannel):
             # For a DM, the person who sent it is the owner
@@ -29,7 +30,7 @@ class ServerManager:
                 is_dm=True,
             )
             ctx = GuildContext(client, guild, self.session)
-            await ctx.handle_dm(message)
+            await ctx.handle_dm(message, is_test)
         else:
             if message.channel.guild is None:
                 raise UnsupportedChannelException(
@@ -46,13 +47,14 @@ class ServerManager:
                 is_dm=False,
             )
             ctx = GuildContext(client, guild, self.session)
-            await ctx.handle_message(message)
+            await ctx.handle_message(message, is_test)
 
     async def handle_reaction_add(
         self,
         client: discord.Client,
         reaction: discord.Reaction,
         user: discord.User,
+        is_test: bool,
     ) -> None:
         if isinstance(reaction.message.channel, discord.DMChannel):
             # For a DM, the person who sent it is the owner
@@ -79,4 +81,4 @@ class ServerManager:
             )
 
         ctx = GuildContext(client, guild, self.session)
-        await ctx.handle_reaction_add(reaction, user)
+        await ctx.handle_reaction_add(reaction, user, is_test)

@@ -21,6 +21,7 @@ class MessageContext:
     message: discord.Message
     reactor: Optional[User]
     reaction: Optional[discord.Reaction]
+    is_test: bool
 
     @property
     def guild_id(self) -> int:

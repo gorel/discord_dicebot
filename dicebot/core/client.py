@@ -52,7 +52,7 @@ class Client(discord.Client):
 
         async with self.sessionmaker() as session:
             mgr = ServerManager(session)
-            await mgr.handle_message(self, message)
+            await mgr.handle_message(self, message, self.is_test)
 
     async def on_reaction_add(
         self,
@@ -63,9 +63,18 @@ class Client(discord.Client):
             # Don't let the bot listen to reactions from itself
             return
 
+        if self.is_test:
+            guild_id = None
+            if reaction.message.guild is not None:
+                guild_id = reaction.message.guild.id
+
+            # Only pay attention to reactions in the test guild if one was given
+            if self.test_guild_id is not None and guild_id != self.test_guild_id:
+                return
+
         async with self.sessionmaker() as session:
             mgr = ServerManager(session)
-            await mgr.handle_reaction_add(self, reaction, user)
+            await mgr.handle_reaction_add(self, reaction, user, self.is_test)
 
     async def on_ready(self) -> None:
         assert self.user is not None

@@ -38,6 +38,7 @@ class GuildContext:
     async def handle_message(
         self,
         message: discord.Message,
+        is_test: bool,
     ) -> None:
         author = await User.get_or_create(self.session, message.author.id)
         ctx = MessageContext(
@@ -48,6 +49,7 @@ class GuildContext:
             message=message,
             reactor=None,
             reaction=None,
+            is_test=is_test,
         )
 
         # TODO: Build handlers from set of handlers defined on guild features
@@ -72,6 +74,7 @@ class GuildContext:
         self,
         reaction: discord.Reaction,
         user: discord.User,
+        is_test: bool,
     ) -> None:
         author = await User.get_or_create(self.session, reaction.message.author.id)
         reactor = await User.get_or_create(self.session, user.id)
@@ -83,6 +86,7 @@ class GuildContext:
             message=reaction.message,
             reactor=reactor,
             reaction=reaction,
+            is_test=is_test,
         )
 
         # TODO: Build handlers from set of handlers defined on guild features
@@ -95,6 +99,7 @@ class GuildContext:
     async def handle_dm(
         self,
         message: discord.Message,
+        is_test: bool,
     ) -> None:
         author = await User.get_or_create(self.session, message.author.id)
         ctx = MessageContext(
@@ -105,6 +110,7 @@ class GuildContext:
             message=message,
             reactor=None,
             reaction=None,
+            is_test=is_test,
         )
 
         # TODO: Build handlers from set of handlers defined on guild features

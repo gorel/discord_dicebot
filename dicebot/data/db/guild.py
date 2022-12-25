@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Sequence
 
 import discord
 from sqlalchemy import (
@@ -15,6 +15,7 @@ from sqlalchemy import (
     desc,
     func,
     select,
+    sql,
     text,
 )
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -34,6 +35,8 @@ bigint_pk_natural = Annotated[
     int, mapped_column(BigInteger, primary_key=True, autoincrement=False)
 ]
 bool_f = Annotated[bool, mapped_column(default=False)]
+# This is gross, but otherwise any future bools will have to be nullable
+bool_f_sd = Annotated[bool, mapped_column(server_default=sql.false())]
 
 DEFAULT_START_ROLL = 6
 DEFAULT_ROLL_TIMEOUT_HOURS = 12
@@ -82,6 +85,8 @@ class Guild(Base):
     turboban_threshold: Mapped[bigint] = mapped_column(
         default=DEFAULT_TURBOBAN_THRESHOLD_SECS
     )
+    primary_text_channel: Mapped[Optional[bigint]]
+    disable_announcements: Mapped[bool_f_sd]
 
     # Relationships
     admins: Mapped[list[User]] = relationship(
@@ -136,17 +141,12 @@ class Guild(Base):
             select(
                 Roll.discord_user_id,
                 func.count(
-                    case((Roll.actual_roll == Roll.target_roll, 1),
-                    else_=0)
-                    ).label("wins"),
+                    case((Roll.actual_roll == Roll.target_roll, 1), else_=0)
+                ).label("wins"),
                 func.count(
-                    case((Roll.actual_roll == Roll.target_roll - 1, 1),
-                    else_=0)
-                    ).label("losses"),
-                func.count(
-                    case((Roll.actual_roll == 1, 1),
-                    else_=0)
-                    ).label("ones"),
+                    case((Roll.actual_roll == Roll.target_roll - 1, 1), else_=0)
+                ).label("losses"),
+                func.count(case((Roll.actual_roll == 1, 1), else_=0)).label("ones"),
                 func.count(Roll.discord_user_id).label("attempts"),
             )
             .filter_by(guild_id=self.id)
@@ -213,6 +213,13 @@ class Guild(Base):
     @classmethod
     async def get_or_none(cls, session: AsyncSession, guild_id: int) -> Optional[Guild]:
         return await session.get(cls, guild_id)
+
+    @classmethod
+    async def get_all_for_announcements(cls, session: AsyncSession) -> Sequence[Guild]:
+        res = await session.scalars(
+            select(Guild).filter_by(is_dm=False, disable_announcements=False)
+        )
+        return res.all()
 
     def __repr__(self) -> str:
         return f"Guild({self.id=}, {self.is_dm=})"

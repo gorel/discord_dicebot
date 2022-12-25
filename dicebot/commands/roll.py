@@ -3,17 +3,15 @@
 import datetime
 import logging
 import random
-import time
 
 from dicebot.commands import ban, timezone
+from dicebot.commands.admin import requires_admin
 from dicebot.core.register_command import register_command
 from dicebot.data.db.roll import Roll
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
-
-MAX_NUM_ROLLS = 10
 
 
 @register_command
@@ -56,11 +54,9 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     except ValueError:
         rolls_remaining = 1
 
-    gambling_penalty = max(rolls_remaining - 1, 0)
-
     if rolls_remaining <= 0:
         await ctx.channel.send("How... dumb are you?")
-        ban_time = Time(f"{next_roll + gambling_penalty}hr")
+        ban_time = Time(f"{next_roll}hr")
         await ban.ban(
             ctx,
             ctx.author,
@@ -79,16 +75,20 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         )
         return
 
-    if rolls_remaining > MAX_NUM_ROLLS:
+    if (
+        ctx.guild.gambling_limit is not None
+        and rolls_remaining > ctx.guild.gambling_limit
+    ):
         await ctx.channel.send(
-            f"You all keep spamming this, so I'm setting the max to {MAX_NUM_ROLLS}\n"
-            "This is why we can't have nice things."
+            f"This server has set the roll gambling limit to {ctx.guild.gambling_limit}"
         )
-        rolls_remaining = MAX_NUM_ROLLS
+        rolls_remaining = ctx.guild.gambling_limit
 
     sent_message = False
     no_match = True
     roll_results_strings = []
+    gambling_penalty = max(rolls_remaining - 1, 0)
+
     while rolls_remaining and no_match:
         logging.info(f"rolls_remaining: {rolls_remaining}, no_match: {no_match}")
         # optimistically hope for a good roll
@@ -174,3 +174,15 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
             num_hours=min(gambling_penalty**2, 168),
             reason=BotParam("Gambled and lost"),
         )
+
+
+@requires_admin
+@register_command
+async def set_gambling_limit(ctx: MessageContext, value: int) -> None:
+    """Set the roll gambling limit for this server. Use -1 to remove the limit."""
+    if value == -1:
+        ctx.guild.gambling_limit = None
+    else:
+        ctx.guild.gambling_limit = value
+    await ctx.session.commit()
+    await ctx.channel.send(f"The roll gambling limit for this server is now {value}")

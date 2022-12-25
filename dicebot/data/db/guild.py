@@ -87,6 +87,7 @@ class Guild(Base):
     )
     primary_text_channel: Mapped[Optional[bigint]]
     disable_announcements: Mapped[bool_f_sd]
+    gambling_limit: Mapped[Optional[int]]
 
     # Relationships
     admins: Mapped[list[User]] = relationship(

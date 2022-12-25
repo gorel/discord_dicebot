@@ -141,13 +141,13 @@ class Guild(Base):
         records = await session.execute(
             select(
                 Roll.discord_user_id,
-                func.count(
+                func.sum(
                     case((Roll.actual_roll == Roll.target_roll, 1), else_=0)
                 ).label("wins"),
-                func.count(
+                func.sum(
                     case((Roll.actual_roll == Roll.target_roll - 1, 1), else_=0)
                 ).label("losses"),
-                func.count(case((Roll.actual_roll == 1, 1), else_=0)).label("ones"),
+                func.sum(case((Roll.actual_roll == 1, 1), else_=0)).label("ones"),
                 func.count(Roll.discord_user_id).label("attempts"),
             )
             .filter_by(guild_id=self.id)

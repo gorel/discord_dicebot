@@ -135,7 +135,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
                 )
             else:
                 await ctx.channel.send(
-                    f"{ctx.author.as_mention()}: {ctx.guild.critical_failure_message}"
+                    f"{ctx.author.as_mention()}: {ctx.guild.critical_failure_msg}"
                 )
         elif roll == next_roll:
             # Increment the current roll

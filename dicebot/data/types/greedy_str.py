@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import shlex
+from typing import List
+
 
 class GreedyStr(str):
     """
@@ -13,3 +16,9 @@ class GreedyStr(str):
 
     def unwrap(self) -> str:
         return self.s
+
+    def unwrap_as_args(self) -> List[str]:
+        splitter = shlex.shlex(self.s, posix=True)
+        splitter.whitespace += ","
+        splitter.whitespace_split = True
+        return list(splitter)

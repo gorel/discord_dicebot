@@ -21,4 +21,5 @@ jobs:
           script: |
             cd /home/gorel/github/discord_dicebot/
             git pull
+            docker compose build
             sudo systemctl restart docker-compose@dicebot

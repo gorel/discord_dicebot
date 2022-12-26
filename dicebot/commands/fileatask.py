@@ -7,7 +7,7 @@ import random
 
 import aiohttp
 
-from dicebot.commands import ban
+from dicebot.commands import ban, giffer
 from dicebot.core.register_command import register_command
 from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
@@ -17,7 +17,8 @@ from dicebot.data.types.time import Time
 ISSUES_URL = "https://api.github.com/repos/gorel/discord_dicebot/issues"
 SUCCESS_CODE = 201
 
-RANDOM_BAN_THRESHOLD = 0.20
+RANDOM_TRASH_GIF_THRESHOLD = 0.10
+RANDOM_BAN_THRESHOLD = 0.10
 
 
 async def _fileatask_real(ctx: MessageContext, title: str) -> None:
@@ -28,7 +29,10 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
 
     async with aiohttp.ClientSession() as session:
         async with session.post(
-            ISSUES_URL, json={"title": title}, headers=headers, auth=aiohttp.BasicAuth(user, password)
+            ISSUES_URL,
+            json={"title": title},
+            headers=headers,
+            auth=aiohttp.BasicAuth(user, password),
         ) as r:
             json_resp = await r.json()
             if r.status == SUCCESS_CODE:
@@ -39,7 +43,8 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
             else:
                 logging.error(f"Request to GitHub failed: {json_resp}")
                 await ctx.channel.send(
-                    f"Something went wrong submitting the issue to GitHub (status_code = {r.status})"
+                    "Something went wrong submitting the issue "
+                    f"to GitHub (status_code = {r.status})"
                 )
 
 
@@ -71,13 +76,15 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
             ctx,
             "I'm not fixing this for you heathens.",
         )
-    elif random.random() < RANDOM_BAN_THRESHOLD:
-        await _ban_helper(
-            ctx,
-            "This is a bad idea and you should feel bad.",
+    elif await ctx.author.is_currently_banned(ctx.session, ctx.guild):
+        await ctx.channel.send(
+            "You are banned. Your opinion does not matter.", reference=ctx.message
         )
-    elif ctx.author.is_currently_banned(ctx.session, ctx.guild):
-        await ctx.channel.send("Your opinion does not matter.", reference=ctx.message)
+    elif random.random() < RANDOM_TRASH_GIF_THRESHOLD:
+        await ctx.channel.send("Oh yeah, I'll get *right* on that.")
+        await giffer.gif(ctx, GreedyStr("trash"))
+    elif random.random() < RANDOM_BAN_THRESHOLD:
+        await _ban_helper(ctx, "This is a bad idea and you should feel bad.")
     else:
         await ctx.channel.send(
             "Thanks for the suggestion! Adding it to the backlog.",

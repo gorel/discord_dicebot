@@ -27,6 +27,7 @@ from dicebot.data.db.feature import Feature
 from dicebot.data.db.macro import Macro
 from dicebot.data.db.rename import Rename
 from dicebot.data.db.roll import Roll
+from dicebot.data.db.thanks import Thanks
 from dicebot.data.db.user import User
 
 # Special types to make the ORM models prettier
@@ -158,13 +159,13 @@ class Guild(Base):
         msg = "**Stats:**\n"
         record_strs = []
         # TODO: Put this in a nice table
-        for record in records.all():
-            user = client.get_user(record.discord_user_id)
+        for rec in records.all():
+            user = client.get_user(rec.discord_user_id)
             if not user:
-                user = await client.fetch_user(record.discord_user_id)
+                user = await client.fetch_user(rec.discord_user_id)
             record_strs.append(
-                f"\t- {user.name} {record.wins} wins, {record.losses} losses, "
-                f"{record.ones} critical losses (rolled 1), {record.attempts} total rolls"
+                f"\t- {user.name} {rec.wins} wins, {rec.losses} losses, "
+                f"{rec.ones} critical losses (rolled 1), {rec.attempts} total rolls"
             )
         msg += "\n".join(record_strs)
         return msg
@@ -188,6 +189,56 @@ class Guild(Base):
                 user = await client.fetch_user(record.bannee_id)
             record_strs.append(
                 f"\t- {user.name} has been banned {record.ban_count} times"
+            )
+        msg += "\n".join(record_strs)
+        return msg
+
+    async def thanks_scoreboard_str(
+        self, client: discord.Client, session: AsyncSession
+    ) -> str:
+        # TODO: Probably a better way to do this with declarative ORM style
+        users_q = (
+            select(Thanks.thanker_id.label("user_id"))
+            .filter_by(guild_id=self.id)
+            .union(
+                select(Thanks.thankee_id.label("user_id")).filter_by(guild_id=self.id)
+            )
+        ).subquery()
+        distinct_users_q = select(
+            users_q.c.user_id.distinct().label("user_id")
+        ).subquery()
+
+        thanks_q = (
+            select(Thanks.thanker_id, Thanks.thankee_id).filter_by(guild_id=self.id)
+        ).subquery()
+
+        # This is an intentional Cartesian product
+        joined_q = select(
+            distinct_users_q.c.user_id, thanks_q.c.thanker_id, thanks_q.c.thankee_id
+        ).subquery()
+
+        records = await session.execute(
+            select(
+                joined_q.c.user_id,
+                func.sum(
+                    case((joined_q.c.user_id == joined_q.c.thanker_id, 1), else_=0)
+                ).label("sent"),
+                func.sum(
+                    case((joined_q.c.user_id == joined_q.c.thankee_id, 1), else_=0)
+                ).label("received"),
+            )
+            .group_by(joined_q.c.user_id)
+            .order_by(text("received"), text("sent"))
+        )
+
+        msg = "**Thanks stats:**\n"
+        record_strs = []
+        for record in records.all():
+            user = client.get_user(record.user_id)
+            if not user:
+                user = await client.fetch_user(record.bannee_id)
+            record_strs.append(
+                f"\t- {user.name}: {record.received} received, {record.sent} sent"
             )
         msg += "\n".join(record_strs)
         return msg

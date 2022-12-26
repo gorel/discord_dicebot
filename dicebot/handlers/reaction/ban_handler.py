@@ -72,7 +72,7 @@ class BanReactionHandler(AbstractReactionHandler):
             return
 
         # Check if the user was turbo banned
-        elapsed = datetime.datetime.now() - ctx.reaction.message.created_at
+        elapsed = datetime.datetime.utcnow() - ctx.reaction.message.created_at
         turbo_ban = elapsed.total_seconds() <= ctx.guild.turboban_threshold
 
         discord_user = await User.get_or_create(

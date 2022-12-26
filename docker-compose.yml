@@ -58,6 +58,21 @@ services:
   #     - redis
   #     - db
 
+  web:
+    build:
+      context: .
+      dockerfile: ${APP_ROOT}/compose/Dockerfile
+    image: dicebot_web
+    command: /start-web
+    volumes:
+      - ${APP_ROOT}:/app
+    env_file:
+      - .env
+    depends_on:
+      - redis
+      - db
+      - bot
+
 volumes:
   postgres_data:
     driver: local

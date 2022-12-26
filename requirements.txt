@@ -1,3 +1,4 @@
+# For dicebot
 aiohttp[speedups]~=3.7
 aiosqlite~=0.17
 alembic~=1.8
@@ -13,6 +14,10 @@ pytube~=12.1
 pytz~=2022.6
 redis~=3.5
 sqlalchemy~=2.0.0b3
+
+# Additional requirements for web
+flask[async]~=2.2
+stytch~=6.1
 
 # For type checking
 mypy

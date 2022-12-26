@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>Discord Dicebot | Admin List</title>
+</head>
+
+<body>
+  <div class="app">
+    {% for guild in guilds %}
+    <a href='{{ flask.url_for("admin", guild_id=guild.id) }}'>{{guild.id}}: The name would go here if I loaded it</a>
+    {% endfor %}
+  </div>
+</body>
+
+</html>

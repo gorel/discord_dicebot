@@ -273,5 +273,10 @@ class Guild(Base):
         )
         return res.all()
 
+    @classmethod
+    async def get_all(cls, session: AsyncSession) -> Sequence[Guild]:
+        res = await session.scalars(select(Guild).filter_by(is_dm=False))
+        return res.all()
+
     def __repr__(self) -> str:
         return f"Guild({self.id=}, {self.is_dm=})"

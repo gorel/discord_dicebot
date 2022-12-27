@@ -1,4 +1,5 @@
 version: "3.9"
+# Most knowledge was taken from https://testdriven.io/courses/flask-celery/docker/
 
 services:
   bot:
@@ -66,12 +67,12 @@ services:
     command: /start-web
     volumes:
       - ${APP_ROOT}:/app
+    ports:
+      - "5010:5000"
     env_file:
       - .env
     depends_on:
-      - redis
       - db
-      - bot
 
 volumes:
   postgres_data:

@@ -12,6 +12,9 @@
       href="https://test.stytch.com/v1/public/oauth/discord/start?public_token=public-token-test-ffa72311-8313-4ac7-989a-028e7a23714e">
       Click here to login to Discord
     </a>
+    {% for error in errors %}
+    <p>ERROR: {{ error }}</p>
+    {% endfor %}
   </div>
 </body>
 

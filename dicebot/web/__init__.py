@@ -1,20 +1,15 @@
 #!/usr/bin/env python3
 
-import asyncio
 import os
 import sys
 
 import dotenv
-import flask
+import quart
 import stytch
-
-from dicebot.core.client import Client
 
 # Load environment
 dotenv.load_dotenv()
-FLASK_DEBUG = bool(int(os.getenv("FLASK_DEBUG", 0)))
-HOST = os.getenv("HOST", "localhost")
-PORT = int(os.getenv("PORT", "5553"))
+QUART_DEBUG = bool(int(os.getenv("QUART_DEBUG", 0)))
 
 # Load the Stytch credentials, but quit if they aren't defined
 __stytch_project_id = os.getenv("STYTCH_PROJECT_ID")
@@ -31,15 +26,8 @@ if __web_secret_key is None:
     sys.exit("WEB_SECRET_KEY env variable must be defined to enable session signing")
 
 # Create the web app and stytch client
-flask_app = flask.Flask("dicebot.web")
-flask_app.secret_key = __web_secret_key
+quart_app = quart.Quart("dicebot.web")
+quart_app.secret_key = __web_secret_key
 stytch_client = stytch.Client(
     __stytch_project_id, __stytch_secret, environment=__stytch_environment
 )
-
-
-async def __get_client_sync():
-    return await Client.get_and_login()
-
-
-discord_client = asyncio.run(__get_client_sync())

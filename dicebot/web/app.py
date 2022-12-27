@@ -54,7 +54,7 @@ async def login():
     if await form.validate():
         return quart.redirect(quart.url_for("admin_list"))
     else:
-        return quart.render_template("login.html", errors=form.errors)
+        return await quart.render_template("login.html", errors=form.errors)
 
 
 @quart_app.route("/admin/list")
@@ -69,8 +69,14 @@ async def admin_list():
             for g_db, g_discord in zip(db_guilds, fetched_guilds)
         }
 
-    return quart.render_template(
-        "admin_list.html", guilds=db_guilds, guild_names=guild_names
+    # Subset to relevant guilds only if the user is logged in
+    discord_user_id = quart.session.get(DISCORD_USER_ID_SESSION_KEY)
+    relevant_guilds = db_guilds
+    if discord_user_id is not None:
+        relevant_guilds = [g for g in db_guilds if discord_user_id in g.admins]
+
+    return await quart.render_template(
+        "admin_list.html", guilds=relevant_guilds, guild_names=guild_names
     )
 
 
@@ -80,7 +86,7 @@ async def admin(guild_id: int):
         discord_client = await Client.get_and_login()
         db_guild = await Guild.get_or_none(session, guild_id)
         if db_guild is None:
-            return quart.render_template("404.html"), 404
+            return await quart.render_template("404.html"), 404
         fetched_guild = await discord_client.fetch_guild(db_guild.id)
         guild_name = fetched_guild.name
 
@@ -91,11 +97,11 @@ async def admin(guild_id: int):
 
     form = UpdateGuildForm(db_guild)
     if await form.validate():
-        return quart.render_template(
+        return await quart.render_template(
             "admin.html", guild=db_guild, guild_name=guild_name, success=True
         )
     else:
-        return quart.render_template(
+        return await quart.render_template(
             "admin.html", guild=db_guild, guild_name=guild_name, errors=form.errors
         )
 

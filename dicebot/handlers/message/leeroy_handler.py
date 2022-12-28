@@ -17,7 +17,7 @@ class LeeRoyHandler(AbstractHandler):
     ) -> bool:
         bot_user = ctx.client.user
         bot_name = bot_user.name if bot_user is not None else DEFAULT_BOT_NAME
-        pattern = re.compile(f"\\w{bot_name}\\w", re.IGNORECASE)
+        pattern = re.compile(rf"\b{bot_name}\b", re.IGNORECASE)
         return pattern.search(ctx.message.content) is not None
 
     async def handle(

@@ -1,0 +1,89 @@
+body {
+  font-family: sans-serif;
+  background-color: #1e1e1e;
+  color: white;
+}
+
+.app {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #2f2f2f;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  margin: 10px 0;
+}
+
+a {
+  display: block;
+  color: #828282;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+a:hover {
+  color: #0070e0;
+}
+
+.img-inline {
+  display: inline-block;
+  height: 1em;
+  width: auto;
+  transform: translate(0, 0.1em);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  width: 500px;
+  margin: 20px auto;
+  border: 1px solid gray;
+  border-radius: 5px;
+  padding: 20px;
+}
+
+.form-row {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+}
+
+.form-row label {
+  flex: 1;
+  font-weight: bold;
+}
+
+.form-row input[type="text"],
+.form-row input[type="checkbox"] {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid gray;
+  border-radius: 5px;
+}
+
+.form-row input[type="submit"] {
+  background-color: #6256cb;
+  color: white;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.form-row input[type="submit"]:hover {
+  background-color: darkblue;
+}
+
+.form-section {
+  margin-bottom: 20px;
+}

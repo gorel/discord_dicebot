@@ -1,13 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %} {% block body %}
+<h1>{{ fetched_guild.name }}</h1>
+<form>
+  <div class="form-section">
+    <h2>Rolling</h2>
 
-<head>
-  <title>Discord Dicebot | Admin</title>
-</head>
+    <div class="form-row">
+      <label for="allow_renaming">Allow renaming:</label>
+      <input type="checkbox" id="allow_renaming">
+    </div>
 
-<body>
-  <div class="app"></div>
-  <h1>{{guild.id}}: {{ guild_name }}</h1>
-</body>
+    <div class="form-row">
+      <label for="current_roll">Current roll:</label>
+      <input type="text" id="current_roll">
+    </div>
 
-</html>
+    <div class="form-row">
+      <label for="roll_timeout">Roll timeout in hours:</label>
+      <input type="text" id="roll_timeout">
+    </div>
+
+    <div class="form-row">
+      <label for="critical_success_msg">Critical success msg:</label>
+      <input type="text" id="critical_success_msg">
+    </div>
+
+    <div class="form-row">
+      <label for="critical_failure_msg">Critical failure msg:</label>
+      <input type="text" id="critical_failure_msg">
+    </div>
+
+    <div class="form-row">
+      <label for="gambling_limit">Gambling limit:</label>
+      <input type="text" id="gambling_limit">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2>Server general</h2>
+
+    <div class="form-row">
+      <label for="disable_announcements">Disable announcements:</label>
+      <input type="text" id="disable_announcements">
+    </div>
+
+    <div class="form-row">
+      <label for="timezone">Server timezone:</label>
+      <input type="text" id="timezone">
+    </div>
+
+    <div class="form-row">
+      <label for="reaction_threshold">Reaction threshold:</label>
+      <input type="text" id="reaction_threshold">
+    </div>
+
+    <div class="form-row">
+      <label for="turboban_threshold">Turboban threshold:</label>
+      <input type="text" id="turboban_threshold">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <input type="submit">
+  </div>
+</form>
+{% endblock %}

@@ -1,20 +1,17 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %} 
+{% block loginhook %}
+<a href="{{ url_for('login') }}">Click here to login as a different user</a>
+{% endblock %}
 
-<head>
-  <title>Discord Dicebot | Admin List</title>
-</head>
-
-<body>
-  <div class="app">
-    <ul>
-      {% for guild in guilds %}
-      <li>
-        <a href='{{ url_for("admin", guild_id=guild.id) }}'>{{guild.id}}: {{ guild_names[guild.id] }}</a>
-      </li>
-      {% endfor %}
-    </ul>
-  </div>
-</body>
-
-</html>
+{% block body %}
+<h1>Servers you administrate</h1>
+<ul>
+  {% for guild in guilds %}
+  <li>
+    <a href='{{ url_for("admin", guild_id=guild.id) }}'>{{ guild.name }}</a>
+  </li>
+  {% else %}
+    <p>You are not an admin of any guilds known to this bot</p>
+  {% endfor %}
+</ul>
+{% endblock %}

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{% block title %}Discord Dicebot{% endblock %}</title>
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+</head>
+
+<body>
+  {% with messages = get_flashed_messages(with_categories=True) %} {% for
+  category, message in messages %}
+  <div class="alert">
+    {% if category == "alert-success" %}
+    <span>✅</span>
+    {% elif category == "alert-warning" %}
+    <span>⚠️</span>
+    {% elif category == "alert-danger" %}
+    <span>❗️</span>
+    {% endif %} {{ message }}
+  </div>
+  {% endfor %} {% endwith %}
+
+
+  <div class="app">
+    {% if user %}
+    <div class="login-user">
+      <p>Logged in as <img class="img-inline" src='{{ user.display_avatar }}' alt='display avatar'> {{ user.name }}</p>
+      {% block loginhook %}
+      <a href="{{ url_for('admin_list') }}">Click here to go to the list of servers you can administrate</a>
+      {% endblock %}
+    </div>
+    <hr>
+    {% endif %}
+    {% block body %} {% endblock %}
+  </div>
+</body>
+
+</html>

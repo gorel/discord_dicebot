@@ -5,7 +5,7 @@ from __future__ import annotations
 from enum import IntEnum, auto
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from sqlalchemy import BigInteger, ForeignKey, select
+from sqlalchemy import BigInteger, ForeignKey, desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -43,6 +43,7 @@ class Rename(Base):
         res = await session.scalars(
             select(cls)
             .filter_by(rename_type=cls.Type.GUILD, guild_id=guild.id)
+            .order_by(desc(cls.id))
             .limit(1)
         )
         return res.one_or_none()
@@ -52,7 +53,10 @@ class Rename(Base):
         cls, session: AsyncSession, guild: Guild
     ) -> Optional[Rename]:
         res = await session.scalars(
-            select(cls).filter_by(rename_type=cls.Type.CHAT, guild_id=guild.id).limit(1)
+            select(cls)
+            .filter_by(rename_type=cls.Type.CHAT, guild_id=guild.id)
+            .order_by(desc(cls.id))
+            .limit(1)
         )
         return res.one_or_none()
 

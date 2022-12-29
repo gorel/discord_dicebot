@@ -105,6 +105,9 @@ class Guild(Base):
     async def get_macro(self, session: AsyncSession, key: str) -> Optional[Macro]:
         return await Macro.get(session, self, key)
 
+    async def get_all_macros(self, session: AsyncSession) -> Sequence[Macro]:
+        return await Macro.get_all(session, self)
+
     async def add_macro(
         self, session: AsyncSession, key: str, value: str, author: User
     ) -> None:

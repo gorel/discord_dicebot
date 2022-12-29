@@ -58,6 +58,12 @@ To run all services locally for debugging:
 $ docker compose up
 ```
 
+To run the webserver without other services:
+
+```
+$ docker compose run --service-ports web
+```
+
 ### DB without other services
 
 If you want to run the db _without_ starting other services:

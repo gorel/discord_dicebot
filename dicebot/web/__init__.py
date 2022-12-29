@@ -2,10 +2,14 @@
 
 import os
 import sys
+from dataclasses import dataclass
 
 import dotenv
 import quart
 import stytch
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from dicebot.core.client import Client
 
 # Load environment
 dotenv.load_dotenv()
@@ -31,3 +35,14 @@ quart_app.secret_key = __web_secret_key
 stytch_client = stytch.Client(
     __stytch_project_id, __stytch_secret, environment=__stytch_environment
 )
+
+
+# Create the app_ctx for using globals created at startup
+# This will be properly initialized in the {before|while}_serving middleware
+@dataclass
+class AppContext:
+    discord_client: Client
+    session: AsyncSession
+
+
+app_ctx = AppContext(None, None)  # type: ignore

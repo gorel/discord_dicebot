@@ -1,0 +1,34 @@
+{% extends "base.html" %} {% block body %}
+<h1>{{ ctx.discord.name }} macros</h1>
+<form method="post">
+  <div class="form-row">
+    <label for="key">Macro key:</label>
+    <input type="text" id="key" name="key" />
+  </div>
+
+  <div class="form-row">
+    <label for="value">Macro value:</label>
+    <input type="text" id="value" name="value" />
+  </div>
+
+  <div class="form-row">
+    <input type="submit" />
+  </div>
+</form>
+
+<hr />
+
+<table class="table-macros">
+  <tr>
+    <th>Key</th>
+    <th>Value</th>
+  </tr>
+  {% for macro in fetched_macros %}
+  <tr>
+    <td>{{ macro.key }}</td>
+    <td>{{ macro.value }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+{% endblock %}

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional, Sequence
 
 from sqlalchemy import BigInteger, ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,6 +41,11 @@ class Macro(Base):
             select(Macro).filter_by(guild_id=guild.id, key=key).limit(1)
         )
         return res.one_or_none()
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession, guild: Guild) -> Sequence[Macro]:
+        res = await session.scalars(select(Macro).filter_by(guild_id=guild.id))
+        return res.all()
 
     def __repr__(self) -> str:
         return f"Macro({self.id=}, {self.key=}, {self.value=})"

@@ -33,6 +33,14 @@ class Macro(Base):
     author: Mapped[User] = relationship("User", lazy="selectin")
 
     # Methods
+    def is_image(self) -> bool:
+        supported_image_exts = ["jpg", "jpeg", "gif", "png", "ico"]
+        for ext in supported_image_exts:
+            if self.value.endswith(ext):
+                print(f"{self.value} endswith {ext}")
+                return True
+        return False
+
     @classmethod
     async def get(
         cls, session: AsyncSession, guild: Guild, key: str

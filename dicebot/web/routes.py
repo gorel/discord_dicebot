@@ -40,7 +40,7 @@ async def admin(guild_id: int):
         await flash("You are not an admin of that server", "alert-danger")
         return redirect(url_for("list"))
 
-    form = UpdateGuildForm(ctx.db)
+    form = UpdateGuildForm(app_ctx.session, ctx.db)
     if await form.validate():
         await flash("Changes saved successfully", "alert-success")
         # Redirect to avoid possible form resubmission

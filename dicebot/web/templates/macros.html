@@ -18,7 +18,8 @@
 
 <hr />
 
-<table class="table-macros">
+{% if fetched_macros %}
+<table>
   <tr>
     <th>Key</th>
     <th>Value</th>
@@ -26,9 +27,16 @@
   {% for macro in fetched_macros %}
   <tr>
     <td>{{ macro.key }}</td>
-    <td>{{ macro.value }}</td>
+    <td>
+    {% if macro.is_image() %}
+      <img class="img-macro" src='{{ macro.value }}'>
+    {% else %}
+      {{ macro.value }}
+    {% endif %}
+    </td>
   </tr>
   {% endfor %}
 </table>
-
-{% endblock %}
+{% else %}
+<p class="info">There are no macros defined for this server yet.</p>
+{% endif %} {% endblock %}

@@ -4,22 +4,18 @@
 {% endblock %}
 
 {% block body %}
-<h1>Relevant servers</h1>
+<h1 class="page-title">Relevant servers</h1>
 <ul>
   {% for guild in guilds %}
-  <span class="list-guild">
-    <li class="list-guild-item">
-      <h2>{{ guild.ctx.discord.name }}</h2>
-      <span class="list-guild-item list-guild-item-actions">
-        <a href='{{ url_for("macros", guild_id=guild.ctx.db.id) }}'>Macros</a>
-        {% if guild.is_admin %}
-          <a class="list-button" href='{{ url_for("admin", guild_id=guild.ctx.db.id) }}'>Admin</a>
-        {% endif %}
-      </span>
-    </li>
+  <h2 class="guild-actions-header">{{ guild.ctx.discord.name }}</h2>
+  <span class="guild-actions">
+    <a class="guild-actions-button" href='{{ url_for("macros", guild_id=guild.ctx.db.id) }}'>Macros</a>
+    {% if guild.is_admin %}
+      <a class="guild-actions-button" href='{{ url_for("admin", guild_id=guild.ctx.db.id) }}'>Admin</a>
+    {% endif %}
   </span>
   {% else %}
-    <p>You are not an admin of any guilds known to this bot</p>
+    <p class="info">You are not an admin of any guilds known to this bot</p>
   {% endfor %}
 </ul>
 {% endblock %}

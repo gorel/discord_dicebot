@@ -1,7 +1,8 @@
+/* Basic styling */
 body {
   font-family: sans-serif;
-  background-color: #1e1e1e;
-  color: white;
+  background-color: #36393f;
+  color: #dcddde;
 }
 
 .app {
@@ -13,27 +14,23 @@ body {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+/* Table styling */
+table {
+  border-collapse: collapse;
+  width: 100%;
 }
 
-li {
-  margin: 10px 0;
+th,
+td {
+  text-align: left;
+  padding: 8px;
 }
 
-a {
-  display: block;
-  color: #828282;
-  text-decoration: none;
-  font-size: 18px;
+tr:nth-child(even) {
+  background-color: #2f3136;
 }
 
-a:hover {
-  color: #0070e0;
-}
-
+/* Image styling */
 .img-inline {
   display: inline-block;
   height: 1em;
@@ -41,49 +38,77 @@ a:hover {
   transform: translate(0, 0.1em);
 }
 
+.img-macro {
+  display: inline-block;
+  height: auto;
+  width: 350px;
+  transform: translate(0, 0.1em);
+}
+
+/* Form styling */
 form {
   display: flex;
   flex-direction: column;
-  width: 500px;
-  margin: 20px auto;
-  border: 1px solid gray;
-  border-radius: 5px;
-  padding: 20px;
 }
 
-.form-row {
-  display: flex;
-  flex-direction: row;
+label {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 12px 20px;
   margin-bottom: 20px;
+  width: 100%;
+  box-sizing: border-box;
+  border: 2px solid #dcddde;
+  border-radius: 4px;
+  background-color: #2f3136;
+  color: #dcddde;
 }
 
-.form-row label {
-  flex: 1;
-  font-weight: bold;
-}
-
-.form-row input[type="text"],
-.form-row input[type="checkbox"] {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid gray;
-  border-radius: 5px;
-}
-
-.form-row input[type="submit"] {
-  background-color: #6256cb;
-  color: white;
-  font-weight: bold;
-  padding: 10px 20px;
+input[type="submit"] {
+  background-color: #7289da;
+  color: #fff;
   border: none;
-  border-radius: 5px;
+  padding: 12px 20px;
+  font-size: 16px;
   cursor: pointer;
+  border-radius: 4px;
 }
 
-.form-row input[type="submit"]:hover {
-  background-color: darkblue;
-}
-
-.form-section {
+input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
   margin-bottom: 20px;
+}
+
+/* Alert styling */
+.alert {
+  padding: 20px;
+  background-color: #7289da;
+  color: white;
+}
+
+.alert-success {
+  background-color: #43b581;
+}
+
+.alert-warning {
+  background-color: #faa61a;
+}
+
+.alert-error {
+  background-color: #f04747;
+}
+
+/* Links */
+a {
+  color: #7289da;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }

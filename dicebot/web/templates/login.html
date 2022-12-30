@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block body %}
 <h1>Login to Discord to verify your identity</h1>
 <a
-  href="https://test.stytch.com/v1/public/oauth/discord/start?public_token=public-token-test-ffa72311-8313-4ac7-989a-028e7a23714e">
+    href="{{ discord_oauth_link }}">
   Click here to login to Discord
 </a>
 {% endblock %}

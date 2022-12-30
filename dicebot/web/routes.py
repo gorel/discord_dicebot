@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import os
+
 from quart import flash, g, redirect, render_template, url_for
 
 from dicebot.web import app_ctx, quart_app
@@ -11,9 +13,14 @@ from dicebot.web.models import CombinedGuildContext, RelevantGuild
 async def login():
     form = LoginForm()
     if await form.validate():
+        await flash("Logged in successfully")
         return redirect(url_for("list"))
     else:
-        return await render_template("login.html", user=g.current_user)
+        return await render_template(
+            "login.html",
+            user=g.current_user,
+            discord_oauth_link=os.getenv("DISCORD_OAUTH_LINK"),
+        )
 
 
 @quart_app.route("/list")

@@ -27,7 +27,7 @@ class RelevantGuild:
 
         res = []
         for ctx in guilds:
-            if ctx.is_member(user):
+            if await ctx.is_member(user):
                 if await ctx.is_admin(user):
                     res.append(RelevantGuild(ctx, is_admin=True))
                 else:

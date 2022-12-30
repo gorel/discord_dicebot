@@ -37,7 +37,6 @@ class Macro(Base):
         supported_image_exts = ["jpg", "jpeg", "gif", "png", "ico"]
         for ext in supported_image_exts:
             if self.value.endswith(ext):
-                print(f"{self.value} endswith {ext}")
                 return True
         return False
 

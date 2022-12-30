@@ -5,6 +5,7 @@ alembic~=1.8
 asyncpg~=0.27
 celery~=5.2
 discord.py~=2.1
+hypercorn~=0.14
 ipython~=8.7
 MemePy~=1.2
 psycopg2-binary~=2.9

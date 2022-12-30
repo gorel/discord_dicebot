@@ -14,6 +14,10 @@ class BanHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
+        # Don't use BanHandler if the user is invoking the ban command
+        if ctx.message.content.startswith("!ban"):
+            return False
+
         return (
             re.search(r"\b(ban)\b", ctx.message.content, flags=re.IGNORECASE)
             is not None

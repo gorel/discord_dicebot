@@ -45,8 +45,11 @@ class CombinedGuildContext:
         return user.id in admins
 
     async def get_member(self, user_id: int) -> Optional[discord.Member]:
-        cached = self.discord.get_member(user_id)
-        return cached or await self.discord.fetch_member(user_id)
+        try:
+            cached = self.discord.get_member(user_id)
+            return cached or await self.discord.fetch_member(user_id)
+        except Exception:
+            return None
 
     async def is_member(self, user: discord.User) -> bool:
         fetched_member = await self.get_member(user.id)

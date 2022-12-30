@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <title>{% block title %}Discord Dicebot{% endblock %}</title>
+
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='favicon/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon/favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon/favicon-16x16.png') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='favicon/site.webmanifest') }}">
+
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  {% block styles %}
+  {% endblock %}
+  {% block scripts %}
+  {% endblock %}
+</head>
+
+<body>
+  <div class="app">
+    <div class="alerts-list">
+      {% for category, message in get_flashed_messages(with_categories=True) %}
+      <div class="alert {{category }}">
+          {% if category == "alert-success" %}
+          <span>✅</span>
+          {% elif category == "alert-warning" %}
+          <span>⚠️</span>
+          {% elif category == "alert-danger" %}
+          <span>❗️</span>
+          {% endif %} {{ message }}
+        </div>
+      {% endfor %}
+    </div>
+
+    {% if user %}
+    <div class="login-user">
+      <h2 class="login-header">Logged in as <img class="img-inline" src='{{ user.display_avatar }}' alt='display avatar'> {{ user.name
+        }}</h2>
+      {% block loginhook %}
+      <a class="all-servers-button" href="{{ url_for('list') }}">Click here to see all servers</a>
+      {% endblock %}
+    </div>
+
+    <hr>
+    {% endif %}
+
+    {% block body %} {% endblock %}
+  </div>
+</body>
+
+</html>

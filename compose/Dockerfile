@@ -18,6 +18,9 @@ RUN chmod +x /start-celeryworker
 COPY ./compose/celery/beat/start /start-celerybeat
 RUN chmod +x /start-celerybeat
 
+COPY ./compose/web/start /start-web
+RUN chmod +x /start-web
+
 WORKDIR /app
 
 ENTRYPOINT ["/entrypoint"]

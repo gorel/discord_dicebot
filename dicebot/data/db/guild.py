@@ -105,6 +105,9 @@ class Guild(Base):
     async def get_macro(self, session: AsyncSession, key: str) -> Optional[Macro]:
         return await Macro.get(session, self, key)
 
+    async def get_all_macros(self, session: AsyncSession) -> Sequence[Macro]:
+        return await Macro.get_all(session, self)
+
     async def add_macro(
         self, session: AsyncSession, key: str, value: str, author: User
     ) -> None:
@@ -271,6 +274,11 @@ class Guild(Base):
         res = await session.scalars(
             select(Guild).filter_by(is_dm=False, disable_announcements=False)
         )
+        return res.all()
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession) -> Sequence[Guild]:
+        res = await session.scalars(select(Guild).filter_by(is_dm=False))
         return res.all()
 
     def __repr__(self) -> str:

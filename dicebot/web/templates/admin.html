@@ -1,0 +1,90 @@
+{% extends "base.html" %} {% block body %}
+<h1>{{ ctx.discord.name }} admin page</h1>
+<form method="post">
+  <div class="form-section">
+    <h2 class="form-section-header">Rolling</h2>
+
+    <div class="form-row">
+      <label for="allow_renaming">Allow renaming:</label>
+      <input type="checkbox" id="allow_renaming" name="allow_renaming" {{ "checked" if ctx.db.allow_renaming else "" }} onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="current_roll">Current roll:</label>
+      <input type="number" id="current_roll" name="current_roll" placeholder={{ ctx.db.current_roll }} onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="roll_timeout">Roll timeout in hours:</label>
+      <input type="number" id="roll_timeout" name="roll_timeout" placeholder={{ ctx.db.roll_timeout }} onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="critical_success_msg">Critical success msg:</label>
+      <input type="text" id="critical_success_msg" name="critical_success_msg" placeholder="{{ ctx.db.critical_success_msg }}" onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="critical_failure_msg">Critical failure msg:</label>
+      <input type="text" id="critical_failure_msg" name="critical_failure_msg" placeholder="{{ ctx.db.critical_failure_msg }}" onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="gambling_limit">Gambling limit:</label>
+      <input type="number" id="gambling_limit" name="gambling_limit" placeholder={{ ctx.db.gambling_limit }} onchange="checkModified(this)">
+    </div>
+  </div>
+
+  <div class="form-section">
+    <h2 class="form-section-header">Server general</h2>
+
+    <div class="form-row">
+      <label for="disable_announcements">Disable announcements:</label>
+      <input type="checkbox" id="disable_announcements" name="disable_announcements" {{ "checked" if ctx.db.disable_announcements else "" }} onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="timezone">Server timezone:</label>
+      <input type="text" id="timezone" name="timezone" placeholder="{{ ctx.db.timezone }}" onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="reaction_threshold">Reaction threshold:</label>
+      <input type="number" id="reaction_threshold" name="reaction_threshold" placeholder={{ ctx.db.reaction_threshold }} onchange="checkModified(this)">
+    </div>
+
+    <div class="form-row">
+      <label for="turboban_threshold">Turboban threshold:</label>
+      <input type="number" id="turboban_threshold" name="turboban_threshold" placeholder={{ ctx.db.turboban_threshold }} onchange="checkModified(this)">
+    </div>
+  </div>
+
+  <div class="form-row">
+    <input type="submit" />
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function checkModified(elem) {
+
+    if (elem.type === "checkbox") {
+      shouldDisplayWarning = elem.checked !== elem.defaultChecked;
+    } else {
+      shouldDisplayWarning = elem.value !== elem.placeholder;
+    }
+
+    // For other inputs
+    if (shouldDisplayWarning) {
+      // Display warning symbol in front of label
+      if (!elem.previousElementSibling.textContent.includes('⚠️')) {
+        elem.previousElementSibling.textContent = '⚠️' + elem.previousElementSibling.textContent;
+      }
+    } else {
+      // Hide warning symbol
+      elem.previousElementSibling.textContent = elem.previousElementSibling.textContent.replace('⚠️', '');
+    }
+  }
+</script>
+{% endblock %}

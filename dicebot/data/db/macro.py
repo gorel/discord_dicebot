@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Annotated, Optional
+from typing import TYPE_CHECKING, Annotated, Optional, Sequence
 
 from sqlalchemy import BigInteger, ForeignKey, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -33,6 +33,13 @@ class Macro(Base):
     author: Mapped[User] = relationship("User", lazy="selectin")
 
     # Methods
+    def is_image(self) -> bool:
+        supported_image_exts = ["jpg", "jpeg", "gif", "png", "ico"]
+        for ext in supported_image_exts:
+            if self.value.endswith(ext):
+                return True
+        return False
+
     @classmethod
     async def get(
         cls, session: AsyncSession, guild: Guild, key: str
@@ -41,6 +48,11 @@ class Macro(Base):
             select(Macro).filter_by(guild_id=guild.id, key=key).limit(1)
         )
         return res.one_or_none()
+
+    @classmethod
+    async def get_all(cls, session: AsyncSession, guild: Guild) -> Sequence[Macro]:
+        res = await session.scalars(select(Macro).filter_by(guild_id=guild.id))
+        return res.all()
 
     def __repr__(self) -> str:
         return f"Macro({self.id=}, {self.key=}, {self.value=})"

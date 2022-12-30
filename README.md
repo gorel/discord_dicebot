@@ -19,16 +19,17 @@ Usage:
 $ python -m dicebot.app.bot
 ```
 
-Environment settings (put these in your `.env` file)
+Environment settings (put these in your `.env` file). There's a sample file in the root of the repository called
+`sample.env` that may be useful to reference. You should consider using a better `POSTGRES_PASSWORD` for the database,
+but within `sample.env`, `dicebot_pw` is the password used to illustrate how to construct the `DATABASE_URL`.
+
+There are two important API keys you will need to retrieve:
 
 - `DISCORD_TOKEN`: Your [Discord bot token](https://discord.com/developers/docs/topics/oauth2)
 - `TENOR_API_KEY`: A key for [tenor](https://tenor.com/gifapi/documentation)
-- `GITHUB_USER`: Username for the GitHub account to use `!fileatask`
-- `GITHUB_PASS`: Password for the GitHub account to use `!fileatask`
-- `OWNER_DISCORD_ID`: The Discord ID of the owner (used for `!fileatask`)
-- `TEST_GUILD_ID`: If set, it will ignore any other guilds
-- `CELERY_BROKER_URL`: The broker Celery will use to send/receive messages
-- `CELERY_RESULT_BACKEND`: The backend Celery will use to persist results
+
+You must also replace the `DISCORD_OAUTH_LINK` with the OAuth link from Stytch and set up the OAuth2 redirect at
+https://discord.com/developers/applications for the webserver to work for login.
 
 ## Running the IPython shell
 
@@ -56,6 +57,12 @@ To run all services locally for debugging:
 
 ```
 $ docker compose up
+```
+
+To run the webserver without other services:
+
+```
+$ docker compose run --service-ports web
 ```
 
 ### DB without other services
@@ -95,3 +102,11 @@ Edit the `/etc/sudoers.d/$USER` file and include the following (replace $VARIABL
 
 From there, check out the `.github/workflows/deploy.yml` workflow to see how it works to automatically restart the
 service on the remote machine where `dicebot` is running.
+
+### Web automation
+
+DigitalOcean has [great tutorials on setting up
+nginx](https://www.digitalocean.com/community/tutorials/how-to-install-nginx-on-ubuntu-18-04#step-5-%E2%80%93-setting-up-server-blocks-recommended).
+
+Follow [the guide from here](https://www.uvicorn.org/deployment/#running-behind-nginx) to set up Hypercorn. Even though
+that guide is for uvicorn, the setup is the same.

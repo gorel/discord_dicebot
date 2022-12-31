@@ -13,6 +13,7 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.ban_handler import BanHandler
 from dicebot.handlers.message.birthday_handler import BirthdayHandler
 from dicebot.handlers.message.command_handler import CommandHandler
+from dicebot.handlers.message.hbd_handler import HbdHandler
 from dicebot.handlers.message.leeroy_handler import LeeRoyHandler
 from dicebot.handlers.message.log_message_handler import (
     LogMessageHandler,
@@ -59,6 +60,7 @@ class GuildContext:
             BanHandler(),
             BirthdayHandler(),
             CommandHandler(),
+            HbdHandler(),
             LeeRoyHandler(),
             LongMessageHandler(),
             ShameHandler(),

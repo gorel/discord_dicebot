@@ -58,6 +58,7 @@ async def announce(ctx: MessageContext, announcement: GreedyStr) -> None:
             msg += "channel where you'd like to receive announcements from the bot."
             await channel.send(msg)
 
+        assert isinstance(channel, TextChannel)
         await channel.send(announcement)
 
 

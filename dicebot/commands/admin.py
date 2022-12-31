@@ -5,7 +5,9 @@ import os
 
 from dicebot.core.register_command import register_command
 from dicebot.data.db.user import User
+from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
+from dicebot.data.types.set_message_subcommand import SetMessageSubcommand
 
 
 def requires_owner(coro):
@@ -66,3 +68,51 @@ async def remove_admin(
         ctx.guild.admins.remove(target)
         await ctx.session.commit()
         await ctx.channel.send(f"{target.as_mention()} is no longer an admin.")
+
+
+@requires_admin
+@register_command
+async def set_msg(
+    ctx: MessageContext,
+    win_or_lose: SetMessageSubcommand,
+    msg: GreedyStr,
+) -> None:
+    """Set the win/loss message in this server for critical success or failure"""
+    msg_str = msg.unwrap()
+    if win_or_lose is SetMessageSubcommand.WIN:
+        ctx.guild.critical_success_msg = msg_str
+        await ctx.session.commit()
+        await ctx.channel.send(f"Set the win message to '{msg_str}'")
+    else:
+        ctx.guild.critical_failure_msg = msg_str
+        await ctx.session.commit()
+        await ctx.channel.send(f"Set the lose message to '{msg_str}'")
+
+
+@requires_admin
+@register_command
+async def set_reaction_threshold(ctx: MessageContext, threshold: int) -> None:
+    """Set the reaction threshold for this server. This is how many reactions
+    are needed before a reaction-reaction occurs (like the bot reacting kekw)"""
+    ctx.guild.reaction_threshold = threshold
+    await ctx.session.commit()
+    await ctx.channel.send(f"Set the reaction threshold to {threshold}")
+
+
+@requires_admin
+@register_command
+async def set_timeout(ctx: MessageContext, hours: int) -> None:
+    """Set the roll timeout (how often you can roll) for this server"""
+    ctx.guild.roll_timeout = hours
+    await ctx.session.commit()
+    await ctx.channel.send(f"Set the roll timeout to {hours} hours")
+
+
+@requires_admin
+@register_command
+async def set_turbo_ban_timing_threshold(ctx: MessageContext, threshold: int) -> None:
+    """Set the turbo ban timing threshold for this server. This is the maximum number of
+    seconds before a turbo banned will be issued instead of a regular ban"""
+    ctx.guild.turboban_threshold = threshold
+    await ctx.session.commit()
+    await ctx.channel.send(f"Set the turbo ban timing threshold to {threshold}")

@@ -26,8 +26,6 @@ class CommandHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        # TODO: Help text is too long... need to make it shorter
-        # Maybe even throw it online somewhere as a URL?
         if ctx.message.content.startswith("!help") or ctx.message.content.startswith(
             "!commands"
         ):

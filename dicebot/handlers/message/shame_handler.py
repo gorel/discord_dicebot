@@ -5,6 +5,7 @@ import logging
 import pytz
 
 from dicebot.commands.ban import unban_internal
+from dicebot.data.db.channel import Channel
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -17,6 +18,9 @@ class ShameHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
+        channel = await Channel.get_or_create(ctx.session, ctx.channel.id, ctx.guild_id)
+        if not channel.shame:
+            return False
         return await ctx.author.is_currently_banned(ctx.session, ctx.guild)
 
     async def handle(

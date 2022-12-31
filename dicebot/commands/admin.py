@@ -4,6 +4,7 @@ import functools
 import os
 
 from dicebot.core.register_command import register_command
+from dicebot.data.db.channel import Channel
 from dicebot.data.db.user import User
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
@@ -116,3 +117,14 @@ async def set_turbo_ban_timing_threshold(ctx: MessageContext, threshold: int) ->
     ctx.guild.turboban_threshold = threshold
     await ctx.session.commit()
     await ctx.channel.send(f"Set the turbo ban timing threshold to {threshold}")
+
+
+@requires_admin
+@register_command
+async def toggle_shame(ctx: MessageContext) -> None:
+    """Toggle whether shame can be sent to a channel"""
+    channel = await Channel.get_or_create(ctx.session, ctx.channel.id, ctx.guild_id)
+    channel.shame = not channel.shame
+    await ctx.session.commit()
+    s = "**no longer** " if not channel.shame else ""
+    await ctx.channel.send(f"Shame will now {s}be sent to this channel.")

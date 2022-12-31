@@ -13,6 +13,8 @@ from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 
+SPECIAL_ROLL_NUMBER = 69
+
 
 @register_command
 async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
@@ -108,6 +110,8 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
 
         # We batch all the roll messages so the bot doesn't get rate limited
         roll_results_strings.append(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
+        if roll == SPECIAL_ROLL_NUMBER:
+            roll_results_strings.append("Nice")
         logging.info(f"{name} rolled a {roll} (d{next_roll})")
 
         if roll == 1:

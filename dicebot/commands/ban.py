@@ -68,20 +68,29 @@ async def ban(
     )
 
 
+# Intentionally *not* a registered command
+async def unban_internal(ctx: MessageContext, target: User, msg: str) -> None:
+    await ctx.guild.unban(ctx.session, target)
+    await ctx.session.commit()
+    await ctx.channel.send(msg)
+
+
 @register_command
 async def unban(ctx: MessageContext, target: User) -> None:
     """Unban a user immediately"""
-    await ctx.guild.unban(ctx.session, target)
-    await ctx.session.commit()
     if ctx.message.author.id == target.id:
-        await ctx.channel.send(
+        await unban_internal(
+            ctx,
+            target,
             f"<@{target.id}> has been unbanned early.\n"
-            "You should thank your benevolent sav -- Oh, unbanning _yourself_? Yikes."
+            "You should thank your benevolent sav -- Oh, unbanning _yourself_? Yikes.",
         )
     else:
-        await ctx.channel.send(
+        await unban_internal(
+            ctx,
+            target,
             f"<@{target.id}> has been unbanned early.\n"
-            "You should thank your benevolent savior.\n"
+            "You should thank your benevolent savior.\n",
         )
 
 

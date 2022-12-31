@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import urllib.parse
 from typing import TYPE_CHECKING, Annotated, Optional, Sequence
 
 from sqlalchemy import BigInteger, ForeignKey, select
@@ -34,9 +35,14 @@ class Macro(Base):
 
     # Methods
     def is_image(self) -> bool:
+        try:
+            value = urllib.parse.urlparse(self.value).path
+        except Exception:
+            value = self.value
+
         supported_image_exts = ["jpg", "jpeg", "gif", "png", "ico"]
         for ext in supported_image_exts:
-            if self.value.endswith(ext):
+            if value.endswith(ext):
                 return True
         return False
 

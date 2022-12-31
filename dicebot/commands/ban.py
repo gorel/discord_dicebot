@@ -48,24 +48,26 @@ async def ban(
 
     # Record this ban in the db
     banned_until = datetime.datetime.fromtimestamp(time.time() + timer.seconds)
-    ban = Ban(
+    current_ban = await Ban.get_latest_unvoided_ban(ctx.session, ctx.guild, target)
+    new_ban = Ban(
         guild_id=ctx.guild_id,
         bannee_id=target.id,
         banner_id=banner_id,
         reason=reason.unwrap(),
         banned_until=banned_until,
     )
-    ctx.session.add(ban)
+    ctx.session.add(new_ban)
     await ctx.session.commit()
 
-    current_ban = await Ban.get_latest_unvoided_ban(ctx.session, ctx.guild, target)
-    if current_ban is not None and current_ban.banned_until > ban.banned_until:
+    if current_ban is not None and current_ban.banned_until > new_ban.banned_until:
         localized = timezone.localize_dt(current_ban.banned_until, ctx.guild.timezone)
         await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
-
-    unban_task.apply_async(
-        (ctx.channel.id, ctx.guild_id, target.id), countdown=timer.seconds + 1
-    )
+    else:
+        await ctx.session.refresh(new_ban)
+        unban_task.apply_async(
+            (ctx.channel.id, ctx.guild_id, target.id, new_ban.id),
+            countdown=timer.seconds + 1,
+        )
 
 
 # Intentionally *not* a registered command

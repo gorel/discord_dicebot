@@ -2,6 +2,7 @@
 
 import asyncio
 import datetime
+from typing import Optional
 
 import discord
 
@@ -13,12 +14,16 @@ from dicebot.data.db.user import User
 
 
 @celery_app.task
-def unban(channel_id: int, guild_id: int, target_id: int) -> None:
+def unban(
+    channel_id: int, guild_id: int, target_id: int, ban_id: Optional[int] = None
+) -> None:
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(unban_async(channel_id, guild_id, target_id))
+    loop.run_until_complete(unban_async(channel_id, guild_id, target_id, ban_id))
 
 
-async def unban_async(channel_id: int, guild_id: int, target_id: int) -> None:
+async def unban_async(
+    channel_id: int, guild_id: int, target_id: int, ban_id: Optional[int] = None
+) -> None:
     # To avoid circular imports, we put this import here
     # Unfortunately how the tasks are setup, we can't import Client at the top level
     from dicebot.core.client import Client
@@ -41,6 +46,10 @@ async def unban_async(channel_id: int, guild_id: int, target_id: int) -> None:
             current_ban is not None
             and current_ban.banned_until < datetime.datetime.now()
         ):
+            # If ban_id is provided, check that the latest ban *is* this ban
+            if ban_id is not None and current_ban.id != ban_id:
+                return
+
             await channel.send(f"<@{target_id}>: You have been unbanned.")
             # Remember to set this ban as now being acknowledged!
             current_ban.acknowledged = True

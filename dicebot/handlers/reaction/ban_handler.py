@@ -29,7 +29,6 @@ class BanReactionHandler(AbstractReactionHandler):
 
             # Special feature for people trying to ban the bot itself
             if ctx.client.user.id == ctx.message.author.id:
-                # TODO: If it reaches the ban threshold, unban *everyone* in this guild
                 my_name = ctx.client.user.name
                 await ctx.reaction.message.channel.send(
                     f"Who *dares* try to ban the mighty {my_name}?!"
@@ -41,8 +40,7 @@ class BanReactionHandler(AbstractReactionHandler):
                     timer=Time("1hr"),
                     ban_as_bot=BotParam(True),
                 )
-                # Exit early
-                return False
+
         return self.meets_threshold_check(ctx)
 
     async def handle(
@@ -56,18 +54,17 @@ class BanReactionHandler(AbstractReactionHandler):
 
         # Special feature for people trying to ban the bot itself
         if ctx.client.user.id == ctx.message.author.id:
-            # TODO: If it reaches the ban threshold, unban *everyone* in this guild
-            my_name = ctx.client.user.name
-            await ctx.reaction.message.channel.send(
-                f"Who *dares* try to ban the mighty {my_name}?!"
+            msg = (
+                f"What's this?! {ctx.reaction.count} bans against _me?_\n"
+                "Perhaps I was too harsh on you all."
             )
-            discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
-            await ban.ban(
-                ctx,
-                target=discord_user,
-                timer=Time("1hr"),
-                ban_as_bot=BotParam(True),
-            )
+            await ctx.reaction.message.channel.send(msg)
+            await asyncio.sleep(1)
+            async for user in ctx.reaction.users():
+                discord_user = await User.get_or_create(ctx.session, user.id)
+                await ban.unban_internal(
+                    ctx, discord_user, f"<@{user.id}> has been unbanned early."
+                )
             # Exit early
             return
 

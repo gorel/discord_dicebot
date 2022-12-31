@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block body %}
+<h1>Dicebot help</h1>
+<p><b>NOTE:</b> Some commands may require extra permissions to execute</p>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Args</th>
+    <th>Usage</th>
+  </tr>
+  {% for cmd, help_ctx in help_contexts %}
+    <tr>
+      <td>{{ help_ctx.name }}</td>
+      <td>{{ help_ctx.args_html()|safe }}</td>
+      <td>{{ help_ctx.usage }}</td>
+    </tr>
+  {% endfor %}
+</table>
+{% endblock %}

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 
 import logging
+import os
 from typing import Optional
 
 from dicebot.core.command_runner import CommandRunner
+from dicebot.core.constants import DEFAULT_WEB_URL, WEB_URL_KEY
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
@@ -26,7 +28,9 @@ class CommandHandler(AbstractHandler):
     ) -> None:
         # TODO: Help text is too long... need to make it shorter
         # Maybe even throw it online somewhere as a URL?
-        if ctx.message.content.startswith("!help"):
+        if ctx.message.content.startswith("!help") or ctx.message.content.startswith(
+            "!commands"
+        ):
             if " " in ctx.message.content:
                 func = ctx.message.content.split(" ")[1]
                 text = self.helptext(func)
@@ -56,14 +60,6 @@ class CommandHandler(AbstractHandler):
                 cmd_text = f"Could not find command '{cmd}'"
             return cmd_text
         else:
-            # Print help on *all* commands
-            cmds = [
-                # Each line should be relatively short
-                self.runner.helptext(cmd, limit=120)
-                for cmd in self.runner.cmds.values()
-            ]
-            cmd_text = "**Commands:**\n"
-            for cmd in cmds:
-                cmd_text += f"\t{cmd}\n"
-
-        return cmd_text
+            base_url = os.getenv(WEB_URL_KEY, DEFAULT_WEB_URL)
+            help_url = f"{base_url}/help"
+            return help_url

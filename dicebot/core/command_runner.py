@@ -3,6 +3,7 @@
 import logging
 from typing import Any, Awaitable, Callable, Dict, List, Optional, get_type_hints
 
+from dicebot.core.help_context import HelpContext
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS
 from dicebot.data.types.bot_param import BotParam
@@ -76,12 +77,6 @@ class CommandRunner:
             greedy_arg = " ".join(glob)
             args.append(GreedyStr(greedy_arg))
 
-        # TODO: This is *maybe* a good idea, but if we want to support default
-        # arguments, I think it could cause some additional headaches. For now,
-        # let's just allow extraneous arguments.
-        # if len(parameters) != len(args):
-        #    raise ValueError(f"Have {len(parameters)} parameters bUt {len(args)} args given")
-
         # Make sure *all* arguments are kwargs now
         typed_args = {
             k: await typify_str(ctx, types[k], v)
@@ -118,33 +113,27 @@ class CommandRunner:
             # Reraise to let server context provide help content
             raise
 
-    @staticmethod
-    def helptext(f: CommandFunc, limit: Optional[int] = None) -> str:
+    @classmethod
+    def help_context(cls, f: CommandFunc, limit: Optional[int] = None) -> HelpContext:
         types = get_type_hints(f)
         argc = f.__code__.co_argcount
-        args = f.__code__.co_varnames[:argc]
+        args = list(f.__code__.co_varnames[:argc])
 
-        args_str = ""
         if len(args) > 0 and types[args[0]] is MessageContext:
             args = args[1:]
-            # If there are args, we prepend a space character since it will
-            # start right after the function name (otherwise there's a somewhat
-            # awkward extra space with helptext for param-less functions)
-            if len(args) > 0:
-                args_str = " "
-        # This is going to look like some more witchcraft, but we have to fully
-        # instantiate a generic and then check its __class__ attribute since
-        # calling issubclass immediately tells us that types[arg] is not a class
-        args_str += " ".join(
-            f"<{arg}>" for arg in args if not CommandRunner.is_botparam_type(types[arg])
-        )
 
         usage = ""
         if f.__doc__ and len(f.__doc__) > 0:
             doc = f.__doc__
             if limit and len(doc) > limit:
                 doc = doc[:limit] + "..."
-                usage = f": {doc}"
+                usage = doc
             else:
-                usage = f":\n{doc}"
-        return f"__!{f.__name__}__{args_str}{usage}"
+                usage = f"\n{doc}"
+
+        return HelpContext(f.__name__, args, types, usage)
+
+    @classmethod
+    def helptext(cls, f: CommandFunc, limit: Optional[int] = None) -> str:
+        help_context = cls.help_context(f, limit)
+        return str(help_context)

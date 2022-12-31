@@ -4,9 +4,25 @@ import os
 
 from quart import flash, g, redirect, render_template, url_for
 
+from dicebot.core.command_runner import CommandRunner
 from dicebot.web import app_ctx, quart_app
 from dicebot.web.forms import AddMacroForm, LoginForm, UpdateGuildForm
 from dicebot.web.models import CombinedGuildContext, RelevantGuild
+
+
+@quart_app.route("/help")
+async def help():
+    runner = CommandRunner()
+    help_contexts = sorted(
+        (cmd_name, runner.help_context(cmd))
+        for cmd_name, cmd in runner.cmds.items()
+        # A bit hacky, but exclude these since they're only for the bot owner
+        if cmd_name not in ("announce", "fileatask")
+    )
+
+    return await render_template(
+        "help.html", user=g.current_user, help_contexts=help_contexts
+    )
 
 
 @quart_app.route("/login")

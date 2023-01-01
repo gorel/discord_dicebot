@@ -247,9 +247,9 @@ class Guild(Base):
         return msg
 
     async def clear_stats(self, session: AsyncSession) -> None:
-        await session.scalars(delete(Roll).where(Roll.guild_id == self.id))
-        await session.scalars(delete(Rename).where(Rename.guild_id == self.id))
+        await session.execute(delete(Roll).where(Roll.guild_id == self.id))
         self.current_roll = DEFAULT_START_ROLL
+        await session.commit()
 
     @classmethod
     async def get_or_create(

@@ -5,17 +5,23 @@
 
 {% block body %}
 <h1 class="page-title">Relevant servers</h1>
-<ul>
-  {% for guild in guilds %}
-  <h2 class="guild-actions-header">{{ guild.ctx.discord.name }}</h2>
-  <span class="guild-actions">
-    <a class="guild-actions-button" href='{{ url_for("macros", guild_id=guild.ctx.db.id) }}'>Macros</a>
-    {% if guild.is_admin %}
-      <a class="guild-actions-button" href='{{ url_for("admin", guild_id=guild.ctx.db.id) }}'>Admin</a>
-    {% endif %}
-  </span>
-  {% else %}
-    <p class="info">You are not an admin of any guilds known to this bot</p>
-  {% endfor %}
-</ul>
+{% if guilds %}
+  <input class="search" type="text" id="search" placeholder="Search guilds" oninput="filterTable(this, 'guilds')">
+  <table id="guilds">
+    {% for guild in guilds %}
+    <tr>
+      <td><b>{{ guild.ctx.discord.name }}</b></td>
+      <td><a href='{{ url_for("macros", guild_id=guild.ctx.db.id) }}'>Macros</a></td>
+      <td>
+        {% if guild.is_admin %}
+          <a href='{{ url_for("admin", guild_id=guild.ctx.db.id) }}'>Admin</a>
+        {% endif %}
+      </td>
+      </span>
+    </tr>
+    {% endfor %}
+  </table>
+{% else %}
+  <p class="info">You are not a member of any guilds known to this bot</p>
+{% endif %}
 {% endblock %}

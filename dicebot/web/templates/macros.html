@@ -19,7 +19,9 @@
 <hr />
 
 {% if fetched_macros %}
-<table>
+<input class="search" type="text" id="search" placeholder="Search macros" oninput="filterTable(this, 'macros')">
+
+<table id="macros">
   <tr>
     <th>Key</th>
     <th>Value</th>
@@ -39,4 +41,8 @@
 </table>
 {% else %}
 <p class="info">There are no macros defined for this server yet.</p>
-{% endif %} {% endblock %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

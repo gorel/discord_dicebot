@@ -41,7 +41,7 @@ class BanReactionHandler(AbstractReactionHandler):
                     ban_as_bot=BotParam(True),
                 )
 
-        return self.meets_threshold_check(ctx)
+        return await super().should_handle(ctx)
 
     async def handle(
         self,

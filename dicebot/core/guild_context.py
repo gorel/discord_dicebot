@@ -20,6 +20,7 @@ from dicebot.handlers.message.log_message_handler import (
     LogMessageHandlerSource,
 )
 from dicebot.handlers.message.long_message_handler import LongMessageHandler
+from dicebot.handlers.message.mocking_handler import MockingHandler
 from dicebot.handlers.message.shame_handler import ShameHandler
 from dicebot.handlers.message.youtube_handler import YoutubeHandler
 
@@ -63,6 +64,7 @@ class GuildContext:
             HbdHandler(),
             LeeRoyHandler(),
             LongMessageHandler(),
+            MockingHandler(),
             ShameHandler(),
             YoutubeHandler(),
         ]

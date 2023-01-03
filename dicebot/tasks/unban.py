@@ -13,7 +13,7 @@ from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
 
 
-@celery_app.task
+@celery_app.task(ignore_result=True)
 def unban(
     channel_id: int, guild_id: int, target_id: int, ban_id: Optional[int] = None
 ) -> None:

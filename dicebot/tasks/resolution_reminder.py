@@ -8,7 +8,7 @@ from dicebot.app import app_sessionmaker, celery_app
 from dicebot.data.db.resolution import Resolution
 
 
-@celery_app.task
+@celery_app.task(ignore_result=True)
 def remind(resolution_id: int) -> None:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(remind_async(resolution_id))

@@ -7,7 +7,7 @@ import discord
 from dicebot.app import celery_app
 
 
-@celery_app.task
+@celery_app.task(ignore_result=True)
 def send_reminder(channel_id: int, author_id: int, reminder: str) -> None:
     loop = asyncio.get_event_loop()
     loop.run_until_complete(send_reminder_async(channel_id, author_id, reminder))

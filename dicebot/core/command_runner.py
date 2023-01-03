@@ -6,7 +6,6 @@ from typing import Any, Awaitable, Callable, Dict, List, Optional, get_type_hint
 from dicebot.core.help_context import HelpContext
 from dicebot.core.import_witchcraft import import_submodules
 from dicebot.core.register_command import REGISTERED_COMMANDS
-from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.protocols import typify_str
@@ -26,12 +25,6 @@ class CommandRunner:
 
     def register(self, cmd: CommandFunc) -> None:
         self.cmds[cmd.__name__] = cmd
-
-    @staticmethod
-    def is_botparam_type(t: Any) -> bool:
-        if hasattr(t, "__origin__"):
-            return issubclass(t.__origin__, BotParam)
-        return False
 
     @staticmethod
     async def typify_all(
@@ -64,11 +57,7 @@ class CommandRunner:
                 break
 
         # Also check if there are bot params we should disable
-        parameters = [
-            param
-            for param in parameters
-            if not CommandRunner.is_botparam_type(types[param])
-        ]
+        parameters = [param for param in parameters]
 
         if len(parameters) > 0 and types[parameters[-1]] is GreedyStr:
             # This is -1 because the last argument will be part of the glob

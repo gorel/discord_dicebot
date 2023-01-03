@@ -10,26 +10,21 @@ from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.user import User
-from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 from dicebot.tasks.unban import unban as unban_task
 
 
-@register_command
-async def ban(
-    ctx: MessageContext,
-    target: User,
-    timer: Time,
-    ban_as_bot: BotParam[bool] = BotParam(False),
-    reason: BotParam[str] = BotParam(""),
+# Intentionally *not* a registered command
+async def ban_internal(
+    ctx: MessageContext, target: User, timer: Time, ban_as_bot: bool, reason: str
 ) -> None:
-    """Ban a user for a given amount of time (bot will shame them)"""
+    """Ban a user for a given amount of time"""
     new_ban = int(time.time()) + timer.seconds
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id
 
-    if ban_as_bot.unwrap():
+    if ban_as_bot:
         await ctx.channel.send(
             f"I have chosen to ban <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
@@ -39,7 +34,6 @@ async def ban(
         assert ctx.client.user is not None
         banner_id = ctx.client.user.id
     else:
-        reason = BotParam("Because they didn't like you")
         await ctx.channel.send(
             f"<@{banner_id}> has banned <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
@@ -53,7 +47,7 @@ async def ban(
         guild_id=ctx.guild_id,
         bannee_id=target.id,
         banner_id=banner_id,
-        reason=reason.unwrap(),
+        reason=reason,
         banned_until=banned_until,
     )
     ctx.session.add(new_ban)
@@ -68,6 +62,14 @@ async def ban(
             (ctx.channel.id, ctx.guild_id, target.id, new_ban.id),
             countdown=timer.seconds + 1,
         )
+
+
+@register_command
+async def ban(ctx: MessageContext, target: User, timer: Time) -> None:
+    """Ban a user for a given amount of time (bot will shame them)"""
+    await ban_internal(
+        ctx, target, timer, ban_as_bot=False, reason="Because they didn't like you"
+    )
 
 
 # Intentionally *not* a registered command
@@ -104,12 +106,13 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
     await ctx.channel.send(leaderboard_str)
 
 
+# Intentionally *not* a registered command
 async def turboban(
     ctx: MessageContext,
     reference_msg: discord.Message,
     target: User,
     num_hours: int = 5,
-    reason: Optional[BotParam[str]] = None,
+    reason: Optional[str] = None,
 ) -> None:
     emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
     turbo = ["T_", "U_", "R_", "B_", "O_"]
@@ -118,10 +121,14 @@ async def turboban(
     banned_str = "".join(emojis[s] for s in banned)
     turbo_ban_msg = f"{turbo_str} {banned_str}"
     await reference_msg.channel.send(turbo_ban_msg, reference=reference_msg)
-    await ban(
+
+    if reason is None:
+        reason = "Generic turboban"
+
+    await ban_internal(
         ctx,
         target=target,
         timer=Time(f"{num_hours}hr"),
-        ban_as_bot=BotParam(True),
-        reason=reason or BotParam("Generic turboban"),
+        ban_as_bot=True,
+        reason=reason,
     )

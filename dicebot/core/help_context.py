@@ -3,8 +3,6 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List
 
-from dicebot.data.types.bot_param import BotParam
-
 
 @dataclass
 class HelpContext:
@@ -12,12 +10,6 @@ class HelpContext:
     args: List[str]
     types: Dict[str, Any]
     usage: str
-
-    @classmethod
-    def is_botparam_type(cls, t: Any) -> bool:
-        if hasattr(t, "__origin__"):
-            return issubclass(t.__origin__, BotParam)
-        return False
 
     def args_html(self) -> str:
         human_typenames = {
@@ -35,7 +27,6 @@ class HelpContext:
         list_items = "".join(
             f"<li><code>{arg}: {simplified_typenames[arg]}</code></li>"
             for arg in self.args
-            if not self.is_botparam_type(self.types[arg])
         )
         return f"<ul>{list_items}</ul>"
 
@@ -49,11 +40,7 @@ class HelpContext:
         # This is going to look like some more witchcraft, but we have to fully
         # instantiate a generic and then check its __class__ attribute since
         # calling issubclass immediately tells us that types[arg] is not a class
-        args_str += " ".join(
-            f"<{arg}>"
-            for arg in self.args
-            if not self.is_botparam_type(self.types[arg])
-        )
+        args_str += " ".join(f"<{arg}>" for arg in self.args)
         if len(self.usage) > 0:
             usage = f": {self.usage}"
         else:

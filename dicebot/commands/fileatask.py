@@ -9,7 +9,6 @@ import aiohttp
 
 from dicebot.commands import ban, giffer
 from dicebot.core.register_command import register_command
-from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
@@ -54,12 +53,12 @@ async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:
         reference=ctx.message,
     )
     await asyncio.sleep(3)
-    await ban.ban(
+    await ban.ban_internal(
         ctx,
         target=ctx.author,
         timer=Time("1hr"),
-        ban_as_bot=BotParam(True),
-        reason=BotParam("Bad fileatask idea"),
+        ban_as_bot=True,
+        reason="Bad fileatask idea",
     )
 
 

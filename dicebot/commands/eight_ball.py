@@ -5,9 +5,8 @@ import random
 
 from dicebot.commands import ban
 from dicebot.core.register_command import register_command
-from dicebot.data.types.message_context import MessageContext
-from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 
 RANDOM_BAN_THRESHOLD = 0.05
@@ -40,16 +39,17 @@ async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
     """Ask a question to the magic eight ball"""
     if random.random() < RANDOM_BAN_THRESHOLD:
         await ctx.channel.send(
-            "This is such a stupid question, I'm just going to ban you instead of answering it.",
+            "This is such a stupid question, "
+            "I'm just going to ban you instead of answering it.",
             reference=ctx.message,
         )
         await asyncio.sleep(3)
-        await ban.ban(
+        await ban.ban_internal(
             ctx,
             target=ctx.author,
             timer=Time("1hr"),
-            ban_as_bot=BotParam(True),
-            reason=BotParam("Unlucky eight ball"),
+            ban_as_bot=True,
+            reason="Unlucky eight ball",
         )
     else:
         response = random.choice(EIGHT_BALL_RESPONSES)

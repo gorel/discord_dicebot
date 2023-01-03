@@ -5,7 +5,6 @@ import datetime
 
 from dicebot.commands import ban
 from dicebot.data.db.user import User
-from dicebot.data.types.bot_param import BotParam
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReactionHandler
@@ -34,11 +33,12 @@ class BanReactionHandler(AbstractReactionHandler):
                     f"Who *dares* try to ban the mighty {my_name}?!"
                 )
                 discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
-                await ban.ban(
+                await ban.ban_internal(
                     ctx,
                     target=discord_user,
                     timer=Time("1hr"),
-                    ban_as_bot=BotParam(True),
+                    ban_as_bot=True,
+                    reason="Tried to react-ban the bot",
                 )
 
         return await super().should_handle(ctx)
@@ -89,9 +89,10 @@ class BanReactionHandler(AbstractReactionHandler):
             )
             # Sleep 3 seconds to build suspense
             await asyncio.sleep(3)
-            await ban.ban(
+            await ban.ban_internal(
                 ctx,
                 target=discord_user,
                 timer=Time("1hr"),
-                ban_as_bot=BotParam(True),
+                ban_as_bot=True,
+                reason="Got react-banned",
             )

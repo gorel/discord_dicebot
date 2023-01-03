@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import random
+
 from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.resolution import Resolution
@@ -7,7 +9,7 @@ from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 from dicebot.tasks.resolution_reminder import remind
 
-SUPPORTED_FREQUENCIES = ["daily", "weekly", "monthly", "quarterly", "yearly"]
+SUPPORTED_FREQUENCIES = ["daily", "weekly", "monthly", "quarterly", "yearly", "random"]
 SECONDS_IN_DAY = 86400
 
 
@@ -15,7 +17,8 @@ SECONDS_IN_DAY = 86400
 async def resolution(ctx: MessageContext, frequency: str, msg: GreedyStr) -> None:
     """Add a new resolution to track throughout the year.
     The bot will ask you how things are going occasionally.
-    `frequency` can be one of 'daily', 'weekly', 'monthly', 'quarterly', or 'yearly'."""
+    `frequency` can be one of 'daily', 'weekly', 'monthly',
+    'quarterly', 'yearly', or 'random'."""
 
     if frequency not in SUPPORTED_FREQUENCIES:
         response = (
@@ -62,6 +65,11 @@ async def resolution(ctx: MessageContext, frequency: str, msg: GreedyStr) -> Non
     elif frequency == "yearly":
         seconds = SECONDS_IN_DAY * 365
         remind.apply_async((resolution.id,), countdown=seconds)
+    elif frequency == "random":
+        # Just pick 10 random days to send the reminder
+        for i in range(10):
+            seconds = SECONDS_IN_DAY * random.randint(1, 365)
+            remind.apply_async((resolution.id,), countdown=seconds)
 
     await ctx.channel.send(response)
 

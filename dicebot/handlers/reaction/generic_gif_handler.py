@@ -13,6 +13,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             "deletethis": "Delete this",
             "livelaughlove": "live laugh love",
             "ok_boomer": "OK boomer",
+            "this_tbh": "This tbh",
             "press_f": "Press F to pay respects",
         }
 

@@ -8,11 +8,12 @@ from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReaction
 class GenericGifReactionHandler(AbstractReactionHandler):
     def __init__(self) -> None:
         self.triggers = {
-            "ok_boomer": "OK boomer",
-            "deletethis": "Delete this",
-            "press_f": "Press F to pay respects",
             "biden_nice": "Thanks, Obama",
             "cool_dab": "Cool dab",
+            "deletethis": "Delete this",
+            "livelaughlove": "live laugh love",
+            "ok_boomer": "OK boomer",
+            "press_f": "Press F to pay respects",
         }
 
     @property

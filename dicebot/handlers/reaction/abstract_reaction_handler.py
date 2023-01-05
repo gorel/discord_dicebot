@@ -53,7 +53,7 @@ class AbstractReactionHandler(ABC):
         assert not isinstance(ctx.reaction.emoji, str)
 
         # Check if this message has been reacted before
-        if self.was_reacted_before(ctx):
+        if await self.was_reacted_before(ctx):
             logging.warning("New reaction on message but it was reacted before.")
             return False
 

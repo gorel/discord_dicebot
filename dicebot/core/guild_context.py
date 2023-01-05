@@ -26,6 +26,7 @@ from dicebot.handlers.message.youtube_handler import YoutubeHandler
 
 # on_reaction handlers
 from dicebot.handlers.reaction.ban_handler import BanReactionHandler
+from dicebot.handlers.reaction.generic_gif_handler import GenericGifReactionHandler
 from dicebot.handlers.reaction.kekw_handler import KekwReactionHandler
 from dicebot.handlers.reaction.shrek_handler import ShrekReactionHandler
 
@@ -95,11 +96,14 @@ class GuildContext:
         )
 
         # TODO: Build handlers from set of handlers defined on guild features
-        handlers = [BanReactionHandler(), KekwReactionHandler(), ShrekReactionHandler()]
+        handlers = [
+            BanReactionHandler(),
+            GenericGifReactionHandler(),
+            KekwReactionHandler(),
+            ShrekReactionHandler(),
+        ]
         for handler in handlers:
-            await handler.handle_and_record_no_throw(
-                ctx,
-            )
+            await handler.handle_and_record_no_throw(ctx)
 
     async def handle_dm(
         self,

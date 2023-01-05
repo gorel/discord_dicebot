@@ -15,12 +15,27 @@ class AbstractReactionHandler(ABC):
     def reaction_name(self) -> str:
         pass
 
-    def is_proper_emoji(self, reaction: Reaction) -> bool:
+    def is_emoji_with_name(self, reaction: Reaction, target_name: str) -> bool:
         return (
             not isinstance(reaction.emoji, str)
-            and reaction.emoji.name.lower() == self.reaction_name
+            and reaction.emoji.name.lower() == target_name
             and reaction.emoji.id is not None
         )
+
+    def is_proper_emoji(self, reaction: Reaction) -> bool:
+        return self.is_emoji_with_name(reaction, self.reaction_name)
+
+    async def was_reacted_before(self, ctx: MessageContext) -> bool:
+        """Check if this message has been reacted before"""
+
+        assert ctx.reaction is not None
+        assert not isinstance(ctx.reaction.emoji, str)
+        assert ctx.reaction.emoji.id is not None
+
+        previous_reaction_record = await ReactedMessage.get_by_msg_and_reaction_id(
+            ctx.session, ctx.reaction.message.id, ctx.reaction.emoji.id
+        )
+        return previous_reaction_record is not None
 
     async def should_handle_without_threshold_check(
         self,
@@ -38,10 +53,7 @@ class AbstractReactionHandler(ABC):
         assert not isinstance(ctx.reaction.emoji, str)
 
         # Check if this message has been reacted before
-        previous_reaction_record = await ReactedMessage.get_by_msg_and_reaction_id(
-            ctx.session, ctx.reaction.message.id, ctx.reaction.emoji.id
-        )
-        if previous_reaction_record is not None:
+        if self.was_reacted_before(ctx):
             logging.warning("New reaction on message but it was reacted before.")
             return False
 

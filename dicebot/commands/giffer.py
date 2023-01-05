@@ -8,8 +8,8 @@ from typing import List, Optional
 import aiohttp
 
 from dicebot.core.register_command import register_command
-from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.greedy_str import GreedyStr
+from dicebot.data.types.message_context import MessageContext
 
 
 class TenorGifRetriever:
@@ -35,16 +35,24 @@ class TenorGifRetriever:
             return []
 
 
+async def get_random_gif_url(q: str) -> Optional[str]:
+    retriever = TenorGifRetriever()
+    urls = await retriever.get(q)
+    if len(urls) == 0:
+        logging.warning(f"Could not find any GIFs for query {q}")
+        return None
+    else:
+        return random.choice(urls)
+
+
 @register_command
 async def gif(ctx: MessageContext, q: GreedyStr) -> None:
     """Retrieve a random GIF from Tenor when searching the query string"""
     q_str = q.unwrap()
-    retriever = TenorGifRetriever()
-    urls = await retriever.get(q_str)
-    if len(urls) == 0:
-        logging.warning(f"Could not find any GIFs for query {q}")
+    url = await get_random_gif_url(q_str)
+    if url is None:
+        logging.warning(f"Could not find any GIFs for query {q_str}")
         await ctx.channel.send("Could not find any GIFs for that query :(")
     else:
-        choice = random.choice(urls)
-        logging.info(f"Sending GIF {choice}")
-        await ctx.channel.send(choice)
+        logging.info(f"Sending GIF {url}")
+        await ctx.channel.send(url)

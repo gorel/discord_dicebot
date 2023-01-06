@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from typing import Optional
 from unittest.mock import AsyncMock, create_autospec
 
@@ -30,7 +31,7 @@ class TestMessageContext(MessageContext):
         return cls(
             client=create_autospec(discord.Client),
             session=create_autospec(AsyncSession),
-            author=create_autospec(User),
+            author=create_autospec(User, id=int(os.getenv("OWNER_DISCORD_ID", 0))),
             guild=create_autospec(Guild),
             message=message,
             reactor=create_autospec(User),

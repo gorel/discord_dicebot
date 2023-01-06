@@ -107,7 +107,7 @@ class TestAdmin(unittest.IsolatedAsyncioTestCase):
         with patch(
             "dicebot.commands.admin.Channel",
             get_or_create=AsyncMock(return_value=mock_channel),
-        ) as mock_channel:
+        ):
             # Arrange
             ctx = TestMessageContext.get()
             # Act

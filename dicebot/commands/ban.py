@@ -4,8 +4,6 @@ import datetime
 import time
 from typing import Optional
 
-import discord
-
 from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.ban import Ban

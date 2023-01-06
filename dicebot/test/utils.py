@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from typing import Optional
-from unittest.mock import create_autospec
+from unittest.mock import AsyncMock, create_autospec
 
 import discord
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,6 +14,10 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class TestMessageContext(MessageContext):
+    @property
+    def channel(self):
+        return self.message.channel
+
     @classmethod
     def get(
         cls,
@@ -21,6 +25,7 @@ class TestMessageContext(MessageContext):
         reaction: Optional[discord.Reaction] = None,
     ) -> TestMessageContext:
         message = create_autospec(discord.Message)
+        message.channel = AsyncMock()
         message.content = message_content
         return cls(
             client=create_autospec(discord.Client),

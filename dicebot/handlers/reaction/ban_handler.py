@@ -78,15 +78,9 @@ class BanReactionHandler(AbstractReactionHandler):
             ctx.session, ctx.reaction.message.author.id
         )
         if turbo_ban:
-            await ban.turboban(
-                ctx,
-                reference_msg=ctx.reaction.message,
-                target=discord_user,
-            )
+            await ban.turboban(ctx, target=discord_user)
         else:
-            await ctx.reaction.message.channel.send(
-                "Bro", reference=ctx.reaction.message
-            )
+            await ctx.quote_reply("Bro")
             # Sleep 3 seconds to build suspense
             await asyncio.sleep(3)
             await ban.ban_internal(

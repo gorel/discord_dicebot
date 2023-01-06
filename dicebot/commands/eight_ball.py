@@ -38,10 +38,9 @@ EIGHT_BALL_RESPONSES = [
 async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
     """Ask a question to the magic eight ball"""
     if random.random() < RANDOM_BAN_THRESHOLD:
-        await ctx.channel.send(
+        await ctx.quote_reply(
             "This is such a stupid question, "
             "I'm just going to ban you instead of answering it.",
-            reference=ctx.message,
         )
         await asyncio.sleep(3)
         await ban.ban_internal(
@@ -53,4 +52,4 @@ async def eight_ball(ctx: MessageContext, _: GreedyStr) -> None:
         )
     else:
         response = random.choice(EIGHT_BALL_RESPONSES)
-        await ctx.channel.send(response, reference=ctx.message)
+        await ctx.quote_reply(response)

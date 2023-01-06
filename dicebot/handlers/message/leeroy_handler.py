@@ -24,4 +24,4 @@ class LeeRoyHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        await ctx.channel.send("Say that to my face", reference=ctx.message)
+        await ctx.quote_reply("Say that to my face")

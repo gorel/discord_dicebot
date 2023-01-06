@@ -109,7 +109,6 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
 # Intentionally *not* a registered command
 async def turboban(
     ctx: MessageContext,
-    reference_msg: discord.Message,
     target: User,
     num_hours: int = 5,
     reason: Optional[str] = None,
@@ -120,7 +119,7 @@ async def turboban(
     banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
     banned_str = "".join(emojis[s] for s in banned)
     turbo_ban_msg = f"{turbo_str} {banned_str}"
-    await reference_msg.channel.send(turbo_ban_msg, reference=reference_msg)
+    await ctx.quote_reply(turbo_ban_msg)
 
     if reason is None:
         reason = "Generic turboban"

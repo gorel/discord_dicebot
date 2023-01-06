@@ -16,4 +16,4 @@ class ShrekReactionHandler(AbstractReactionHandler):
         ctx: MessageContext,
     ) -> None:
         assert ctx.reaction is not None
-        await ctx.channel.send(ALL_STAR_URL, reference=ctx.reaction.message)
+        await ctx.quote_reply(ALL_STAR_URL)

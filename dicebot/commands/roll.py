@@ -171,7 +171,6 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     if no_match and gambling_penalty:
         await ban.turboban(
             ctx,
-            reference_msg=ctx.message,
             target=ctx.author,
             # max penalty of 1 week
             num_hours=min(gambling_penalty**2, 168),

@@ -15,4 +15,4 @@ async def choice(ctx: MessageContext, items: GreedyStr) -> None:
     choices = items_str.split(" ")
     logging.info(f"Choices are {choices}")
     response = random.choice(choices)
-    await ctx.channel.send(response, reference=ctx.message)
+    await ctx.quote_reply(response)

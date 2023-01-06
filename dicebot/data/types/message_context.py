@@ -37,3 +37,6 @@ class MessageContext:
             self.message.channel, discord.DMChannel
         )
         return self.message.channel
+
+    async def quote_reply(self, msg: str) -> None:
+        await self.channel.send(msg, reference=self.message)

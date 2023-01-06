@@ -22,15 +22,10 @@ class KekwReactionHandler(AbstractReactionHandler):
 
         # This is the easiest way to pull the same kekw emoji
         emojis = {e.name.lower(): f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
-        await ctx.reaction.message.channel.send(
-            emojis[ctx.reaction.emoji.name.lower()], reference=ctx.reaction.message
-        )
+        await ctx.quote_reply(emojis[ctx.reaction.emoji.name.lower()])
 
         # If the user is banned, unban them early
         if ctx.author.is_currently_banned(ctx.session, ctx.guild):
-            await ctx.channel.send(
-                "That's good stuff, I'm unbanning you early.",
-                reference=ctx.reaction.message,
-            )
+            await ctx.quote_reply("That's good stuff, I'm unbanning you early.")
             discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
             await ban.unban(ctx, discord_user)

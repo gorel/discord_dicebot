@@ -37,7 +37,8 @@ class YoutubeHandler(AbstractHandler):
                     )
                     continue
 
-                # If the video isn't too long, don't handle it (but keep checking other embeds)
+                # If the video isn't too long, don't handle it --
+                # but keep checking other embeds
                 if self.video_length_mins > VIDEO_LENGTH_COMPLAINT_THRESHOLD_MINUTES:
                     return True
         # No embeds had a long YT video
@@ -47,8 +48,6 @@ class YoutubeHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        await ctx.channel.send(
-            f"{self.video_length_mins} minutes?", reference=ctx.message
-        )
+        await ctx.quote_reply(f"{self.video_length_mins} minutes?")
         await asyncio.sleep(1)
         await ctx.channel.send("Bro, I don't have time to watch this")

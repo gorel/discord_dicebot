@@ -49,4 +49,5 @@ class GenericGifReactionHandler(AbstractReactionHandler):
 
         q = self.triggers[ctx.reaction.emoji.name.lower()]
         gif_url = await giffer.get_random_gif_url(q)
-        await ctx.channel.send(gif_url, reference=ctx.reaction.message)
+        if gif_url is not None:
+            await ctx.quote_reply(gif_url)

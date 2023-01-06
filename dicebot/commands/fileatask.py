@@ -48,10 +48,7 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
 
 
 async def _ban_helper(ctx: MessageContext, ban_message: str) -> None:
-    await ctx.channel.send(
-        ban_message,
-        reference=ctx.message,
-    )
+    await ctx.quote_reply(ban_message)
     await asyncio.sleep(3)
     await ban.ban_internal(
         ctx,
@@ -76,17 +73,14 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
             "I'm not fixing this for you heathens.",
         )
     elif await ctx.author.is_currently_banned(ctx.session, ctx.guild):
-        await ctx.channel.send(
-            "You are banned. Your opinion does not matter.", reference=ctx.message
-        )
+        await ctx.quote_reply("You are banned. Your opinion does not matter.")
     elif random.random() < RANDOM_TRASH_GIF_THRESHOLD:
         await ctx.channel.send("Oh yeah, I'll get *right* on that.")
         await giffer.gif(ctx, GreedyStr("trash"))
     elif random.random() < RANDOM_BAN_THRESHOLD:
         await _ban_helper(ctx, "This is a bad idea and you should feel bad.")
     else:
-        await ctx.channel.send(
+        await ctx.quote_reply(
             "Thanks for the suggestion! Adding it to the backlog.",
-            reference=ctx.message,
         )
         logging.info("Sending suggestion to /dev/null")

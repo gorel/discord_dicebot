@@ -28,7 +28,7 @@ class TestMessageContext(MessageContext):
         message = create_autospec(discord.Message)
         message.channel = AsyncMock()
         message.content = message_content
-        return cls(
+        res = cls(
             client=create_autospec(discord.Client),
             session=create_autospec(AsyncSession),
             author=create_autospec(User, id=int(os.getenv("OWNER_DISCORD_ID", 0))),
@@ -39,3 +39,5 @@ class TestMessageContext(MessageContext):
             reaction=reaction,
             is_test=True,
         )
+        res.quote_reply = AsyncMock()
+        return res

@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, create_autospec, patch
 
 from discord import DMChannel
@@ -9,14 +7,10 @@ from discord import DMChannel
 from dicebot.commands import rename
 from dicebot.data.db.rename import Rename
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestRename(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestRename(DicebotTestCase):
     @patch("dicebot.commands.rename.Rename")
     async def test_rename(self, mock_rename) -> None:
 

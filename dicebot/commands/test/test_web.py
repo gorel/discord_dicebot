@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
-
 from dicebot.commands import web
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestWeb(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestWeb(DicebotTestCase):
     async def test_web(self) -> None:
         # Arrange
         ctx = TestMessageContext.get()

@@ -1,20 +1,14 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, create_autospec
 
 from dicebot.commands import macro
 from dicebot.data.db.macro import Macro
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestMacro(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestMacro(DicebotTestCase):
     async def test_macro_add(self) -> None:
         with self.subTest("new macro"):
             # Arrange

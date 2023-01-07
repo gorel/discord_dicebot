@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, create_autospec, patch
 
 import discord
@@ -10,14 +8,10 @@ from discord import TextChannel, VoiceChannel
 from dicebot.commands import announce
 from dicebot.data.db.guild import Guild
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestAnnounce(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestAnnounce(DicebotTestCase):
     async def test_announce(self) -> None:
         with self.subTest("simple"):
             # Arrange

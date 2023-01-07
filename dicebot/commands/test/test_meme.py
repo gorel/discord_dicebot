@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import patch
 
 from dicebot.commands import meme
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestMeme(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestMeme(DicebotTestCase):
     @patch("dicebot.commands.meme.MemeGenerator")
     async def test_meme_simple(self, mock_memegenerator) -> None:
         # Arrange

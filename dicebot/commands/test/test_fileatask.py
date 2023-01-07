@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import patch
 
 from dicebot.commands import fileatask
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestFileatask(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestFileatask(DicebotTestCase):
     @patch("dicebot.commands.fileatask.ban", autospec=True)
     async def test_ban_helper(self, mock_ban) -> None:
         # Arrange

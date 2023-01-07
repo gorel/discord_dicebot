@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, MagicMock, patch
 
 from dicebot.commands import eight_ball
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestEightBall(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestEightBall(DicebotTestCase):
     @patch("dicebot.commands.eight_ball.random")
     @patch("dicebot.commands.eight_ball.asyncio", sleep=AsyncMock())
     @patch("dicebot.commands.eight_ball.ban", ban_internal=AsyncMock())

@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
-import unittest
 from unittest.mock import AsyncMock, create_autospec, patch
 
 from dicebot.commands import resolution
 from dicebot.data.db.resolution import Resolution
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestResolution(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestResolution(DicebotTestCase):
     @patch("dicebot.commands.resolution.Resolution")
     @patch("dicebot.commands.resolution.remind_task")
     async def test_resolution(self, mock_remind_task, mock_resolution) -> None:

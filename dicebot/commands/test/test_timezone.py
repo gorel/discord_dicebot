@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
-import unittest
 from unittest.mock import MagicMock, patch
 
 from dicebot.commands import timezone
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestTimezone(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestTimezone(DicebotTestCase):
     def test_localize_pretty(self) -> None:
         # Arrange
         now_dt = datetime.datetime(

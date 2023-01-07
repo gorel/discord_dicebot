@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, create_autospec, patch
 
 from dicebot.commands import admin
@@ -9,14 +7,10 @@ from dicebot.data.db.channel import Channel
 from dicebot.data.db.user import User
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.set_message_subcommand import SetMessageSubcommand
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestAdmin(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestAdmin(DicebotTestCase):
     async def test_add_admin(self) -> None:
         # Arrange
         ctx = TestMessageContext.get()

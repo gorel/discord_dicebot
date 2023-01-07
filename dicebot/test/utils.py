@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import asyncio
+import logging
 import os
+import unittest
 from typing import Optional
 from unittest.mock import AsyncMock, create_autospec
 
@@ -12,6 +15,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
+
+
+class DicebotTestCase(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        logging.disable(logging.CRITICAL)
+        asyncio.get_running_loop().set_debug(False)
 
 
 class TestMessageContext(MessageContext):

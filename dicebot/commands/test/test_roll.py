@@ -1,21 +1,15 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
-import unittest
 from unittest.mock import AsyncMock, create_autospec, patch
 
 from dicebot.commands import roll
 from dicebot.data.db.roll import Roll
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestRoll(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestRoll(DicebotTestCase):
     @patch("dicebot.commands.roll.Roll", autospec=True)
     @patch("dicebot.commands.roll.ban", autospec=True)
     async def test_roll_no_gambling(self, mock_ban, mock_roll) -> None:

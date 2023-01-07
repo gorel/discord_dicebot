@@ -1,19 +1,13 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
 from unittest.mock import AsyncMock, patch
 
 from dicebot.commands import giffer
 from dicebot.data.types.greedy_str import GreedyStr
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestGiffer(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestGiffer(DicebotTestCase):
     @patch("dicebot.commands.giffer.TenorGifRetriever", autospec=True)
     async def test_get_random_gif_url(self, mock_retriever) -> None:
         with self.subTest("simple"):

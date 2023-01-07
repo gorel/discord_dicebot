@@ -1,17 +1,10 @@
 #!/usr/bin/env python3
 
-import asyncio
-import unittest
-
 from dicebot.commands import reset_roll
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestResetRoll(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestResetRoll(DicebotTestCase):
     async def test_reset_roll(self) -> None:
         # Arrange
         ctx = TestMessageContext.get()

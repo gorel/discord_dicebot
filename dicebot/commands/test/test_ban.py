@@ -1,22 +1,16 @@
 #!/usr/bin/env python3
 
-import asyncio
 import datetime
-import unittest
 from unittest.mock import create_autospec, patch
 
 from dicebot.commands import ban
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.user import User
 from dicebot.data.types.time import Time
-from dicebot.test.utils import TestMessageContext
+from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestBan(unittest.IsolatedAsyncioTestCase):
-    async def asyncSetUp(self) -> None:
-        await super().asyncSetUp()
-        asyncio.get_running_loop().set_debug(False)
-
+class TestBan(DicebotTestCase):
     @patch("dicebot.commands.ban.unban_task", autospec=True)
     @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
     async def test_ban_internal(self, mock_ban, mock_unban_task) -> None:

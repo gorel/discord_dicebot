@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import datetime
-import time
 
 import pytz
 
@@ -75,8 +74,7 @@ def localize(unixtime: int, tz: str) -> str:
 def localize_dt(target_dt: datetime.datetime, tz: str) -> str:
     target_utc = pytz.utc.localize(target_dt)
 
-    now_dt = datetime.datetime.utcfromtimestamp(int(time.time()))
-    now_utc = pytz.utc.localize(now_dt)
+    now_utc = datetime.datetime.now(datetime.timezone.utc)
 
     new_tz = pytz.timezone(tz)
 

@@ -18,6 +18,7 @@ class MessageContext:
     session: AsyncSession
     author: User
     guild: Guild
+    discord_guild: Optional[discord.Guild]
     message: discord.Message
     reactor: Optional[User]
     reaction: Optional[discord.Reaction]

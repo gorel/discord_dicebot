@@ -33,6 +33,7 @@ class TestMessageContext(MessageContext):
             session=create_autospec(AsyncSession),
             author=create_autospec(User, id=int(os.getenv("OWNER_DISCORD_ID", 0))),
             guild=create_autospec(Guild),
+            discord_guild=create_autospec(discord.Guild),
             message=message,
             reactor=create_autospec(User),
             reaction=reaction,

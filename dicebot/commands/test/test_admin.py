@@ -11,6 +11,52 @@ from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
 class TestAdmin(DicebotTestCase):
+    async def test_requires_owner(self) -> None:
+        with self.subTest("is owner"):
+            # Arrange
+            ctx = TestMessageContext.get()
+            inner_coro = AsyncMock()
+            coro = admin.requires_owner(inner_coro)
+            # Act
+            with patch("dicebot.commands.admin.os") as mock_os:
+                mock_os.getenv.return_value = ctx.author.id
+                await coro(ctx)
+            # Assert
+            inner_coro.assert_awaited_once()
+        with self.subTest("not owner"):
+            # Arrange
+            ctx = TestMessageContext.get()
+            inner_coro = AsyncMock()
+            coro = admin.requires_owner(inner_coro)
+            # Act
+            with patch("dicebot.commands.admin.os") as mock_os:
+                mock_os.getenv.return_value = ctx.author.id + 1
+                await coro(ctx)
+            # Assert
+            inner_coro.assert_not_awaited()
+
+    async def test_requires_admin(self) -> None:
+        with self.subTest("is admin"):
+            # Arrange
+            ctx = TestMessageContext.get()
+            ctx.author.is_admin_of.return_value = True
+            inner_coro = AsyncMock()
+            coro = admin.requires_admin(inner_coro)
+            # Act
+            await coro(ctx)
+            # Assert
+            inner_coro.assert_awaited_once()
+        with self.subTest("not admin"):
+            # Arrange
+            ctx = TestMessageContext.get()
+            ctx.author.is_admin_of.return_value = False
+            inner_coro = AsyncMock()
+            coro = admin.requires_admin(inner_coro)
+            # Act
+            await coro(ctx)
+            # Assert
+            inner_coro.assert_not_awaited()
+
     async def test_add_admin(self) -> None:
         # Arrange
         ctx = TestMessageContext.get()

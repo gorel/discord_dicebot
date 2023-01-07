@@ -111,12 +111,15 @@ async def turboban(
     num_hours: int = 5,
     reason: Optional[str] = None,
 ) -> None:
-    emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
-    turbo = ["T_", "U_", "R_", "B_", "O_"]
-    turbo_str = "".join(emojis[s] for s in turbo)
-    banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
-    banned_str = "".join(emojis[s] for s in banned)
-    turbo_ban_msg = f"{turbo_str} {banned_str}"
+    try:
+        emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
+        turbo = ["T_", "U_", "R_", "B_", "O_"]
+        turbo_str = "".join(emojis[s] for s in turbo)
+        banned = ["B_", "A_", "N_", "N_", "E_", "D_"]
+        banned_str = "".join(emojis[s] for s in banned)
+        turbo_ban_msg = f"{turbo_str} {banned_str}"
+    except KeyError:
+        turbo_ban_msg = "**TURBO BANNED**"
     await ctx.quote_reply(turbo_ban_msg)
 
     if reason is None:

@@ -7,7 +7,7 @@ from dicebot.core.register_command import register_command
 from dicebot.data.db.resolution import Resolution
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
-from dicebot.tasks.resolution_reminder import remind
+from dicebot.tasks.resolution_reminder import remind as remind_task
 
 SUPPORTED_FREQUENCIES = ["daily", "weekly", "monthly", "quarterly", "yearly", "random"]
 SECONDS_IN_DAY = 86400
@@ -47,29 +47,29 @@ async def resolution(ctx: MessageContext, frequency: str, msg: GreedyStr) -> Non
     if frequency == "daily":
         for i in range(1, 365 + 1):
             seconds = SECONDS_IN_DAY * i
-            remind.apply_async((resolution.id,), countdown=seconds)
+            remind_task.apply_async((resolution.id,), countdown=seconds)
     elif frequency == "weekly":
         for i in range(1, 52 + 1):
             seconds = SECONDS_IN_DAY * 7 * i
-            remind.apply_async((resolution.id,), countdown=seconds)
+            remind_task.apply_async((resolution.id,), countdown=seconds)
     elif frequency == "monthly":
         for i in range(1, 12 + 1):
             # Just... assume there are 31 days in a month. Close enough.
             seconds = SECONDS_IN_DAY * 31 * i
-            remind.apply_async((resolution.id,), countdown=seconds)
+            remind_task.apply_async((resolution.id,), countdown=seconds)
     elif frequency == "quarterly":
         for i in range(1, 4 + 1):
             # Just... assume there are 31 days in a month. Close enough.
             seconds = SECONDS_IN_DAY * 31 * 4 * i
-            remind.apply_async((resolution.id,), countdown=seconds)
+            remind_task.apply_async((resolution.id,), countdown=seconds)
     elif frequency == "yearly":
         seconds = SECONDS_IN_DAY * 365
-        remind.apply_async((resolution.id,), countdown=seconds)
+        remind_task.apply_async((resolution.id,), countdown=seconds)
     elif frequency == "random":
         # Just pick 10 random days to send the reminder
         for i in range(10):
             seconds = SECONDS_IN_DAY * random.randint(1, 365)
-            remind.apply_async((resolution.id,), countdown=seconds)
+            remind_task.apply_async((resolution.id,), countdown=seconds)
 
     await ctx.channel.send(response)
 
@@ -104,7 +104,7 @@ async def delete_resolution(ctx: MessageContext, resolution_id: int) -> None:
         await ctx.channel.send(response)
         return
 
-    resolution.active = False
+    r.active = False
     await ctx.session.commit()
 
     localized = timezone.localize_dt(r.created_at, ctx.guild.timezone)

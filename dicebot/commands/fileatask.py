@@ -65,7 +65,7 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
     Otherwise say something witty."""
     title_str = title.unwrap()
     owner_discord_id = int(os.getenv("OWNER_DISCORD_ID", 0))
-    if ctx.message.author.id == owner_discord_id:
+    if ctx.author_id == owner_discord_id:
         await _fileatask_real(ctx, title_str)
     elif "fix" in title.split():
         await _ban_helper(

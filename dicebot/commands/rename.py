@@ -9,7 +9,7 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class RenameError(ValueError):
-    pass
+    """Represents that renaming is invalid in some context"""
 
 
 @register_command
@@ -24,10 +24,10 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
         and last_winner.discord_user_id == ctx.author_id
         and not last_winner.rename_used
     ):
-        if ctx.message.guild is None:
+        if isinstance(ctx.channel, DMChannel) or ctx.discord_guild is None:
             raise RenameError("Renaming isn't supported here")
         await ctx.channel.send(f"Setting server name to: {new_name_str}")
-        await ctx.message.guild.edit(name=new_name_str, reason="Dice roll")
+        await ctx.discord_guild.edit(name=new_name_str, reason="Dice roll")
         last_winner.rename_used = True
         await ctx.session.commit()
     elif (
@@ -35,7 +35,7 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
         and last_loser.discord_user_id == ctx.author_id
         and not last_loser.rename_used
     ):
-        if isinstance(ctx.channel, DMChannel):
+        if isinstance(ctx.channel, DMChannel) or ctx.discord_guild is None:
             raise RenameError("Renaming isn't supported here")
         await ctx.channel.send(f"Setting chat name to: {new_name_str}")
         await ctx.channel.edit(name=new_name_str, reason="Dice roll")

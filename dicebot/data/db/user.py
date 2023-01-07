@@ -42,7 +42,8 @@ class User(Base):
         return self in guild.admins
 
     def as_mention(self) -> str:
-        """Returns a representation that can be sent to a channel and will act as a mention"""
+        """Returns a representation that can be sent to a channel
+        and will act as a mention"""
         return f"<@{self.id}>"
 
     async def is_currently_banned(self, session: AsyncSession, guild: Guild) -> bool:

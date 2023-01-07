@@ -12,7 +12,7 @@ SHORT_REASON_THRESHOLD = 20
 AT_MENTION_REGEX = re.compile(r"<@!?(.*?)>")
 
 
-async def extract_targets(msg: str) -> List[int]:
+def extract_targets(msg: str) -> List[int]:
     res = []
     match = AT_MENTION_REGEX.findall(msg)
     for discord_id in match:
@@ -29,7 +29,7 @@ async def thanks(
     You should @mention everyone you want to thank."""
 
     reason_str = reason.unwrap()
-    targets = await extract_targets(ctx.message.content)
+    targets = extract_targets(reason_str)
     if len(targets) == 0:
         await ctx.channel.send(
             "Hmm, I couldn't find any @mention in your message.\n"
@@ -42,7 +42,7 @@ async def thanks(
         thanks.append(
             Thanks(
                 guild_id=ctx.guild_id,
-                thanker_id=ctx.message.author.id,
+                thanker_id=ctx.author_id,
                 thankee_id=target,
                 reason=reason_str,
             )

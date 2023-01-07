@@ -20,6 +20,7 @@ sqlalchemy~=2.0.0b3
 quart~=0.18
 stytch~=6.1
 
-# For type checking
+# For type checking and testing
+coverage
 mypy
 pyright

@@ -27,5 +27,5 @@ class KekwReactionHandler(AbstractReactionHandler):
         # If the user is banned, unban them early
         if ctx.author.is_currently_banned(ctx.session, ctx.guild):
             await ctx.quote_reply("That's good stuff, I'm unbanning you early.")
-            discord_user = await User.get_or_create(ctx.session, ctx.reactor.id)
+            discord_user = await User.get_or_create(ctx.session, ctx.author_id)
             await ban.unban(ctx, discord_user)

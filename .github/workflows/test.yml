@@ -25,6 +25,10 @@ jobs:
           pip install -r requirements.txt
 
       - name: Create coverage report
+        env:
+          STYTCH_PROJECT_ID: ""
+          STYTCH_SECRET: ""
+          WEB_SECRET_KEY: ""
         run: |
           coverage run -m unittest
           coverage xml --omit="*test/*"

@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import datetime
+import logging
 import os
+import random
 from typing import Optional
 
 import discord
@@ -29,6 +32,19 @@ class Client(discord.Client):
         self.is_test = test_guild_id is not None
         self.test_guild_id = test_guild_id
         self.sessionmaker = sessionmaker
+
+    async def on_connect(self) -> None:
+        start = datetime.datetime.now(tz=datetime.timezone.utc)
+        activities = [
+            discord.Game("Barbie Horse Adventure", start=start),
+            discord.Game("Connect Four", start=start),
+            discord.Game("Fortnite", start=start),
+            discord.Game("Minecraft", start=start),
+            discord.Game("Neovim", start=start),
+        ]
+        choice = random.choice(activities)
+        logging.info(f"Setting presence to {choice}")
+        await self.change_presence(status=discord.Status.online, activity=choice)
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:

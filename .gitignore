@@ -22,6 +22,8 @@ manual_migrations/
 
 # Test coverage statistics
 .coverage
+coverage.xml
+htmlcov/
 
 # I use this to jot down ideas sometimes but don't want to commit it
 notes.txt

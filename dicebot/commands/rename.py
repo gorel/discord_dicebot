@@ -9,7 +9,7 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class RenameError(ValueError):
-    pass
+    """Represents that renaming is invalid in some context"""
 
 
 @register_command

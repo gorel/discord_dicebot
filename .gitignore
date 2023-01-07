@@ -20,5 +20,8 @@ celerybeat-schedule
 alembic/versions/
 manual_migrations/
 
+# Test coverage statistics
+.coverage
+
 # I use this to jot down ideas sometimes but don't want to commit it
 notes.txt

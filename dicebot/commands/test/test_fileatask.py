@@ -14,9 +14,6 @@ class TestFileatask(unittest.IsolatedAsyncioTestCase):
         await super().asyncSetUp()
         asyncio.get_running_loop().set_debug(False)
 
-    async def test_fileatask_real(self) -> None:
-        pass
-
     @patch("dicebot.commands.fileatask.ban", autospec=True)
     async def test_ban_helper(self, mock_ban) -> None:
         # Arrange

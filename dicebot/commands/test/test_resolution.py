@@ -37,12 +37,15 @@ class TestResolution(DicebotTestCase):
             ctx.channel.send.assert_awaited_once()
 
     @patch("dicebot.commands.resolution.Resolution")
-    async def my_resolutions(self, mock_resolution) -> None:
+    async def test_my_resolutions(self, mock_resolution) -> None:
         with self.subTest("simple"):
             # Arrange
             ctx = TestMessageContext.get()
+            ctx.guild.timezone = "US/Pacific"
             mock_resolution.get_all_for_user = AsyncMock(
-                return_value=[create_autospec(Resolution)]
+                return_value=[
+                    create_autospec(Resolution, created_at=datetime.datetime.now())
+                ]
             )
             # Act
             await resolution.my_resolutions(ctx)
@@ -53,6 +56,8 @@ class TestResolution(DicebotTestCase):
         with self.subTest("no resolutions"):
             # Arrange
             ctx = TestMessageContext.get()
+            ctx.guild.timezone = "US/Pacific"
+            mock_resolution.get_all_for_user = AsyncMock(return_value=[])
             # Act
             await resolution.my_resolutions(ctx)
             # Assert

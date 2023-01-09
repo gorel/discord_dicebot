@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 from dicebot.commands import ask
 from dicebot.data.types.greedy_str import GreedyStr
@@ -10,7 +10,6 @@ from dicebot.test.utils import DicebotTestCase, TestMessageContext
 class TestAsk(DicebotTestCase):
     @patch("dicebot.commands.ask.AskOpenAI._ask_openai")
     async def test_ask_open_ai(self, mock_ask_openai) -> None:
-        # Arrange
         asker = ask.AskOpenAI()
 
         with self.subTest("No prompt"):
@@ -32,12 +31,10 @@ class TestAsk(DicebotTestCase):
             self.assertEqual(expected_response, actual_response)
 
     async def test_ask(self) -> None:
-        # Arrange
-        with patch("dicebot.commands.ask.AskOpenAI") as m:
-            expected_response = "lolol"
-            m.ask = AsyncMock(return_value=expected_response)
-            ctx = TestMessageContext.get()
-            # Act
+        expected_response = "lolol"
+        ctx = TestMessageContext.get()
+        with patch(
+            "dicebot.commands.ask.AskOpenAI.ask", return_value=expected_response
+        ):
             await ask.ask(ctx, GreedyStr("a b c"))
-            # Assert
-            ctx.channel.send.assert_awaited_once_with(expected_response)
+            ctx.quote_reply.assert_awaited_once_with(expected_response)

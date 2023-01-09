@@ -43,8 +43,10 @@ class Client(discord.Client):
             discord.Game("Neovim", start=start),
         ]
         choice = random.choice(activities)
-        logging.info(f"Setting presence to {choice}")
-        await self.change_presence(status=discord.Status.online, activity=choice)
+        # Don't set presence in test mode
+        if not self.is_test:
+            logging.info(f"Setting presence to {choice}")
+            await self.change_presence(status=discord.Status.online, activity=choice)
 
     async def on_message(self, message: discord.Message) -> None:
         if message.author == self.user:

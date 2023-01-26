@@ -60,7 +60,11 @@ class AskOpenAI:
                 },
             ) as response:
                 json_resp = await response.json()
-                return json_resp["choices"][0]["text"].strip()
+                logging.info(f"JSON response from model: {json_resp}")
+                if "choices" in json_resp:
+                    return json_resp["choices"][0]["text"].strip()
+                else:
+                    return json_resp["error"]["message"]
 
 
 @register_command

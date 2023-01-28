@@ -30,9 +30,6 @@ class WisdomGiver:
 
     def __init__(self, person_to_roleplay: str) -> None:
         self._person = person_to_roleplay
-        self._prompt_fmt = (
-            f"Pretend to be {person_to_roleplay} and give me fake wisdom about {{}}"
-        )
         self._asker = AskOpenAI()
 
     @classmethod

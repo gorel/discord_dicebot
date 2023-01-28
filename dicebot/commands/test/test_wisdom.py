@@ -7,7 +7,7 @@ from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
-class TestAsk(DicebotTestCase):
+class TestWisdom(DicebotTestCase):
     @patch("dicebot.commands.ask.AskOpenAI.ask")
     async def test_give_wisdom(self, mock_ask: Mock) -> None:
         person = "Dicebot"

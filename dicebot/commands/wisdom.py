@@ -52,14 +52,11 @@ class WisdomGiver:
         Do not be afraid to ask for guidance, but also remember that true wisdom
         comes from within."""
 
+        topic = f'"{topic}"' if topic else "a random topic"
+
         self._logger.info(f"Asking {self._person} for wisdom regarding {topic=}")
-
-        if topic:
-            prompt_str = self._prompt_fmt.format(f"the following topic: {topic}")
-        else:
-            prompt_str = self._prompt_fmt.format("a random topic")
-
-        wisdom = await self._asker.ask(prompt_str)
+        prompt = f"Pretend to be {self._person} and give me fake wisdom about {topic}"
+        wisdom = await self._asker.ask(prompt)
 
         return f"{wisdom}\n\n-- {self._person}"
 

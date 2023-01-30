@@ -13,8 +13,9 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             "deletethis": "Delete this",
             "livelaughlove": "live laugh love",
             "ok_boomer": "OK boomer",
-            "this_tbh": "This tbh",
+            "this_tbh": "This is true",
             "press_f": "Press F to pay respects",
+            "question": "Bro what",
         }
 
     @property

@@ -25,15 +25,21 @@ class AbstractReactionHandler(ABC):
     def is_proper_emoji(self, reaction: Reaction) -> bool:
         return self.is_emoji_with_name(reaction, self.reaction_name)
 
+    def get_emoji_id(self, reaction: Reaction) -> int:
+        if isinstance(reaction.emoji, str):
+            # We hack it to make it work for strings
+            return ord(reaction.emoji[0])
+        else:
+            assert reaction.emoji.id is not None
+            return reaction.emoji.id
+
     async def was_reacted_before(self, ctx: MessageContext) -> bool:
         """Check if this message has been reacted before"""
 
         assert ctx.reaction is not None
-        assert not isinstance(ctx.reaction.emoji, str)
-        assert ctx.reaction.emoji.id is not None
 
         previous_reaction_record = await ReactedMessage.get_by_msg_and_reaction_id(
-            ctx.session, ctx.reaction.message.id, ctx.reaction.emoji.id
+            ctx.session, ctx.reaction.message.id, self.get_emoji_id(ctx.reaction)
         )
         return previous_reaction_record is not None
 
@@ -91,7 +97,7 @@ class AbstractReactionHandler(ABC):
         reaction_record = ReactedMessage(
             guild_id=ctx.guild.id,
             msg_id=ctx.reaction.message.id,
-            reaction_id=ctx.reaction.emoji.id,
+            reaction_id=self.get_emoji_id(ctx.reaction),
         )
         ctx.session.add(reaction_record)
         await ctx.session.commit()

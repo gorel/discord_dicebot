@@ -13,6 +13,8 @@ from dicebot.app.defaults import (
     TASKS_DIR,
 )
 
+ONE_YEAR_IN_SECONDS = 86400 * 365
+
 # Load environment
 dotenv.load_dotenv()
 __db_url = os.getenv("ASYNC_DATABASE_URL", DEFAULT_DATABASE_URL)
@@ -36,3 +38,4 @@ celery_app = Celery(
     include=[TASKS_DIR],
     namespace="CELERY",
 )
+celery_app.conf.broker_transport_options = {"visibility_timeout": ONE_YEAR_IN_SECONDS}

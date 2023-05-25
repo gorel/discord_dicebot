@@ -27,6 +27,7 @@ jobs:
           STYTCH_PROJECT_ID: ""
           STYTCH_SECRET: ""
           WEB_SECRET_KEY: ""
+          OPENAI_API_KEY: ""
         run: |
           coverage run -m unittest
           coverage xml --omit="*test/*"

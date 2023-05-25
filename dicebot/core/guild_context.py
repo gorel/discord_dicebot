@@ -22,6 +22,7 @@ from dicebot.handlers.message.log_message_handler import (
 from dicebot.handlers.message.long_message_handler import LongMessageHandler
 from dicebot.handlers.message.mocking_handler import MockingHandler
 from dicebot.handlers.message.shame_handler import ShameHandler
+from dicebot.handlers.message.tldrwl_handler import TldrwlHandler
 from dicebot.handlers.message.youtube_handler import YoutubeHandler
 
 # on_reaction handlers
@@ -70,6 +71,8 @@ class GuildContext:
             MockingHandler(),
             ShameHandler(),
             YoutubeHandler(),
+            # This can be slow, so keep it at the end of the list
+            TldrwlHandler(),
         ]
 
         for handler in handlers:

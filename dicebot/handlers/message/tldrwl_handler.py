@@ -9,6 +9,7 @@ from tldrwl.summarize import Summarizer
 from tldrwl.exception import TldrwlException
 
 
+# make these lowercase because I'm too lazy to write good code
 TLDRWL_TRIGGERS = (
     "tldr",
     "tldw",
@@ -18,7 +19,7 @@ TLDRWL_TRIGGERS = (
     "tl;dw",
     "tl;dl",
     "tl;drwl",
-    "bro, I don't have time for this shit",
+    "bro, i don't have time for this shit",
 )
 
 

@@ -57,6 +57,7 @@ class TldrwlHandler(AbstractHandler):
             logging.info("Bot tried to summarize itself - skipping...")
             return
 
+        await ctx.quote_reply("Beep boop, I'll get right on that")
         logging.info("Getting message summary, this could take awhile...")
         try:
             summary = await Summarizer().summarize_async(replied_message.content)
@@ -67,3 +68,6 @@ class TldrwlHandler(AbstractHandler):
         except TldrwlException as e:
             logging.exception(e)
             await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")
+        except Exception as e:
+            logging.exception(e)
+            await ctx.quote_reply("On second thought, I don't have time for this shit.")

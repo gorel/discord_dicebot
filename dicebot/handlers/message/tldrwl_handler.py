@@ -9,17 +9,20 @@ from tldrwl.summarize import Summarizer
 from tldrwl.exception import TldrwlException
 
 
-TLDRWL_TRIGGERS = (
-    "tldr",
-    "tldw",
-    "tldl",
-    "tldrwl",
-    "tl;dr",
-    "tl;dw",
-    "tl;dl",
-    "tl;drwl",
-    "bro, I don't have time for this shit",
-)
+TLDRWL_TRIGGERS = [
+    t.lower()
+    for t in (
+        "tldr",
+        "tldw",
+        "tldl",
+        "tldrwl",
+        "tl;dr",
+        "tl;dw",
+        "tl;dl",
+        "tl;drwl",
+        "bro, I don't have time for this shit",
+    )
+]
 
 
 class TldrwlHandler(AbstractHandler):

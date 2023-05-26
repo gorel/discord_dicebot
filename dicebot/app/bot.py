@@ -5,11 +5,11 @@ import logging
 import os
 import sys
 
+from tldrwl.register import Register
+
 from dicebot.app import engine
 from dicebot.core.client import Client
 from dicebot.logging.colored_log_formatter import ColoredLogFormatter
-
-from tldrwl.register import Register
 
 
 async def main() -> None:

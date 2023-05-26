@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 from __future__ import annotations
-
+import asyncio
 from dataclasses import dataclass
+import textwrap
 from typing import Optional
 
 import discord
@@ -10,6 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
+
+MAX_CHARS_PER_MSG = 3000
 
 
 @dataclass
@@ -40,4 +43,10 @@ class MessageContext:
         return self.message.channel
 
     async def quote_reply(self, msg: str) -> None:
-        await self.channel.send(msg, reference=self.message)
+        if len(msg) <= MAX_CHARS_PER_MSG:
+            await self.channel.send(msg, reference=self.message)
+            return
+
+        for msg_chunk in textwrap.wrap(msg, width=MAX_CHARS_PER_MSG):
+            await self.channel.send(msg_chunk, reference=self.message)
+            await asyncio.sleep(1)

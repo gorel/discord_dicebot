@@ -2,11 +2,11 @@
 
 import logging
 
+from tldrwl.exception import TldrwlException
+from tldrwl.summarize import Summarizer
+
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
-
-from tldrwl.summarize import Summarizer
-from tldrwl.exception import TldrwlException
 
 
 # make these lowercase because I'm too lazy to write good code

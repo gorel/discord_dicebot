@@ -43,7 +43,7 @@ class MessageContext:
         return self.message.channel
 
     async def quote_reply(self, msg: str) -> None:
-        if len(msg) < MAX_CHARS_PER_MSG:
+        if len(msg) <= MAX_CHARS_PER_MSG:
             await self.channel.send(msg, reference=self.message)
             return
 

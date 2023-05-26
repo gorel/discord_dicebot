@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import asyncio
 import logging
-import textwrap
 
 from tldrwl.exception import TldrwlException
 from tldrwl.summarize import Summarizer
@@ -23,8 +21,6 @@ TLDRWL_TRIGGERS = (
     "tl;drwl",
     "bro, i don't have time for this shit",
 )
-
-MAX_CHARS_PER_MSG = 3000
 
 
 class TldrwlHandler(AbstractHandler):
@@ -67,9 +63,7 @@ class TldrwlHandler(AbstractHandler):
             logging.info(
                 f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
             )
-            for msg_chunk in textwrap.wrap(summary.text, width=MAX_CHARS_PER_MSG):
-                await ctx.quote_reply(msg_chunk)
-                await asyncio.sleep(1)
+            await ctx.quote_reply(summary.text)
         except TldrwlException as e:
             logging.exception(e)
             await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")

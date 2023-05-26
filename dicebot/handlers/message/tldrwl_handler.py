@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
+import asyncio
 import logging
+import textwrap
+
+from tldrwl.exception import TldrwlException
+from tldrwl.summarize import Summarizer
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
-
-from tldrwl.summarize import Summarizer
-from tldrwl.exception import TldrwlException
 
 
 # make these lowercase because I'm too lazy to write good code
@@ -21,6 +23,8 @@ TLDRWL_TRIGGERS = (
     "tl;drwl",
     "bro, i don't have time for this shit",
 )
+
+MAX_CHARS_PER_MSG = 3000
 
 
 class TldrwlHandler(AbstractHandler):
@@ -63,7 +67,9 @@ class TldrwlHandler(AbstractHandler):
             logging.info(
                 f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
             )
-            await ctx.quote_reply(summary.text)
+            for msg_chunk in textwrap.wrap(summary.text, width=MAX_CHARS_PER_MSG):
+                await ctx.quote_reply(msg_chunk)
+                await asyncio.sleep(1)
         except TldrwlException as e:
             logging.exception(e)
             await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")

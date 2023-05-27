@@ -38,6 +38,7 @@ class Client(discord.Client):
         activities = [
             discord.Game("Barbie Horse Adventure", start=start),
             discord.Game("Connect Four", start=start),
+            discord.Game("Excel", start=start),
             discord.Game("Fortnite", start=start),
             discord.Game("Minecraft", start=start),
             discord.Game("Neovim", start=start),

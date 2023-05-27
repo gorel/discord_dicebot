@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import Annotated, Optional, Sequence
 
 import discord
@@ -23,6 +24,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.base import Base
+from dicebot.data.db.custom_reaction_handler import CustomReactionHandler
 from dicebot.data.db.feature import Feature
 from dicebot.data.db.macro import Macro
 from dicebot.data.db.rename import Rename
@@ -46,6 +48,9 @@ DEFAULT_TURBOBAN_THRESHOLD_SECS = 300
 DEFAULT_CRITICAL_SUCCESS_MSG = "critical success!"
 DEFAULT_CRITICAL_FAILURE_MSG = "critical failure!"
 DEFAULT_GUILD_TZ = "US/Pacific"
+
+
+REACTION_EXTRACTOR_REGEX = re.compile(r"<:(\w+):(\d+)>")
 
 
 # Many-to-many assoc to link guilds to features
@@ -250,6 +255,44 @@ class Guild(Base):
         await session.execute(delete(Roll).where(Roll.guild_id == self.id))
         self.current_roll = DEFAULT_START_ROLL
         await session.commit()
+
+    async def get_reaction_handler(
+        self, session: AsyncSession, reaction_id: int, reaction_name: str
+    ) -> Optional[CustomReactionHandler]:
+        return await CustomReactionHandler.get(
+            session, self, reaction_id=reaction_id, reaction_name=reaction_name
+        )
+
+    async def add_reaction_handler(
+        self, session: AsyncSession, reaction: str, gif_search: str, author: User
+    ) -> None:
+        match = REACTION_EXTRACTOR_REGEX.match(reaction)
+        if match is None:
+            raise ValueError(f"Reaction '{reaction}' did not match extractor regex.")
+
+        reaction_id = int(match.group(2))
+        reaction_name = match.group(1)
+
+        old_handler = await self.get_reaction_handler(
+            session, reaction_id, reaction_name
+        )
+        if old_handler is None:
+            new_handler = CustomReactionHandler(
+                guild_id=self.id,
+                added_by=author.id,
+                reaction_id=reaction_id,
+                reaction_name=reaction_name,
+                gif_search=gif_search,
+            )
+            session.add(new_handler)
+        else:
+            old_handler.gif_search = gif_search
+        await session.commit()
+
+    async def get_all_reaction_handlers(
+        self, session: AsyncSession
+    ) -> Sequence[CustomReactionHandler]:
+        return await CustomReactionHandler.get_all(session, self)
 
     @classmethod
     async def get_or_create(

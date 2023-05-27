@@ -34,6 +34,12 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             return False
 
         assert ctx.reaction is not None
+        # First check this server's custom reactions
+        handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
+        for handler in handlers:
+            if handler.reaction_equal(ctx.reaction):
+                return True
+        # Then check the defaults
         for reaction_name in self.triggers:
             if self.is_emoji_with_name(ctx.reaction, reaction_name):
                 return True
@@ -48,6 +54,18 @@ class GenericGifReactionHandler(AbstractReactionHandler):
         assert ctx.reactor is not None
         assert not isinstance(ctx.reaction.emoji, str)
 
+        # First check this server's custom reactions
+        handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
+        for handler in handlers:
+            if handler.reaction_equal(ctx.reaction):
+                gif_url = await giffer.get_random_gif_url(handler.gif_search)
+                if gif_url is not None:
+                    await ctx.quote_reply(gif_url)
+                # Regardless of whether we sent a quote reply, return here
+                # because otherwise we may get an IndexError below for a bad lookup.
+                return
+
+        # Then check the defaults
         q = self.triggers[ctx.reaction.emoji.name.lower()]
         gif_url = await giffer.get_random_gif_url(q)
         if gif_url is not None:

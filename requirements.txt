@@ -15,7 +15,7 @@ pytube~=12.1
 pytz~=2022.6
 redis~=3.5
 sqlalchemy~=2.0.0b3
-tldrwl>=1.0.0,<2.0.0
+tldrwl>=1.1.1,<2.0.0
 
 # Additional requirements for web
 quart~=0.18

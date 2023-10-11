@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 from dicebot.commands import giffer
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReactionHandler
@@ -31,6 +32,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             return False
 
         if await self.was_reacted_before(ctx):
+            logging.warning("New reaction on message but it was reacted before.")
             return False
 
         assert ctx.reaction is not None
@@ -58,6 +60,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
         handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
         for handler in handlers:
             if handler.reaction_equal(ctx.reaction):
+                logging.info(f"Using custom reaction logic for {ctx.reaction}: {handler.gif_search}")
                 gif_url = await giffer.get_random_gif_url(handler.gif_search)
                 if gif_url is not None:
                     await ctx.quote_reply(gif_url)

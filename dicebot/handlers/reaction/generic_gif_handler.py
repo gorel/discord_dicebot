@@ -56,6 +56,8 @@ class GenericGifReactionHandler(AbstractReactionHandler):
         assert ctx.reactor is not None
         assert not isinstance(ctx.reaction.emoji, str)
 
+        logging.info(f"Calling handle for reaction {ctx.reaction}")
+
         # First check this server's custom reactions
         handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
         for handler in handlers:

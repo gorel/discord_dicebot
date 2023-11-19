@@ -50,7 +50,7 @@ DEFAULT_CRITICAL_FAILURE_MSG = "critical failure!"
 DEFAULT_GUILD_TZ = "US/Pacific"
 
 
-REACTION_EXTRACTOR_REGEX = re.compile(r"<:(\w+):(\d+)>")
+REACTION_EXTRACTOR_REGEX = re.compile(r"<a?:(\w+):(\d+)>")
 
 
 # Many-to-many assoc to link guilds to features

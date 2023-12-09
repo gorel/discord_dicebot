@@ -68,8 +68,9 @@ StrTypifiable = (
 async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
+    logger = logging.getLogger(__name__)
+    logger.info(f"Typifying {value} as {typ}")
     if isinstance(typ, Time):
-        logger = logging.getLogger(__name__)
         logger.warn(f"TYPIFYING TIME: {value} with ctx={ctx}")
         return Time(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Protocol, runtime_checkable
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -68,6 +69,8 @@ async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
     if isinstance(typ, Time):
+        logger = logging.getLogger(__name__)
+        logger.warn(f"TYPIFYING TIME: {value} with ctx={ctx}")
         return Time(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):
         # assert getattr(typ, "from_str", None) is not None

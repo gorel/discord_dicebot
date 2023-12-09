@@ -23,7 +23,7 @@ class Time:
     # Adapted from https://stackoverflow.com/a/13430049
     def _parse_future(self, s: str, tz: datetime.tzinfo | None) -> datetime.datetime:
         """Same as dateutil.parser.parse() but only returns future dates."""
-        now = datetime.datetime.now(tz=tz)
+        now = datetime.datetime.now(tz=tz).replace(second=0, microsecond=0)
         default = now
         for _ in range(365):
             dt = dateutil.parser.parse(s, default=default)

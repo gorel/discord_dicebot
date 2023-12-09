@@ -20,6 +20,7 @@ class Time:
             timezone = None
             if ctx is not None:
                 try:
+                    self.logger.info(f"Trying to parse timezone: {ctx.guild.timezone}")
                     timezone = pytz.timezone(ctx.guild.timezone)
                     self.logger.info(f"Parsed guild timezone: {timezone}")
                 except Exception:

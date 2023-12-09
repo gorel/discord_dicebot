@@ -29,10 +29,10 @@ class Time:
             self.seconds = int((self.datetime - now).total_seconds())
             if self.datetime - now < datetime.timedelta(days=1):
                 # Just print like 10:00am
-                self.str = self.datetime.strftime("at %I:%M%P")
+                self.str = self.datetime.strftime("at %-I:%M%P")
             else:
                 # Full date string
-                self.str = self.datetime.strftime("at %Y-%m-%d %I:%M%P")
+                self.str = self.datetime.strftime("at %Y-%m-%d %-I:%M%P")
             logger.info(f"Parsed to {self.str} ({self.datetime})")
         except Exception:
             self.datetime = None

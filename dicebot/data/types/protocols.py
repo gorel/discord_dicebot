@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
+from data.types.time import Time
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.data.types.message_context import MessageContext
@@ -31,6 +32,20 @@ class _StrCallProtocol(Protocol):
 
 
 @runtime_checkable
+class _StrCallWithCtxProtocol(Protocol):
+    def __init__(self, s: str, ctx: MessageContext | None = None) -> None:
+        """Class that accepts a string and ctx constructor."""
+
+    @classmethod
+    def __call__(
+        cls, s: str, ctx: MessageContext | None = None
+    ) -> _StrCallWithCtxProtocol:
+        """Class that accepts a string and ctx constructor.
+        Duplicating this as __call__ helps the type checker."""
+        return cls(s, ctx)
+
+
+@runtime_checkable
 class _LoadFromCmdStrProtocol(Protocol):
     @classmethod
     async def load_from_cmd_str(
@@ -40,12 +55,20 @@ class _LoadFromCmdStrProtocol(Protocol):
         return await cls.load_from_cmd_str(session, s)
 
 
-StrTypifiable = _FromStrProtocol | _StrCallProtocol | _LoadFromCmdStrProtocol
+StrTypifiable = (
+    _FromStrProtocol
+    | _StrCallProtocol
+    | _StrCallWithCtxProtocol
+    | _LoadFromCmdStrProtocol
+    | Time  # A very special case
+)
 
 
 async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
+    if isinstance(typ, Time):
+        return Time(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):
         # assert getattr(typ, "from_str", None) is not None
         return typ.from_str(value)

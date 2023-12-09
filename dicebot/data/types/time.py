@@ -4,18 +4,28 @@ import datetime
 import logging
 
 import dateutil.parser
+import pytz
+
+from dicebot.data.types.message_context import MessageContext
 
 
 class Time:
-    def __init__(self, s: str) -> None:
+    def __init__(self, s: str, ctx: MessageContext | None = None) -> None:
         logger = logging.getLogger(__name__)
         if "@" in s:
             s = s.replace("@", " ")
         self.s = s
         try:
             logger.info(f"Trying to parse {s} as a datetime")
-            now = datetime.datetime.now()
-            self.datetime = self._parse_future(s)
+            timezone = None
+            if ctx is not None:
+                try:
+                    timezone = pytz.timezone(ctx.guild.timezone)
+                    logger.info(f"Parsed guild timezone: {timezone}")
+                except Exception:
+                    pass
+            now = datetime.datetime.now(tz=timezone)
+            self.datetime = self._parse_future(s, timezone)
             self.seconds = int((self.datetime - now).total_seconds())
             if self.datetime - now < datetime.timedelta(days=1):
                 # Just print like 10:00am
@@ -31,9 +41,9 @@ class Time:
             logger.info(f"Parsed to {self.str} -- could not parse as datetime")
 
     # Adapted from https://stackoverflow.com/a/13430049
-    def _parse_future(self, s: str) -> datetime.datetime:
+    def _parse_future(self, s: str, tz: datetime.tzinfo | None) -> datetime.datetime:
         """Same as dateutil.parser.parse() but only returns future dates."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=tz)
         default = now
         for _ in range(365):
             dt = dateutil.parser.parse(s, default=default)

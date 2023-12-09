@@ -11,9 +11,11 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class Time:
+    s: str
+
     def __init__(self, s: str) -> None:
-        self.s = s
         self.logger = logging.getLogger(__name__)
+        self.s = s
         self.datetime = None
         self.seconds = self._old_style_seconds(s)
         self.str = f"in {self.s} ({self.seconds} seconds)"
@@ -65,7 +67,7 @@ class Time:
 
     @classmethod
     def from_str_with_ctx(cls, s: str, ctx: MessageContext) -> Time:
-        res = cls(s)
+        res = cls("0s")
 
         if "@" in s:
             s = s.replace("@", " ")

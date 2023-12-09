@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from typing import Protocol, runtime_checkable
 
-from data.types.time import Time
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.data.types.message_context import MessageContext
+from dicebot.data.types.time import Time
 
 
 @runtime_checkable

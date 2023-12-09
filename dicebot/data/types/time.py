@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from __future__ import annotations
 
 import datetime
 import logging
@@ -10,36 +11,12 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class Time:
-    def __init__(self, s: str, ctx: MessageContext | None = None) -> None:
-        self.logger = logging.getLogger(__name__)
-        if "@" in s:
-            s = s.replace("@", " ")
+    def __init__(self, s: str) -> None:
         self.s = s
-        try:
-            self.logger.info(f"Trying to parse {s} as a datetime")
-            timezone = None
-            if ctx is not None:
-                try:
-                    self.logger.info(f"Trying to parse timezone: {ctx.guild.timezone}")
-                    timezone = pytz.timezone(ctx.guild.timezone)
-                    self.logger.info(f"Parsed guild timezone: {timezone}")
-                except Exception:
-                    pass
-            now = datetime.datetime.now(tz=timezone)
-            self.datetime = self._parse_future(s, timezone)
-            self.seconds = int((self.datetime - now).total_seconds())
-            if self.datetime - now < datetime.timedelta(days=1):
-                # Just print like 10:00am
-                self.str = self.datetime.strftime("at %-I:%M%P")
-            else:
-                # Full date string
-                self.str = self.datetime.strftime("at %Y-%m-%d %-I:%M%P")
-            self.logger.info(f"Parsed to {self.str} ({self.datetime})")
-        except Exception:
-            self.datetime = None
-            self.seconds = self._old_style_seconds(s)
-            self.str = f"in {self.s} ({self.seconds} seconds)"
-            self.logger.info(f"Parsed to {self.str} -- could not parse as datetime")
+        self.logger = logging.getLogger(__name__)
+        self.datetime = None
+        self.seconds = self._old_style_seconds(s)
+        self.str = f"in {self.s} ({self.seconds} seconds)"
 
     # Adapted from https://stackoverflow.com/a/13430049
     def _parse_future(self, s: str, tz: datetime.tzinfo | None) -> datetime.datetime:
@@ -85,3 +62,38 @@ class Time:
 
     def __repr__(self) -> str:
         return str(self)
+
+    @classmethod
+    def from_str_with_ctx(cls, s: str, ctx: MessageContext) -> Time:
+        res = cls(s)
+
+        if "@" in s:
+            s = s.replace("@", " ")
+        res.s = s
+        try:
+            res.logger.info(f"Trying to parse {s} as a datetime")
+            timezone = None
+            if ctx is not None:
+                try:
+                    res.logger.info(f"Trying to parse timezone: {ctx.guild.timezone}")
+                    timezone = pytz.timezone(ctx.guild.timezone)
+                    res.logger.info(f"Parsed guild timezone: {timezone}")
+                except Exception:
+                    pass
+            now = datetime.datetime.now(tz=timezone)
+            res.datetime = res._parse_future(s, timezone)
+            res.seconds = int((res.datetime - now).total_seconds())
+            if res.datetime - now < datetime.timedelta(days=1):
+                # Just print like 10:00am
+                res.str = res.datetime.strftime("at %-I:%M%P")
+            else:
+                # Full date string
+                res.str = res.datetime.strftime("at %Y-%m-%d %-I:%M%P")
+            res.logger.info(f"Parsed to {res.str} ({res.datetime})")
+        except Exception:
+            res.datetime = None
+            res.seconds = res._old_style_seconds(s)
+            res.str = f"in {res.s} ({res.seconds} seconds)"
+            res.logger.info(f"Parsed to {res.str} -- could not parse as datetime")
+
+        return res

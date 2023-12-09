@@ -19,6 +19,15 @@ class _FromStrProtocol(Protocol):
 
 
 @runtime_checkable
+class _FromStrWithCtxProtocol(Protocol):
+    @classmethod
+    def from_str_with_ctx(cls, s: str, ctx: MessageContext) -> _FromStrProtocol:
+        """Class method that constructs itself from a string"""
+        # Appease the type checker
+        return cls.from_str_with_ctx(s, ctx)
+
+
+@runtime_checkable
 class _StrCallProtocol(Protocol):
     def __init__(self, s: str) -> None:
         """Class that accepts a string single-argument constructor."""
@@ -28,20 +37,6 @@ class _StrCallProtocol(Protocol):
         """Class that accepts a string single-argument constructor.
         Duplicating this as __call__ helps the type checker."""
         return cls(s)
-
-
-@runtime_checkable
-class _StrCallWithCtxProtocol(Protocol):
-    def __init__(self, s: str, ctx: MessageContext | None = None) -> None:
-        """Class that accepts a string and ctx constructor."""
-
-    @classmethod
-    def __call__(
-        cls, s: str, ctx: MessageContext | None = None
-    ) -> _StrCallWithCtxProtocol:
-        """Class that accepts a string and ctx constructor.
-        Duplicating this as __call__ helps the type checker."""
-        return cls(s, ctx)
 
 
 @runtime_checkable
@@ -56,8 +51,8 @@ class _LoadFromCmdStrProtocol(Protocol):
 
 StrTypifiable = (
     _FromStrProtocol
+    | _FromStrWithCtxProtocol
     | _StrCallProtocol
-    | _StrCallWithCtxProtocol
     | _LoadFromCmdStrProtocol
 )
 
@@ -65,8 +60,8 @@ StrTypifiable = (
 async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
-    if isinstance(typ, _StrCallWithCtxProtocol):
-        return typ(value, ctx=ctx)
+    if isinstance(typ, _FromStrWithCtxProtocol):
+        return typ.from_str_with_ctx(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):
         # assert getattr(typ, "from_str", None) is not None
         return typ.from_str(value)

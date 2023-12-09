@@ -1,29 +1,34 @@
 #!/usr/bin/env python3
 
 import datetime
+import logging
 
 import dateutil.parser
 
 
 class Time:
     def __init__(self, s: str) -> None:
+        logger = logging.getLogger(__name__)
         if "@" in s:
             s = s.replace("@", " ")
         self.s = s
         try:
+            logger.info(f"Trying to parse {s} as a datetime")
             now = datetime.datetime.now()
             self.datetime = self._parse_future(s)
             self.seconds = int((self.datetime - now).total_seconds())
             if self.datetime - now < datetime.timedelta(days=1):
                 # Just print like 10:00am
-                self.str = self.datetime.strftime("%H:%M%P")
+                self.str = self.datetime.strftime("at %I:%M%P")
             else:
                 # Full date string
-                self.str = self.datetime.strftime("%Y-%m-%d %H:%M%P")
+                self.str = self.datetime.strftime("at %Y-%m-%d %I:%M%P")
+            logger.info("Parsed to {self.str} ({self.datetime})")
         except Exception:
             self.datetime = None
             self.seconds = self._old_style_seconds(s)
-            self.str = f"{self.s} ({self.seconds} seconds)"
+            self.str = f"in {self.s} ({self.seconds} seconds)"
+            logger.info("Parsed to {self.str} -- could not parse as datetime")
 
     # Adapted from https://stackoverflow.com/a/13430049
     def _parse_future(self, s: str) -> datetime.datetime:

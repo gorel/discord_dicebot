@@ -23,12 +23,12 @@ class Time:
             else:
                 # Full date string
                 self.str = self.datetime.strftime("at %Y-%m-%d %I:%M%P")
-            logger.info("Parsed to {self.str} ({self.datetime})")
+            logger.info(f"Parsed to {self.str} ({self.datetime})")
         except Exception:
             self.datetime = None
             self.seconds = self._old_style_seconds(s)
             self.str = f"in {self.s} ({self.seconds} seconds)"
-            logger.info("Parsed to {self.str} -- could not parse as datetime")
+            logger.info(f"Parsed to {self.str} -- could not parse as datetime")
 
     # Adapted from https://stackoverflow.com/a/13430049
     def _parse_future(self, s: str) -> datetime.datetime:

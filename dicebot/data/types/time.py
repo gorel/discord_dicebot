@@ -11,17 +11,17 @@ from dicebot.data.types.message_context import MessageContext
 
 class Time:
     def __init__(self, s: str, ctx: MessageContext | None = None) -> None:
-        logger = logging.getLogger(__name__)
+        self.logger = logging.getLogger(__name__)
         if "@" in s:
             s = s.replace("@", " ")
         self.s = s
         try:
-            logger.info(f"Trying to parse {s} as a datetime")
+            self.logger.info(f"Trying to parse {s} as a datetime")
             timezone = None
             if ctx is not None:
                 try:
                     timezone = pytz.timezone(ctx.guild.timezone)
-                    logger.info(f"Parsed guild timezone: {timezone}")
+                    self.logger.info(f"Parsed guild timezone: {timezone}")
                 except Exception:
                     pass
             now = datetime.datetime.now(tz=timezone)
@@ -33,12 +33,12 @@ class Time:
             else:
                 # Full date string
                 self.str = self.datetime.strftime("at %Y-%m-%d %-I:%M%P")
-            logger.info(f"Parsed to {self.str} ({self.datetime})")
+            self.logger.info(f"Parsed to {self.str} ({self.datetime})")
         except Exception:
             self.datetime = None
             self.seconds = self._old_style_seconds(s)
             self.str = f"in {self.s} ({self.seconds} seconds)"
-            logger.info(f"Parsed to {self.str} -- could not parse as datetime")
+            self.logger.info(f"Parsed to {self.str} -- could not parse as datetime")
 
     # Adapted from https://stackoverflow.com/a/13430049
     def _parse_future(self, s: str, tz: datetime.tzinfo | None) -> datetime.datetime:
@@ -47,6 +47,7 @@ class Time:
         default = now
         for _ in range(365):
             dt = dateutil.parser.parse(s, default=default)
+            self.logger.info(f"Parsed {dt} (vs now, {now})")
             if dt > now:
                 return dt
             default += datetime.timedelta(days=1)

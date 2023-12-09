@@ -44,6 +44,9 @@ class Client(discord.Client):
             discord.Game("Neovim", start=start),
         ]
         choice = random.choice(activities)
+        # If it's December, presence = advent of code
+        if start.month == 12:
+            choice = discord.Game("Advent of Code", start=start)
         # Don't set presence in test mode
         if not self.is_test:
             logging.info(f"Setting presence to {choice}")

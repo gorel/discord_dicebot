@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-import logging
 from typing import Protocol, runtime_checkable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.data.types.message_context import MessageContext
-from dicebot.data.types.time import Time
 
 
 @runtime_checkable
@@ -61,18 +59,14 @@ StrTypifiable = (
     | _StrCallProtocol
     | _StrCallWithCtxProtocol
     | _LoadFromCmdStrProtocol
-    | Time  # A very special case
 )
 
 
 async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
-    logger = logging.getLogger(__name__)
-    logger.info(f"Typifying {value} as {typ}")
-    if isinstance(typ, Time):
-        logger.warn(f"TYPIFYING TIME: {value} with ctx={ctx}")
-        return Time(value, ctx=ctx)
+    if isinstance(typ, _StrCallWithCtxProtocol):
+        return typ(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):
         # assert getattr(typ, "from_str", None) is not None
         return typ.from_str(value)

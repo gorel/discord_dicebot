@@ -24,14 +24,19 @@ class Time:
     def _parse_future(self, s: str, tz: datetime.tzinfo | None) -> datetime.datetime:
         """Same as dateutil.parser.parse() but only returns future dates."""
         now = datetime.datetime.now(tz=tz).replace(second=0, microsecond=0)
-        default = now
+        default = None
         for _ in range(365):
             dt = dateutil.parser.parse(s, default=default)
+            if tz is not None:
+                dt = dt.astimezone(tz)
             self.logger.info(f"Parsed {dt} (vs now, {now})")
             if dt > now:
                 return dt
-            default += datetime.timedelta(days=1)
-            default = default.replace(hour=0, minute=0, second=0, microsecond=0)
+            if default is None:
+                default = now
+            else:
+                default += datetime.timedelta(days=1)
+                default = default.replace(hour=0, minute=0, second=0, microsecond=0)
         raise ValueError("Could not parse future date")
 
     def _old_style_seconds(self, s: str) -> int:

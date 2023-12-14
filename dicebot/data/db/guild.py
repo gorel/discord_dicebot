@@ -103,6 +103,10 @@ class Guild(Base):
         secondary=guild_feature_assoc, lazy="selectin"
     )
 
+    @property
+    def turbo_reaction_threshold(self) -> bigint:
+        return self.turboban_threshold
+
     # Methods
     async def unban(self, session: AsyncSession, target: User) -> None:
         await Ban.unban(session, self, target)

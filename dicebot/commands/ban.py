@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import random
 import time
 from typing import Optional
 
@@ -12,12 +13,19 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 from dicebot.tasks.unban import unban as unban_task
 
+VERY_BAD_THRESHOLD = 0.05
+
 
 # Intentionally *not* a registered command
 async def ban_internal(
     ctx: MessageContext, target: User, timer: Time, ban_as_bot: bool, reason: str
 ) -> None:
     """Ban a user for a given amount of time"""
+    if random.random() < VERY_BAD_THRESHOLD:
+        msg = "I have decided that {timer} is not enough.\n"
+        msg += "Let's multiply that by 10."
+        await ctx.channel.send(msg)
+        timer.seconds *= 10
     new_ban = int(time.time()) + timer.seconds
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id

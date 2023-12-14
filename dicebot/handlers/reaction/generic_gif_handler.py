@@ -72,7 +72,9 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             turbo = ["T_", "U_", "R_", "B_", "O_"]
             turbo_str = "".join(emojis[s] for s in turbo)
             name = [f"{char}_" for char in ctx.reaction.emoji.name.upper()]
-            name_str = "".join(emojis[s] for s in name if s in string.ascii_uppercase)
+            name_str = "".join(
+                emojis[s] for s in name if s[0] in string.ascii_uppercase
+            )
             turbo_msg = f"{turbo_str} {name_str}"
             await ctx.quote_reply(turbo_msg)
 

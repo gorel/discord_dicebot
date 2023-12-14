@@ -22,7 +22,7 @@ async def ban_internal(
 ) -> None:
     """Ban a user for a given amount of time"""
     if random.random() < VERY_BAD_THRESHOLD:
-        msg = "I have decided that {timer} is not enough.\n"
+        msg = f"I have decided that {timer} is not enough.\n"
         msg += "Let's multiply that by 10."
         await ctx.channel.send(msg)
         timer.seconds *= 10

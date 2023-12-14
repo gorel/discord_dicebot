@@ -2,6 +2,7 @@
 
 import datetime
 import logging
+import string
 
 from dicebot.commands import giffer
 from dicebot.data.types.message_context import MessageContext
@@ -71,7 +72,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
             turbo = ["T_", "U_", "R_", "B_", "O_"]
             turbo_str = "".join(emojis[s] for s in turbo)
             name = [f"{char}_" for char in ctx.reaction.emoji.name.upper()]
-            name_str = "".join(emojis[s] for s in name)
+            name_str = "".join(emojis[s] for s in name if s in string.ascii_uppercase)
             turbo_msg = f"{turbo_str} {name_str}"
             await ctx.quote_reply(turbo_msg)
 

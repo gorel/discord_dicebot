@@ -32,4 +32,4 @@ class TestGiffer(DicebotTestCase):
         # Act
         await giffer.gif(ctx, GreedyStr("a b c"))
         # Assert
-       ctx.channel.send.assert_awaited_once_with(mock_get_random_gif_url.return_value)
+        ctx.channel.send.assert_awaited_once_with(mock_get_random_gif_url.return_value)

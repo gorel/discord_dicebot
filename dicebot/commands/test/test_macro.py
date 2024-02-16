@@ -70,4 +70,4 @@ class TestMacro(DicebotTestCase):
             # Act
             await macro.m(ctx, "key")
             # Assert
-            ctx.channel.send.assert_awaited_once_with(mock_macro.value)
+            ctx.channel.send.assert_awaited_once_with(mock_macro.value, silent=True)

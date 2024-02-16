@@ -52,7 +52,7 @@ class TestResolution(DicebotTestCase):
             # Assert
             mock_resolution.get_all_for_user.assert_awaited_once()
             ctx.channel.send.assert_awaited_once()
-            self.assertNotIn("Your resolutions", ctx.channel.send.await_args.args[0])
+            self.assertIn("Your resolutions", ctx.channel.send.await_args.args[0])
         with self.subTest("no resolutions"):
             # Arrange
             ctx = TestMessageContext.get()

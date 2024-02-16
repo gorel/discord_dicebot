@@ -32,4 +32,4 @@ async def meme(ctx: MessageContext, q: GreedyStr) -> None:
 
     image_bytes = MemeGenerator.get_meme_image_bytes(template_str, args)
     fmt = template.image_file_path.split(".")[-1]
-    await ctx.send(file=discord.File(image_bytes, f"meme.{fmt}"))
+    await ctx.channel.send(file=discord.File(image_bytes, f"meme.{fmt}"), silent=True)

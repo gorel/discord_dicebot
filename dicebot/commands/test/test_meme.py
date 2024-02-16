@@ -21,7 +21,7 @@ class TestMeme(DicebotTestCase):
         mock_memegenerator.get_meme_image_bytes.assert_called_once_with(
             expected_template, expected_args
         )
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()
 
     @patch("dicebot.commands.meme.MemeGenerator")
     async def test_meme_list(self, mock_memegenerator) -> None:
@@ -32,7 +32,7 @@ class TestMeme(DicebotTestCase):
             await meme.meme(ctx, GreedyStr("list"))
         # Assert
         mock_memegenerator.get_meme_image_bytes.assert_not_called()
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()
 
     @patch("dicebot.commands.meme.MemeFactory")
     @patch("dicebot.commands.meme.MemeGenerator")
@@ -44,4 +44,4 @@ class TestMeme(DicebotTestCase):
         await meme.meme(ctx, GreedyStr("list"))
         # Assert
         mock_memegenerator.get_meme_image_bytes.assert_not_called()
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()

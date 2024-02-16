@@ -11,4 +11,4 @@ class TestWeb(DicebotTestCase):
         # Act
         await web.web(ctx)
         # Assert
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()

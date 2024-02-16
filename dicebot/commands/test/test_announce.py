@@ -127,7 +127,7 @@ class TestAnnounce(DicebotTestCase):
         # Act
         await announce.set_announce_channel(ctx)
         # Assert
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()
         self.assertEqual(ctx.channel.id, ctx.guild.primary_text_channel)
         ctx.session.commit.assert_awaited_once()
 
@@ -137,6 +137,6 @@ class TestAnnounce(DicebotTestCase):
         # Act
         await announce.disable_announcements(ctx)
         # Assert
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()
         self.assertTrue(ctx.guild.disable_announcements)
         ctx.session.commit.assert_awaited_once()

@@ -12,4 +12,4 @@ class TestScoreboard(DicebotTestCase):
         await scoreboard.scoreboard(ctx)
         # Assert
         ctx.guild.roll_scoreboard_str.assert_awaited_once()
-        ctx.send.assert_awaited_once()
+        ctx.channel.send.assert_awaited_once()

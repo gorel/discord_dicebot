@@ -19,7 +19,7 @@ class TestMacro(DicebotTestCase):
             # Assert
             ctx.guild.add_macro.assert_awaited_once()
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("macro exists"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -29,7 +29,7 @@ class TestMacro(DicebotTestCase):
             # Assert
             ctx.guild.add_macro.assert_not_awaited()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
 
     async def test_macro_del(self) -> None:
         with self.subTest("new macro"):
@@ -40,7 +40,7 @@ class TestMacro(DicebotTestCase):
             await macro.macro_del(ctx, "key")
             # Assert
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("macro exists"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -51,7 +51,7 @@ class TestMacro(DicebotTestCase):
             # Assert
             ctx.session.delete.assert_awaited_once_with(mock_macro)
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
 
     async def test_m(self) -> None:
         with self.subTest("new macro"):
@@ -61,7 +61,7 @@ class TestMacro(DicebotTestCase):
             # Act
             await macro.m(ctx, "key")
             # Assert
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("macro exists"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -70,4 +70,4 @@ class TestMacro(DicebotTestCase):
             # Act
             await macro.m(ctx, "key")
             # Assert
-            ctx.send.assert_awaited_once_with(mock_macro.value)
+            ctx.channel.send.assert_awaited_once_with(mock_macro.value)

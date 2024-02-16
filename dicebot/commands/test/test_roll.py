@@ -30,7 +30,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_called_once()
             mock_ban.ban_internal.assert_not_awaited()
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
         with self.subTest("first roll ever"):
             # Arrange
             mock_roll.reset_mock()
@@ -48,7 +48,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_called_once()
             mock_ban.ban_internal.assert_not_awaited()
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
         with self.subTest("rolled recently"):
             # Arrange
             mock_roll.reset_mock()
@@ -68,7 +68,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_not_called()
             mock_ban.ban_internal.assert_awaited_once()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("rolled 1"):
             # Arrange
             mock_roll.reset_mock()
@@ -86,7 +86,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_called_once()
             mock_ban.ban_internal.assert_awaited_once()
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
         with self.subTest("rolled one off"):
             # Arrange
             mock_roll.reset_mock()
@@ -105,7 +105,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_called_once()
             mock_ban.ban_internal.assert_not_awaited()
             ctx.session.commit.assert_awaited()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
             ctx.guild.add_chat_rename.assert_awaited_once()
             ctx.guild.add_guild_rename.assert_not_awaited()
         with self.subTest("rolled win"):
@@ -126,7 +126,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_called_once()
             mock_ban.ban_internal.assert_not_awaited()
             ctx.session.commit.assert_awaited()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
             ctx.guild.add_chat_rename.assert_not_awaited()
             ctx.guild.add_guild_rename.assert_awaited_once()
 
@@ -151,7 +151,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_not_called()
             mock_ban.ban_internal.assert_awaited_once()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
             ctx.guild.add_chat_rename.assert_not_awaited()
             ctx.guild.add_guild_rename.assert_not_awaited()
         with self.subTest("too high"):
@@ -172,7 +172,7 @@ class TestRoll(DicebotTestCase):
             mock_roll.assert_not_called()
             mock_ban.ban_internal.assert_not_awaited()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
             ctx.guild.add_chat_rename.assert_not_awaited()
             ctx.guild.add_guild_rename.assert_not_awaited()
         with self.subTest("turboban"):
@@ -195,7 +195,7 @@ class TestRoll(DicebotTestCase):
             mock_ban.ban_internal.assert_not_awaited()
             mock_ban.turboban.assert_awaited_once()
             ctx.session.commit.assert_awaited()
-            ctx.send.assert_awaited()
+            ctx.channel.send.assert_awaited()
             ctx.guild.add_chat_rename.assert_not_awaited()
             ctx.guild.add_guild_rename.assert_not_awaited()
 
@@ -208,7 +208,7 @@ class TestRoll(DicebotTestCase):
             # Assert
             self.assertEqual(123, ctx.guild.gambling_limit)
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("negative"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -217,4 +217,4 @@ class TestRoll(DicebotTestCase):
             # Assert
             self.assertIsNone(ctx.guild.gambling_limit)
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()

@@ -77,7 +77,7 @@ class TestTimezone(DicebotTestCase):
             # Assert
             self.assertEqual(tz, ctx.guild.timezone)
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("invalid timezone"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -85,4 +85,4 @@ class TestTimezone(DicebotTestCase):
             # Act
             await timezone.set_tz(ctx, tz)
             # Assert
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()

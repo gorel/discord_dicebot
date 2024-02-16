@@ -23,7 +23,7 @@ class TestResolution(DicebotTestCase):
             mock_remind_task.apply_async.assert_called_once()
             ctx.session.commit.assert_awaited_once()
             ctx.session.refresh.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("invalid"):
             # Arrange
             mock_resolution.reset_mock()
@@ -34,7 +34,7 @@ class TestResolution(DicebotTestCase):
             # Assert
             mock_resolution.assert_not_called()
             mock_remind_task.apply_async.assert_not_called()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
 
     @patch("dicebot.commands.resolution.Resolution")
     async def test_my_resolutions(self, mock_resolution) -> None:
@@ -51,8 +51,8 @@ class TestResolution(DicebotTestCase):
             await resolution.my_resolutions(ctx)
             # Assert
             mock_resolution.get_all_for_user.assert_awaited_once()
-            ctx.send.assert_awaited_once()
-            self.assertIn("Your resolutions", ctx.send.await_args.args[0])
+            ctx.channel.send.assert_awaited_once()
+            self.assertNotIn("Your resolutions", ctx.channel.send.await_args.args[0])
         with self.subTest("no resolutions"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -62,9 +62,8 @@ class TestResolution(DicebotTestCase):
             await resolution.my_resolutions(ctx)
             # Assert
             mock_resolution.get_all_for_user.assert_awaited_once()
-            ctx.send.assert_awaited_once()
-            self.assertNotIn("Your resolutions", ctx.send.await_args.args[0])
-
+            ctx.channel.send.assert_awaited_once()
+            self.assertNotIn("Your resolutions", ctx.channel.send.await_args.args[0])
     @patch("dicebot.commands.resolution.Resolution")
     async def test_delete_resolution(self, mock_resolution) -> None:
         with self.subTest("simple"):
@@ -81,7 +80,7 @@ class TestResolution(DicebotTestCase):
             mock_resolution.get_or_none.assert_awaited_once()
             self.assertFalse(mock_res.active)
             ctx.session.commit.assert_awaited_once()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("bad resolution id"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -91,7 +90,7 @@ class TestResolution(DicebotTestCase):
             # Assert
             mock_resolution.get_or_none.assert_awaited_once()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()
         with self.subTest("not the author"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -102,4 +101,4 @@ class TestResolution(DicebotTestCase):
             # Assert
             mock_resolution.get_or_none.assert_awaited_once()
             ctx.session.commit.assert_not_awaited()
-            ctx.send.assert_awaited_once()
+            ctx.channel.send.assert_awaited_once()

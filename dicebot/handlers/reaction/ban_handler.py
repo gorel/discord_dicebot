@@ -58,7 +58,7 @@ class BanReactionHandler(AbstractReactionHandler):
                 f"What's this?! {ctx.reaction.count} bans against _me?_\n"
                 "Perhaps I was too harsh on you all."
             )
-            await ctx.reaction.message.channel.send(msg)
+            await ctx.reaction.message.channel.send(msg, silent=True)
             await asyncio.sleep(1)
             async for user in ctx.reaction.users():
                 discord_user = await User.get_or_create(ctx.session, user.id)

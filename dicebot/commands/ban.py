@@ -43,7 +43,7 @@ async def ban_internal(
         await ctx.channel.send(
             f"<@{banner_id}> has banned <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
-            "May God have mercy on your soul."
+            "May God have mercy os your soul."
         )
 
     # Record this ban in the db

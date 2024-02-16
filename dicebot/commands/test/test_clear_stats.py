@@ -12,4 +12,4 @@ class TestClearStats(DicebotTestCase):
         await clear_stats.clear_stats(ctx)
         # Assert
         ctx.guild.clear_stats.assert_awaited_once_with(ctx.session)
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()

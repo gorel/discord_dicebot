@@ -64,7 +64,7 @@ class TestBan(DicebotTestCase):
         # Assert
         ctx.guild.unban.assert_awaited_once()
         ctx.session.commit.assert_awaited_once()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
 
     @patch("dicebot.commands.ban.unban_internal", autospec=True)
     async def test_unban(self, mock_unban_internal) -> None:
@@ -83,7 +83,7 @@ class TestBan(DicebotTestCase):
         await ban.ban_leaderboard(ctx)
         # Assert
         ctx.guild.ban_scoreboard_str.assert_awaited_once()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
 
     @patch("dicebot.commands.ban.ban_internal", autospec=True)
     async def test_turboban(self, mock_ban_internal) -> None:

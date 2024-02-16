@@ -34,7 +34,7 @@ class CommandHandler(AbstractHandler):
                 text = self.helptext(func)
             else:
                 text = self.helptext()
-            await ctx.channel.send(text)
+            await ctx.send(text)
             # Early return - just send help text and quit
             return
 
@@ -47,7 +47,7 @@ class CommandHandler(AbstractHandler):
             func = ctx.message.content[1:end]
             helptext = self.helptext(func)
             logging.exception(f"Failed to call command: {e}")
-            await ctx.channel.send(helptext)
+            await ctx.send(helptext)
 
     def helptext(self, cmd: Optional[str] = None) -> str:
         if cmd is not None:

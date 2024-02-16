@@ -49,7 +49,7 @@ class TestRename(DicebotTestCase):
             # Act
             await rename.rename(ctx, GreedyStr("new name"))
             # Assert
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
             ctx.session.commit.assert_not_awaited()
         with self.subTest("dm channel"):
             # Arrange

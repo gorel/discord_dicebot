@@ -14,4 +14,4 @@ async def time(ctx: MessageContext) -> None:
     tz = pytz.timezone(ctx.guild.timezone)
     now = datetime.datetime.now(tz=tz)
     localized_str = now.strftime("%I:%M %p %Z")
-    await ctx.channel.send(f"The current time in this server is {localized_str}")
+    await ctx.send(f"The current time in this server is {localized_str}")

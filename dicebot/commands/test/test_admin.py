@@ -66,7 +66,7 @@ class TestAdmin(DicebotTestCase):
         # Assert
         ctx.guild.admins.append.assert_called_once_with(target)
         ctx.session.commit.assert_awaited()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
 
     async def test_remove_admin(self) -> None:
         # Arrange
@@ -78,7 +78,7 @@ class TestAdmin(DicebotTestCase):
         # Assert
         ctx.guild.admins.remove.assert_called_once_with(target)
         ctx.session.commit.assert_awaited()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
 
     async def test_remove_admin_only_one_left(self) -> None:
         # Arrange
@@ -88,7 +88,7 @@ class TestAdmin(DicebotTestCase):
         # Act
         await admin.remove_admin(ctx, target)
         # Assert
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
         ctx.guild.admins.remove.assert_not_called()
         ctx.session.commit.assert_not_awaited()
 
@@ -99,7 +99,7 @@ class TestAdmin(DicebotTestCase):
             # Act
             await admin.set_msg(ctx, SetMessageSubcommand.WIN, msg=GreedyStr("win"))
             # Assert
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
             self.assertEqual("win", ctx.guild.critical_success_msg)
             ctx.session.commit.assert_awaited_once()
         with self.subTest("lose"):
@@ -108,7 +108,7 @@ class TestAdmin(DicebotTestCase):
             # Act
             await admin.set_msg(ctx, SetMessageSubcommand.LOSE, msg=GreedyStr("lose"))
             # Assert
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
             self.assertEqual("lose", ctx.guild.critical_failure_msg)
             ctx.session.commit.assert_awaited_once()
 
@@ -118,7 +118,7 @@ class TestAdmin(DicebotTestCase):
         # Act
         await admin.set_reaction_threshold(ctx, 123)
         # Assert
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
         self.assertEqual(123, ctx.guild.reaction_threshold)
         ctx.session.commit.assert_awaited_once()
 
@@ -128,7 +128,7 @@ class TestAdmin(DicebotTestCase):
         # Act
         await admin.set_timeout(ctx, 456)
         # Assert
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
         self.assertEqual(456, ctx.guild.roll_timeout)
         ctx.session.commit.assert_awaited_once()
 
@@ -138,7 +138,7 @@ class TestAdmin(DicebotTestCase):
         # Act
         await admin.set_turbo_ban_timing_threshold(ctx, 789)
         # Assert
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
         self.assertEqual(789, ctx.guild.turboban_threshold)
         ctx.session.commit.assert_awaited_once()
 
@@ -153,6 +153,6 @@ class TestAdmin(DicebotTestCase):
             # Act
             await admin.toggle_shame(ctx)
             # Assert
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
             self.assertTrue(mock_channel.shame)
             ctx.session.commit.assert_awaited_once()

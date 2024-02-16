@@ -27,4 +27,4 @@ class HbdHandler(AbstractHandler):
             await ctx.message.add_reaction(guild_emojis["this_tbh"])
         elif "this_tbh" in all_emojis.keys():
             await ctx.message.add_reaction(all_emojis["this_tbh"])
-        await ctx.channel.send("^")
+        await ctx.send("^")

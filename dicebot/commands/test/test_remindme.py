@@ -16,5 +16,5 @@ class TestRemindMe(DicebotTestCase):
         # Act
         await remindme.remindme(ctx, Time("1hr"), GreedyStr("reminder"))
         # Assert
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()
         mock_send_reminder.apply_async.assert_called_once()

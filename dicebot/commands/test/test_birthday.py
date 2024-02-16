@@ -20,7 +20,7 @@ class TestBirthday(DicebotTestCase):
             # Assert
             self.assertEqual(expected, ctx.author.birthday)
             ctx.session.commit.assert_awaited()
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
         with self.subTest("invalid"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -30,4 +30,4 @@ class TestBirthday(DicebotTestCase):
             await birthday.birthday(ctx, GreedyStr(birthday_str))
             # Assert
             ctx.session.commit.assert_not_awaited()
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()

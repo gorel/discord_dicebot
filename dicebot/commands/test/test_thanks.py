@@ -29,7 +29,7 @@ class TestThanks(DicebotTestCase):
             # Assert
             ctx.session.add_all.assert_called_once()
             ctx.session.commit.assert_awaited_once()
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
         with self.subTest("no targets"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -39,7 +39,7 @@ class TestThanks(DicebotTestCase):
             # Assert
             ctx.session.add_all.assert_not_called()
             ctx.session.commit.assert_not_awaited()
-            ctx.channel.send.assert_awaited_once()
+            ctx.send.assert_awaited_once()
 
     async def test_thanks_scoreboard(self) -> None:
         # Arrange
@@ -48,4 +48,4 @@ class TestThanks(DicebotTestCase):
         await thanks.thanks_scoreboard(ctx)
         # Assert
         ctx.guild.thanks_scoreboard_str.assert_awaited_once()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()

@@ -11,7 +11,7 @@ async def clear_stats(ctx: MessageContext) -> None:
     """Clear all stats in the server's roll record (PERMANENT)"""
     await ctx.guild.clear_stats(ctx.session)
 
-    await ctx.channel.send(
+    await ctx.send(
         "All winner/loser stats have been cleared for this server.\n"
         f"The next roll for this server has been reset to {ctx.guild.current_roll}"
     )

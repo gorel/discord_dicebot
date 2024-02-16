@@ -52,7 +52,7 @@ async def gif(ctx: MessageContext, q: GreedyStr) -> None:
     url = await get_random_gif_url(q_str)
     if url is None:
         logging.warning(f"Could not find any GIFs for query {q_str}")
-        await ctx.channel.send("Could not find any GIFs for that query :(")
+        await ctx.send("Could not find any GIFs for that query :(")
     else:
         logging.info(f"Sending GIF {url}")
-        await ctx.channel.send(url)
+        await ctx.send(url)

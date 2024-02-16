@@ -24,14 +24,14 @@ async def ban_internal(
     if random.random() < VERY_BAD_THRESHOLD:
         msg = f"I have decided that {timer} is not enough.\n"
         msg += "Let's multiply that by 10."
-        await ctx.channel.send(msg)
+        await ctx.send(msg)
         timer.seconds *= 10
     new_ban = int(time.time()) + timer.seconds
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id
 
     if ban_as_bot:
-        await ctx.channel.send(
+        await ctx.send(
             f"I have chosen to ban <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
             f"May God have mercy on your soul."
@@ -40,7 +40,7 @@ async def ban_internal(
         assert ctx.client.user is not None
         banner_id = ctx.client.user.id
     else:
-        await ctx.channel.send(
+        await ctx.send(
             f"<@{banner_id}> has banned <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
             "May God have mercy on your soul."
@@ -61,7 +61,7 @@ async def ban_internal(
 
     if current_ban is not None and current_ban.banned_until > new_ban.banned_until:
         localized = timezone.localize_dt(current_ban.banned_until, ctx.guild.timezone)
-        await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
+        await ctx.send(f"Oh... you're already banned until {localized}. Wow...")
     else:
         await ctx.session.refresh(new_ban)
         unban_task.apply_async(
@@ -82,7 +82,7 @@ async def ban(ctx: MessageContext, target: User, timer: Time) -> None:
 async def unban_internal(ctx: MessageContext, target: User, msg: str) -> None:
     await ctx.guild.unban(ctx.session, target)
     await ctx.session.commit()
-    await ctx.channel.send(msg)
+    await ctx.send(msg)
 
 
 @register_command
@@ -109,7 +109,7 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
     """View the ban leaderboard"""
 
     leaderboard_str = await ctx.guild.ban_scoreboard_str(ctx.client, ctx.session)
-    await ctx.channel.send(leaderboard_str)
+    await ctx.send(leaderboard_str)
 
 
 # Intentionally *not* a registered command

@@ -13,4 +13,4 @@ class TestResetRoll(DicebotTestCase):
         # Assert
         self.assertEqual(123, ctx.guild.current_roll)
         ctx.session.commit.assert_awaited_once()
-        ctx.channel.send.assert_awaited_once()
+        ctx.send.assert_awaited_once()

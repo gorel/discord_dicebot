@@ -19,5 +19,5 @@ class TestTime(DicebotTestCase):
         with patch("dicebot.commands.time.pytz"):
             await time.time(ctx)
         # Assert
-        ctx.channel.send.assert_awaited_once()
-        self.assertIn(timestamp, ctx.channel.send.await_args.args[0])
+        ctx.send.assert_awaited_once()
+        self.assertIn(timestamp, ctx.send.await_args.args[0])

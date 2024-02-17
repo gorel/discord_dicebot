@@ -32,6 +32,10 @@ There are three important API keys you will need to retrieve:
 You must also replace the `DISCORD_OAUTH_LINK` with the OAuth link from Stytch and set up the OAuth2 redirect at
 https://discord.com/developers/applications for the webserver to work for login.
 
+## Running tests
+
+Tests can be run with `make test`
+
 ## Running the IPython shell
 
 You can run an interactive Python shell where you can use the client directly like so:

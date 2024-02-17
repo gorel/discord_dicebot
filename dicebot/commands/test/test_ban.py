@@ -18,7 +18,7 @@ class TestBan(DicebotTestCase):
             # Arrange
             ctx = TestMessageContext.get()
             target = create_autospec(User)
-            timer = create_autospec(Time)
+            timer = Time("10seconds")
             mock_ban.return_value = None
             # Act
             with patch("dicebot.commands.ban.timezone"):

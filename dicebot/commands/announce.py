@@ -69,7 +69,9 @@ async def set_announce_channel(ctx: MessageContext) -> None:
     announcements from the bot."""
     ctx.guild.primary_text_channel = ctx.channel.id
     await ctx.session.commit()
-    await ctx.send("From now on, announcements will be sent to this channel", silent=False)
+    await ctx.send(
+        "From now on, announcements will be sent to this channel", silent=False
+    )
 
 
 @requires_admin

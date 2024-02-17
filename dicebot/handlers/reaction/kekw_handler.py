@@ -35,14 +35,16 @@ class KekwReactionHandler(AbstractReactionHandler):
             kekw = ["K_", "E_", "K_", "W_"]
             kekw_str = "".join(emojis[s] for s in kekw)
             turbo_msg = f"{turbo_str} {kekw_str}"
-            await ctx.quote_reply(turbo_msg)
+            await ctx.quote_reply(turbo_msg, silent=False)
             gif_url = await giffer.get_random_gif_url("kekw")
             if gif_url is not None:
-                await ctx.quote_reply(gif_url)
+                await ctx.quote_reply(gif_url, silent=False)
 
         # If the user is banned, unban them early
         if await ctx.author.is_currently_banned(ctx.session, ctx.guild):
-            await ctx.quote_reply("That's good stuff, I'm unbanning you early.")
+            await ctx.quote_reply(
+                "That's good stuff, I'm unbanning you early.", silent=False
+            )
             discord_user = await User.get_or_create(ctx.session, ctx.author_id)
             await ban.unban_internal(
                 ctx, discord_user, f"<@{ctx.author_id}> has been unbanned early."

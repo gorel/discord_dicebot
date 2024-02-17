@@ -28,9 +28,7 @@ async def macro_del(ctx: MessageContext, name: str) -> None:
     if macro is not None:
         await ctx.session.delete(macro)
         await ctx.session.commit()
-        await ctx.send(
-            f"Warning: <@{ctx.author_id}> deleted the macro for {name}\n"
-        )
+        await ctx.send(f"Warning: <@{ctx.author_id}> deleted the macro for {name}\n")
     else:
         await ctx.send(f"There's no macro defined for {name}.")
 

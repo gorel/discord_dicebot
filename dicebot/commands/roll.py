@@ -153,9 +153,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
             if ctx.guild.allow_renaming:
                 await ctx.guild.add_guild_rename(ctx.session, ctx.author)
                 await ctx.session.commit()
-                await ctx.send(
-                    f"{ctx.author.as_mention()}: gets to rename the server!"
-                )
+                await ctx.send(f"{ctx.author.as_mention()}: gets to rename the server!")
             else:
                 await ctx.send(
                     f"{ctx.author.as_mention()}: {ctx.guild.critical_success_msg}"

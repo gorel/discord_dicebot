@@ -16,4 +16,4 @@ class ShrekReactionHandler(AbstractReactionHandler):
         ctx: MessageContext,
     ) -> None:
         assert ctx.reaction is not None
-        await ctx.quote_reply(ALL_STAR_URL)
+        await ctx.quote_reply(ALL_STAR_URL, silent=False)

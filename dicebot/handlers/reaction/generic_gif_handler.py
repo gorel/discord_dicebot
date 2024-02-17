@@ -76,7 +76,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
                 emojis[s] for s in name if s[0] in string.ascii_uppercase
             )
             turbo_msg = f"{turbo_str} {name_str}"
-            await ctx.quote_reply(turbo_msg)
+            await ctx.quote_reply(turbo_msg, silent=False)
 
         # First check this server's custom reactions
         handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
@@ -87,7 +87,7 @@ class GenericGifReactionHandler(AbstractReactionHandler):
                 )
                 gif_url = await giffer.get_random_gif_url(handler.gif_search)
                 if gif_url is not None:
-                    await ctx.quote_reply(gif_url)
+                    await ctx.quote_reply(gif_url, silent=False)
                 # Regardless of whether we sent a quote reply, return here
                 # because otherwise we may get an IndexError below for a bad lookup.
                 return
@@ -96,4 +96,4 @@ class GenericGifReactionHandler(AbstractReactionHandler):
         q = self.triggers[ctx.reaction.emoji.name.lower()]
         gif_url = await giffer.get_random_gif_url(q)
         if gif_url is not None:
-            await ctx.quote_reply(gif_url)
+            await ctx.quote_reply(gif_url, silent=False)

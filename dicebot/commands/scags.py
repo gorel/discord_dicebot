@@ -3,6 +3,7 @@
 from dicebot.core.register_command import register_command
 from dicebot.data.types.message_context import MessageContext
 
+
 @register_command
 async def scags(ctx: MessageContext) -> None:
     """Ridicule the user for using the wrong command"""

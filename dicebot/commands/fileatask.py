@@ -36,9 +36,7 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
             json_resp = await r.json()
             if r.status == SUCCESS_CODE:
                 response_url = json_resp["html_url"]
-                await ctx.send(
-                    f"Your suggestion has been noted: {response_url}"
-                )
+                await ctx.send(f"Your suggestion has been noted: {response_url}")
             else:
                 logging.error(f"Request to GitHub failed: {json_resp}")
                 await ctx.send(

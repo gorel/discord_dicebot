@@ -33,9 +33,7 @@ def requires_admin(coro):
         if ctx.author.is_admin_of(ctx.guild):
             await coro(ctx, *args, **kwargs)
         else:
-            await ctx.send(
-                "You're not an admin.\nThis incident will be recorded."
-            )
+            await ctx.send("You're not an admin.\nThis incident will be recorded.")
 
     return wrapper
 

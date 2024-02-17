@@ -64,6 +64,7 @@ class TestResolution(DicebotTestCase):
             mock_resolution.get_all_for_user.assert_awaited_once()
             ctx.channel.send.assert_awaited_once()
             self.assertNotIn("Your resolutions", ctx.channel.send.await_args.args[0])
+
     @patch("dicebot.commands.resolution.Resolution")
     async def test_delete_resolution(self, mock_resolution) -> None:
         with self.subTest("simple"):

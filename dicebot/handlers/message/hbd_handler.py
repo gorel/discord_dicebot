@@ -11,7 +11,7 @@ class HbdHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.message.content.startswith("hbd")
+        return ctx.message.content.lower().startswith("hbd")
 
     async def handle(
         self,

@@ -91,6 +91,6 @@ async def set_tz(ctx: MessageContext, tz: str) -> None:
         pytz.timezone(tz)
         ctx.guild.timezone = tz
         await ctx.session.commit()
-        await ctx.channel.send(f"Set this server's timezone to '{tz}'")
+        await ctx.send(f"Set this server's timezone to '{tz}'")
     except pytz.UnknownTimeZoneError:
-        await ctx.channel.send(f"Unknown timezone '{tz}'")
+        await ctx.send(f"Unknown timezone '{tz}'")

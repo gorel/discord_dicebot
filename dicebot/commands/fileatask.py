@@ -36,12 +36,12 @@ async def _fileatask_real(ctx: MessageContext, title: str) -> None:
             json_resp = await r.json()
             if r.status == SUCCESS_CODE:
                 response_url = json_resp["html_url"]
-                await ctx.channel.send(
+                await ctx.send(
                     f"Your suggestion has been noted: {response_url}"
                 )
             else:
                 logging.error(f"Request to GitHub failed: {json_resp}")
-                await ctx.channel.send(
+                await ctx.send(
                     "Something went wrong submitting the issue "
                     f"to GitHub (status_code = {r.status})"
                 )
@@ -75,7 +75,7 @@ async def fileatask(ctx: MessageContext, title: GreedyStr) -> None:
     elif await ctx.author.is_currently_banned(ctx.session, ctx.guild):
         await ctx.quote_reply("You are banned. Your opinion does not matter.")
     elif random.random() < RANDOM_TRASH_GIF_THRESHOLD:
-        await ctx.channel.send("Oh yeah, I'll get *right* on that.")
+        await ctx.send("Oh yeah, I'll get *right* on that.")
         await giffer.gif(ctx, GreedyStr("trash"))
     elif random.random() < RANDOM_BAN_THRESHOLD:
         await _ban_helper(ctx, "This is a bad idea and you should feel bad.")

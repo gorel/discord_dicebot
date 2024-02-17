@@ -26,7 +26,7 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
     ):
         if isinstance(ctx.channel, DMChannel) or ctx.discord_guild is None:
             raise RenameError("Renaming isn't supported here")
-        await ctx.channel.send(f"Setting server name to: {new_name_str}")
+        await ctx.send(f"Setting server name to: {new_name_str}")
         await ctx.discord_guild.edit(name=new_name_str, reason="Dice roll")
         last_winner.rename_used = True
         await ctx.session.commit()
@@ -37,12 +37,12 @@ async def rename(ctx: MessageContext, new_name: GreedyStr) -> None:
     ):
         if isinstance(ctx.channel, DMChannel) or ctx.discord_guild is None:
             raise RenameError("Renaming isn't supported here")
-        await ctx.channel.send(f"Setting chat name to: {new_name_str}")
+        await ctx.send(f"Setting chat name to: {new_name_str}")
         await ctx.channel.edit(name=new_name_str, reason="Dice roll")
         last_loser.rename_used = True
         await ctx.session.commit()
     else:
-        await ctx.channel.send(
+        await ctx.send(
             f"I can't let you do that, <@{ctx.author_id}>\n"
             "This incident will be recorded."
         )

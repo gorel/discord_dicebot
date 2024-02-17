@@ -34,4 +34,4 @@ class MockingHandler(AbstractHandler):
     ) -> None:
         embed = Embed(type="image")
         embed.set_image(url=SPONGEBOB_IMG_URL)
-        await ctx.channel.send(self.spongebobify(ctx.message.content), embed=embed)
+        await ctx.send(self.spongebobify(ctx.message.content), embed=embed)

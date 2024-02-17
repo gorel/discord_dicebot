@@ -11,14 +11,14 @@ async def macro_add(ctx: MessageContext, name: str, value: GreedyStr) -> None:
     value_str = value.unwrap()
     macro = await ctx.guild.get_macro(ctx.session, name)
     if macro is not None:
-        await ctx.channel.send(
+        await ctx.send(
             "Macro already exists for {name}.\n"
             "Delete it first if you want to record a new macro."
         )
     else:
         await ctx.guild.add_macro(ctx.session, name, value_str, ctx.author)
         await ctx.session.commit()
-        await ctx.channel.send(f"Set macro for {name}")
+        await ctx.send(f"Set macro for {name}")
 
 
 @register_command
@@ -28,11 +28,11 @@ async def macro_del(ctx: MessageContext, name: str) -> None:
     if macro is not None:
         await ctx.session.delete(macro)
         await ctx.session.commit()
-        await ctx.channel.send(
+        await ctx.send(
             f"Warning: <@{ctx.author_id}> deleted the macro for {name}\n"
         )
     else:
-        await ctx.channel.send(f"There's no macro defined for {name}.")
+        await ctx.send(f"There's no macro defined for {name}.")
 
 
 @register_command
@@ -40,6 +40,6 @@ async def m(ctx: MessageContext, name: str) -> None:
     """Retrieve the value for a saved macro in this server"""
     macro = await ctx.guild.get_macro(ctx.session, name)
     if macro is not None:
-        await ctx.channel.send(macro.value)
+        await ctx.send(macro.value)
     else:
-        await ctx.channel.send(f"There's no macro defined for {name}.")
+        await ctx.send(f"There's no macro defined for {name}.")

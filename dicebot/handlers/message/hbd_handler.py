@@ -11,7 +11,7 @@ class HbdHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return ctx.message.content.startswith("hbd")
+        return ctx.message.content.lower().startswith("hbd")
 
     async def handle(
         self,
@@ -27,4 +27,4 @@ class HbdHandler(AbstractHandler):
             await ctx.message.add_reaction(guild_emojis["this_tbh"])
         elif "this_tbh" in all_emojis.keys():
             await ctx.message.add_reaction(all_emojis["this_tbh"])
-        await ctx.channel.send("^")
+        await ctx.send("^")

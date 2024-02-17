@@ -42,11 +42,17 @@ class MessageContext:
         )
         return self.message.channel
 
-    async def quote_reply(self, msg: str) -> None:
+    # This function is a simple wrapper around the official send() function and thus does no chunking
+    # for messages that are over the length limit.
+    async def send(self, *args, silent: bool = True, **kwargs) -> None:
+        await self.channel.send(*args, silent=silent, **kwargs)
+
+    # This function contains some special logic to segment messages that are over the length limit.
+    async def quote_reply(self, msg: str, silent: bool = True) -> None:
         if len(msg) <= MAX_CHARS_PER_MSG:
-            await self.channel.send(msg, reference=self.message)
+            await self.channel.send(msg, reference=self.message, silent=silent)
             return
 
         for msg_chunk in textwrap.wrap(msg, width=MAX_CHARS_PER_MSG):
-            await self.channel.send(msg_chunk, reference=self.message)
+            await self.channel.send(msg_chunk, reference=self.message, silent=silent)
             await asyncio.sleep(1)

@@ -13,8 +13,8 @@ async def birthday(ctx: MessageContext, birthday: GreedyStr) -> None:
     try:
         parsed_birthday = dateutil.parser.parse(birthday.unwrap())
     except dateutil.parser.ParserError:
-        await ctx.channel.send("I have no idea when that is. Try again.")
+        await ctx.send("I have no idea when that is. Try again.")
     else:
         ctx.author.birthday = parsed_birthday
         await ctx.session.commit()
-        await ctx.channel.send("Okay, I'll remember your birthday for later!")
+        await ctx.send("Okay, I'll remember your birthday for later!")

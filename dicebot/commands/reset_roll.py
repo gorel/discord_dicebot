@@ -11,4 +11,4 @@ async def reset_roll(ctx: MessageContext, to: int) -> None:
     """Reset the next roll for this server to the given value"""
     ctx.guild.current_roll = to
     await ctx.session.commit()
-    await ctx.channel.send(f"<@{ctx.author_id}> set the next roll to {to}")
+    await ctx.send(f"<@{ctx.author_id}> set the next roll to {to}")

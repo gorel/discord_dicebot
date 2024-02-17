@@ -25,7 +25,7 @@ async def resolution(ctx: MessageContext, frequency: str, msg: GreedyStr) -> Non
             f"Unsupported frequency '{frequency}'\n"
             f"Supported frequencies are {SUPPORTED_FREQUENCIES}"
         )
-        await ctx.channel.send(response)
+        await ctx.send(response)
         return
 
     resolution = Resolution(
@@ -71,14 +71,14 @@ async def resolution(ctx: MessageContext, frequency: str, msg: GreedyStr) -> Non
             seconds = SECONDS_IN_DAY * random.randint(1, 365)
             remind_task.apply_async((resolution.id,), countdown=seconds)
 
-    await ctx.channel.send(response)
+    await ctx.send(response)
 
 
 @register_command
 async def my_resolutions(ctx: MessageContext) -> None:
     resolutions = await Resolution.get_all_for_user(ctx.session, ctx.author_id)
     if len(resolutions) == 0:
-        await ctx.channel.send("You have no active resolutions.")
+        await ctx.send("You have no active resolutions.")
         return
 
     resolutions_with_times = [
@@ -89,7 +89,7 @@ async def my_resolutions(ctx: MessageContext) -> None:
         f"  - #{r.id}: {r.msg} (created {t}, {r.frequency} reminders)"
         for r, t in resolutions_with_times
     )
-    await ctx.channel.send(response)
+    await ctx.send(response)
 
 
 @register_command
@@ -101,7 +101,7 @@ async def delete_resolution(ctx: MessageContext, resolution_id: int) -> None:
             f"Resolution #{resolution_id} doesn't belong to you.\n"
             f"Try `!my_resolutions` to see your resolutions"
         )
-        await ctx.channel.send(response)
+        await ctx.send(response)
         return
 
     r.active = False
@@ -112,4 +112,4 @@ async def delete_resolution(ctx: MessageContext, resolution_id: int) -> None:
         f"You created that resolution {localized}. You're already giving up?\n"
         "Anyway, I'll stop reminding you about it."
     )
-    await ctx.channel.send(response)
+    await ctx.send(response)

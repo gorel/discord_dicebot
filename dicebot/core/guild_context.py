@@ -13,6 +13,7 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.ban_handler import BanHandler
 from dicebot.handlers.message.birthday_handler import BirthdayHandler
 from dicebot.handlers.message.command_handler import CommandHandler
+from dicebot.handlers.message.fool_handler import FoolHandler
 from dicebot.handlers.message.hbd_handler import HbdHandler
 from dicebot.handlers.message.leeroy_handler import LeeRoyHandler
 from dicebot.handlers.message.log_message_handler import (
@@ -20,7 +21,6 @@ from dicebot.handlers.message.log_message_handler import (
     LogMessageHandlerSource,
 )
 from dicebot.handlers.message.long_message_handler import LongMessageHandler
-from dicebot.handlers.message.mocking_handler import MockingHandler
 from dicebot.handlers.message.shame_handler import ShameHandler
 from dicebot.handlers.message.tldrwl_handler import TldrwlHandler
 from dicebot.handlers.message.youtube_handler import YoutubeHandler
@@ -68,7 +68,7 @@ class GuildContext:
             HbdHandler(),
             LeeRoyHandler(),
             LongMessageHandler(),
-            MockingHandler(),
+            FoolHandler(),
             ShameHandler(),
             YoutubeHandler(),
             # This can be slow, so keep it at the end of the list

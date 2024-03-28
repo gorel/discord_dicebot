@@ -36,6 +36,7 @@ class Client(discord.Client):
     async def on_connect(self) -> None:
         start = datetime.datetime.now(tz=datetime.timezone.utc)
         activities = [
+            discord.Game("in the Metaverse", start=start),
             discord.Game("Barbie Horse Adventure", start=start),
             discord.Game("Connect Four", start=start),
             discord.Game("Excel", start=start),
@@ -47,6 +48,11 @@ class Client(discord.Client):
         # If it's December, presence = advent of code
         if start.month == 12:
             choice = discord.Game("Advent of Code", start=start)
+        # If it's within a week of April 1, presence = tricks on you
+        if (start.month == 2 and start.day >= 25) or (
+            start.month == 3 and start.day <= 7
+        ):
+            choice = discord.Game("tricks on you")
         # Don't set presence in test mode
         if not self.is_test:
             logging.info(f"Setting presence to {choice}")

@@ -26,7 +26,14 @@ async def ban_internal(
         msg += "Let's multiply that by 10."
         await ctx.send(msg)
         timer.seconds *= 10
-    new_ban = int(time.time()) + timer.seconds
+    # "Why +1?"
+    # There's a longstanding bug - https://github.com/gorel/discord_dicebot/issues/78
+    # where the bot will say "the ban will end 59 minutes from now" because the
+    # pretty-printer truncates down, meaning it thinks we're just *nanoseconds* away
+    # from one hour, but since it uses strict comparison, it reports it as 59 minutes.
+    # The easiest way to fix this is to just add one second now.
+    # They probably deserved an extra second of ban anyway.
+    new_ban = int(time.time()) + timer.seconds + 1
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id
 

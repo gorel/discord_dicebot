@@ -49,8 +49,8 @@ class Client(discord.Client):
         if start.month == 12:
             choice = discord.Game("Advent of Code", start=start)
         # If it's within a week of April 1, presence = tricks on you
-        if (start.month == 2 and start.day >= 25) or (
-            start.month == 3 and start.day <= 7
+        if (start.month == 3 and start.day >= 25) or (
+            start.month == 4 and start.day <= 7
         ):
             choice = discord.Game("tricks on you")
         # Don't set presence in test mode

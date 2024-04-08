@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import datetime
+import random
 import time
 from typing import Optional
 
@@ -12,18 +13,32 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 from dicebot.tasks.unban import unban as unban_task
 
+VERY_BAD_THRESHOLD = 0.05
+
 
 # Intentionally *not* a registered command
 async def ban_internal(
     ctx: MessageContext, target: User, timer: Time, ban_as_bot: bool, reason: str
 ) -> None:
     """Ban a user for a given amount of time"""
-    new_ban = int(time.time()) + timer.seconds
+    if random.random() < VERY_BAD_THRESHOLD:
+        msg = f"I have decided that {timer} is not enough.\n"
+        msg += "Let's multiply that by 10."
+        await ctx.send(msg)
+        timer.seconds *= 10
+    # "Why +1?"
+    # There's a longstanding bug - https://github.com/gorel/discord_dicebot/issues/78
+    # where the bot will say "the ban will end 59 minutes from now" because the
+    # pretty-printer truncates down, meaning it thinks we're just *nanoseconds* away
+    # from one hour, but since it uses strict comparison, it reports it as 59 minutes.
+    # The easiest way to fix this is to just add one second now.
+    # They probably deserved an extra second of ban anyway.
+    new_ban = int(time.time()) + timer.seconds + 1
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id
 
     if ban_as_bot:
-        await ctx.channel.send(
+        await ctx.send(
             f"I have chosen to ban <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
             f"May God have mercy on your soul."
@@ -32,7 +47,7 @@ async def ban_internal(
         assert ctx.client.user is not None
         banner_id = ctx.client.user.id
     else:
-        await ctx.channel.send(
+        await ctx.send(
             f"<@{banner_id}> has banned <@{target.id}>. "
             f"The ban will end {new_ban_end_str}.\n"
             "May God have mercy on your soul."
@@ -53,7 +68,7 @@ async def ban_internal(
 
     if current_ban is not None and current_ban.banned_until > new_ban.banned_until:
         localized = timezone.localize_dt(current_ban.banned_until, ctx.guild.timezone)
-        await ctx.channel.send(f"Oh... you're already banned until {localized}. Wow...")
+        await ctx.send(f"Oh... you're already banned until {localized}. Wow...")
     else:
         await ctx.session.refresh(new_ban)
         unban_task.apply_async(
@@ -74,7 +89,7 @@ async def ban(ctx: MessageContext, target: User, timer: Time) -> None:
 async def unban_internal(ctx: MessageContext, target: User, msg: str) -> None:
     await ctx.guild.unban(ctx.session, target)
     await ctx.session.commit()
-    await ctx.channel.send(msg)
+    await ctx.send(msg)
 
 
 @register_command
@@ -101,7 +116,7 @@ async def ban_leaderboard(ctx: MessageContext) -> None:
     """View the ban leaderboard"""
 
     leaderboard_str = await ctx.guild.ban_scoreboard_str(ctx.client, ctx.session)
-    await ctx.channel.send(leaderboard_str)
+    await ctx.send(leaderboard_str)
 
 
 # Intentionally *not* a registered command

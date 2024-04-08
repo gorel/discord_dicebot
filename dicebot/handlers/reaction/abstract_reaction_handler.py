@@ -70,6 +70,9 @@ class AbstractReactionHandler(ABC):
             return False
 
         # Only handle if we've hit the reaction threshold
+        have = ctx.reaction.count
+        want = ctx.guild.reaction_threshold
+        logging.debug(f"Got reaction {ctx.reaction} ({have} / {want})")
         return ctx.reaction.count == ctx.guild.reaction_threshold
 
     async def should_handle(

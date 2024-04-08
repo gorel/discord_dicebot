@@ -17,6 +17,7 @@ redis~=3.5
 sqlalchemy~=2.0.0b3
 tldrwl>=2.0.0,<3.0.0
 
+
 # Additional requirements for web
 quart~=0.18
 stytch~=6.1

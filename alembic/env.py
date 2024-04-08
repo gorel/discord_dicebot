@@ -47,6 +47,7 @@ def run_migrations_offline() -> None:
     # the db directory layout works. This was the easiest fix I found
     import_submodules("dicebot.data.db")
     from dicebot.data.db.base import Base
+
     target_metadata = Base.metadata
     context.configure(
         url=url,
@@ -74,11 +75,10 @@ def run_migrations_online() -> None:
     # the db directory layout works. This was the easiest fix I found
     import_submodules("dicebot.data.db")
     from dicebot.data.db.base import Base
+
     target_metadata = Base.metadata
     with engine.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

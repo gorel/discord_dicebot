@@ -20,15 +20,15 @@ import_submodules("dicebot.commands")
 
 class CommandRunner:
     def __init__(self, cmds: Optional[List[CommandFunc]] = None) -> None:
+        self.logger = logging.getLogger(__name__)
         cmds = cmds or REGISTERED_COMMANDS
         self.cmds = {cmd.__name__: cmd for cmd in cmds}
 
     def register(self, cmd: CommandFunc) -> None:
         self.cmds[cmd.__name__] = cmd
 
-    @staticmethod
     async def typify_all(
-        ctx: MessageContext, f: CommandFunc, args: List[str]
+        self, ctx: MessageContext, f: CommandFunc, args: List[str]
     ) -> Dict[str, Any]:
         types = get_type_hints(f)
 
@@ -37,6 +37,7 @@ class CommandRunner:
         for k, v in types.items():
             if v is MessageContext:
                 ctx_param = k
+                break
 
         if ctx_param is None:
             error = "Can only typify function with signature like:\n\t"
@@ -88,17 +89,17 @@ class CommandRunner:
         args_str = ""
         try:
             func = self.cmds[funcname]
-            prepared_args = await CommandRunner.typify_all(ctx, func, args)
+            prepared_args = await self.typify_all(ctx, func, args)
             args_str = ", ".join(args)
-            logging.info(f"Calling {funcname}(ctx, {args_str}) successfully")
+            self.logger.info(f"Calling {funcname}(ctx, {args_str}) successfully")
             await func(ctx, **prepared_args)
         except KeyError:
-            logging.error(f"Could not find function {funcname}")
+            self.logger.error(f"Could not find function {funcname}")
             raise
         except Exception as e:
             # TODO: Log helpful message to message.guild
-            logging.error(f"Failed to call function: {funcname}(ctx, {args_str})")
-            logging.error(f"{type(e)}: {e}")
+            self.logger.error(f"Failed to call function: {funcname}(ctx, {args_str})")
+            self.logger.error(f"{type(e)}: {e}")
             # Reraise to let server context provide help content
             raise
 

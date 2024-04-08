@@ -50,7 +50,7 @@ async def unban_async(
             if ban_id is not None and current_ban.id != ban_id:
                 return
 
-            await channel.send(f"<@{target_id}>: You have been unbanned.")
+            await channel.send(f"<@{target_id}>: You have been unbanned.", silent=True)
             # Remember to set this ban as now being acknowledged!
             current_ban.acknowledged = True
             await session.commit()

@@ -50,7 +50,7 @@ DEFAULT_CRITICAL_FAILURE_MSG = "critical failure!"
 DEFAULT_GUILD_TZ = "US/Pacific"
 
 
-REACTION_EXTRACTOR_REGEX = re.compile(r"<:(\w+):(\d+)>")
+REACTION_EXTRACTOR_REGEX = re.compile(r"<a?:(\w+):(\d+)>")
 
 
 # Many-to-many assoc to link guilds to features
@@ -102,6 +102,10 @@ class Guild(Base):
     features: Mapped[list[Feature]] = relationship(
         secondary=guild_feature_assoc, lazy="selectin"
     )
+
+    @property
+    def turbo_reaction_threshold(self) -> bigint:
+        return self.turboban_threshold
 
     # Methods
     async def unban(self, session: AsyncSession, target: User) -> None:

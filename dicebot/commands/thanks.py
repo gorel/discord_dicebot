@@ -31,7 +31,7 @@ async def thanks(
     reason_str = reason.unwrap()
     targets = extract_targets(reason_str)
     if len(targets) == 0:
-        await ctx.channel.send(
+        await ctx.send(
             "Hmm, I couldn't find any @mention in your message.\n"
             "Try sending your message again but remember to tag at least one person."
         )
@@ -53,11 +53,11 @@ async def thanks(
     msg = "Woohoo! Your `!thanks` has been recorded."
     if len(reason_str) < SHORT_REASON_THRESHOLD:
         msg += "\nNext time try adding more context on why you're thanking this person."
-    await ctx.channel.send(msg)
+    await ctx.send(msg)
 
 
 @register_command
 async def thanks_scoreboard(ctx: MessageContext) -> None:
     """Display the scoreboard for !thanks"""
     msg = await ctx.guild.thanks_scoreboard_str(ctx.client, ctx.session)
-    await ctx.channel.send(msg)
+    await ctx.send(msg)

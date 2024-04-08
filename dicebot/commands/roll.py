@@ -32,7 +32,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         last_roll_delta = int((now - last_roll.rolled_at).total_seconds() // 3600)
         timeout = ctx.guild.roll_timeout
         if last_roll_delta < timeout:
-            await ctx.channel.send(
+            await ctx.send(
                 f"{ctx.author.as_mention()} last rolled {last_roll_str}.\n"
                 f"This server only allows rolling once every {timeout} hours.\n"
             )
@@ -56,7 +56,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         rolls_remaining = 1
 
     if rolls_remaining <= 0:
-        await ctx.channel.send("How... dumb are you?")
+        await ctx.send("How... dumb are you?")
         ban_time = Time(f"{next_roll}hr")
         await ban.ban_internal(
             ctx,
@@ -68,7 +68,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         return
 
     if rolls_remaining > next_roll > 1:
-        await ctx.channel.send(
+        await ctx.send(
             "The National Problem Gambling Helpline (1-800-522-4700) "
             "is available 24/7 and is 100% confidential. "
             "This hotline connects callers to local health and government "
@@ -80,7 +80,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         ctx.guild.gambling_limit is not None
         and rolls_remaining > ctx.guild.gambling_limit
     ):
-        await ctx.channel.send(
+        await ctx.send(
             f"This server has set the roll gambling limit to {ctx.guild.gambling_limit}"
         )
         rolls_remaining = ctx.guild.gambling_limit
@@ -115,9 +115,9 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
 
         if roll == 1:
             batched_rolls_message = "\n".join(roll_results_strings)
-            await ctx.channel.send(batched_rolls_message)
+            await ctx.send(batched_rolls_message)
             sent_message = True
-            await ctx.channel.send("Lol, you suck")
+            await ctx.send("Lol, you suck")
             ban_time = Time(f"{next_roll + gambling_penalty}hr")
             await ban.ban_internal(
                 ctx,
@@ -128,16 +128,16 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
             )
         elif roll == next_roll - 1:
             batched_rolls_message = "\n".join(roll_results_strings)
-            await ctx.channel.send(batched_rolls_message)
+            await ctx.send(batched_rolls_message)
             sent_message = True
             if ctx.guild.allow_renaming:
                 await ctx.guild.add_chat_rename(ctx.session, ctx.author)
                 await ctx.session.commit()
-                await ctx.channel.send(
+                await ctx.send(
                     f"{ctx.author.as_mention()} gets to rename the chat channel!"
                 )
             else:
-                await ctx.channel.send(
+                await ctx.send(
                     f"{ctx.author.as_mention()}: {ctx.guild.critical_failure_msg}"
                 )
         elif roll == next_roll:
@@ -147,17 +147,15 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
             logging.info(f"Next roll in guild({ctx.guild_id}) is now {next_roll + 1}")
 
             batched_rolls_message = "\n".join(roll_results_strings)
-            await ctx.channel.send(batched_rolls_message)
+            await ctx.send(batched_rolls_message)
             sent_message = True
 
             if ctx.guild.allow_renaming:
                 await ctx.guild.add_guild_rename(ctx.session, ctx.author)
                 await ctx.session.commit()
-                await ctx.channel.send(
-                    f"{ctx.author.as_mention()}: gets to rename the server!"
-                )
+                await ctx.send(f"{ctx.author.as_mention()}: gets to rename the server!")
             else:
-                await ctx.channel.send(
+                await ctx.send(
                     f"{ctx.author.as_mention()}: {ctx.guild.critical_success_msg}"
                 )
         else:
@@ -166,7 +164,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     # We're done rolling, send the batched message if we never sent it
     if not sent_message:
         batched_rolls_message = "\n".join(roll_results_strings)
-        await ctx.channel.send(batched_rolls_message)
+        await ctx.send(batched_rolls_message)
 
     if no_match and gambling_penalty:
         await ban.turboban(
@@ -187,4 +185,4 @@ async def set_gambling_limit(ctx: MessageContext, value: int) -> None:
     else:
         ctx.guild.gambling_limit = value
     await ctx.session.commit()
-    await ctx.channel.send(f"The roll gambling limit for this server is now {value}")
+    await ctx.send(f"The roll gambling limit for this server is now {value}")

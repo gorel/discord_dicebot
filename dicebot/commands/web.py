@@ -12,4 +12,4 @@ async def web(ctx: MessageContext) -> None:
     """Return a link to the running webserver"""
     base_url = os.getenv(WEB_URL_KEY, DEFAULT_WEB_URL)
     login_url = f"{base_url}/login"
-    await ctx.channel.send(login_url)
+    await ctx.send(login_url)

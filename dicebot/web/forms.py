@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from typing import Callable, Optional, Type, TypeVar
+from typing import Callable, Optional, TypeVar
 
 import pytz
 import quart

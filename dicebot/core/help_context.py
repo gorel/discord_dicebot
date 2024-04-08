@@ -15,7 +15,7 @@ class HelpContext:
         human_typenames = {
             "GreedyStr": "word, sentence, or phrase (spaces allowed)",
             "User": "@mention",
-            "Time": "time string (like '1hr')",
+            "Time": "time (like '1hr', '8:59pm', 'Friday@8:59pm', or 'May30@12am')",
             "SetMessageSubcommand": "literal string 'win' or 'lose'",
             "int": "number",
             "str": "string (no spaces allowed)",

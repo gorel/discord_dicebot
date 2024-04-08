@@ -11,8 +11,7 @@ from dicebot.tasks.remind import send_reminder
 async def remindme(ctx: MessageContext, timer: Time, text: GreedyStr) -> None:
     """Set a reminder for yourself"""
     text_str = text.unwrap()
-    # TODO: Allow specifying a certain date instead
-    await ctx.channel.send(f"Okay, <@{ctx.author_id}>, I'll remind you in {timer}")
+    await ctx.send(f"Okay, <@{ctx.author_id}>, I'll remind you {timer}")
     send_reminder.apply_async(
         (ctx.channel.id, ctx.author_id, text_str), countdown=timer.seconds
     )

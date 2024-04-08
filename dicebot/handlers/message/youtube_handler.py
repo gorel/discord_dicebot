@@ -50,4 +50,4 @@ class YoutubeHandler(AbstractHandler):
     ) -> None:
         await ctx.quote_reply(f"{self.video_length_mins} minutes?")
         await asyncio.sleep(1)
-        await ctx.channel.send("Bro, I don't have time to watch this")
+        await ctx.send("Bro, I don't have time to watch this")

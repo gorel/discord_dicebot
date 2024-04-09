@@ -1,4 +1,4 @@
-#!/urs/bin/env python3
+#!/usr/bin/env python3
 
 import logging
 import os
@@ -11,9 +11,9 @@ from dicebot.data.types.message_context import MessageContext
 
 
 class AskOpenAI:
-    # https://beta.openai.com/docs/api-reference/completions/create
-    _URL = "https://api.openai.com/v1/completions"
-    _DEFAULT_MODEL = "text-davinci-003"
+    # https://platform.openai.com/docs/api-reference/chat/create
+    _URL = "https://api.openai.com/v1/chat/completions"
+    _DEFAULT_MODEL = "gpt-3.5-turbo"
     _DEFAULT_MAX_TOKENS = 2048
     _DEFAULT_TEMPERATURE = 0.5
 
@@ -53,7 +53,7 @@ class AskOpenAI:
                     "Authorization": f"Bearer {self._secret}",
                 },
                 json={
-                    "prompt": prompt,
+                    "messages": [{"role": "user", "content": prompt}],
                     "model": self.model,
                     "max_tokens": self.max_tokens,
                     "temperature": self.temperature,
@@ -62,7 +62,7 @@ class AskOpenAI:
                 json_resp = await response.json()
                 logging.info(f"JSON response from model: {json_resp}")
                 if "choices" in json_resp:
-                    return json_resp["choices"][0]["text"].strip()
+                    return json_resp["choices"][0]["message"]["content"].strip()
                 else:
                     return json_resp["error"]["message"]
 

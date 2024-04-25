@@ -7,7 +7,7 @@ from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 
 class PunHandler(AbstractHandler):
-    """Easter egg if the bot detects its name being said"""
+    """Easter egg if the bot detects a pun in a message."""
 
     async def should_handle(
         self,

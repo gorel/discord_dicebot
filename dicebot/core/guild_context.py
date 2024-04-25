@@ -16,6 +16,7 @@ from dicebot.handlers.message.command_handler import CommandHandler
 from dicebot.handlers.message.fool_handler import FoolHandler
 from dicebot.handlers.message.hbd_handler import HbdHandler
 from dicebot.handlers.message.leeroy_handler import LeeRoyHandler
+from dicebot.handlers.message.pun_handler import PunHandler
 from dicebot.handlers.message.log_message_handler import (
     LogMessageHandler,
     LogMessageHandlerSource,
@@ -71,8 +72,9 @@ class GuildContext:
             FoolHandler(),
             ShameHandler(),
             YoutubeHandler(),
-            # This can be slow, so keep it at the end of the list
+            # These can be slow, so keep them at the end of the list
             TldrwlHandler(),
+            PunHandler(),
         ]
 
         for handler in handlers:

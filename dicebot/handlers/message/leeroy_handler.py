@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
+from random import random
 import re
 
+from dicebot.commands import giffer
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
@@ -24,4 +26,10 @@ class LeeRoyHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        await ctx.quote_reply("Say that to my face")
+        # 50% chance to say the quote, 50% chance to send a gif
+        if random.random() < 0.5:
+            await ctx.quote_reply("Say that to my face")
+        else:
+            gif_url = await giffer.get_random_gif_url("Say that to my face")
+            if gif_url is not None:
+                await ctx.quote_reply(gif_url)

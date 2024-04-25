@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from random import random
+import random
 import re
 
 from dicebot.commands import giffer

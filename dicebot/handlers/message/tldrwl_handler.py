@@ -3,7 +3,7 @@
 import logging
 
 from tldrwl.exception import TldrwlException
-from tldrwl.summarize import Gpt35TurboTextSummarizer, Summarizer, TextSummarizer
+from tldrwl.summarize import ChatCompletionsTextSummarizer, Summarizer
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -25,7 +25,7 @@ TLDRWL_TRIGGERS = (
 )
 
 
-class LazierSummarizer(Gpt35TurboTextSummarizer):
+class LazierSummarizer(ChatCompletionsTextSummarizer):
     def __init__(self) -> None:
         super().__init__(prompt_string=LAZIER_PROMPT)
 

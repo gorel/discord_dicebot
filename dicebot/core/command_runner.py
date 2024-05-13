@@ -85,6 +85,10 @@ class CommandRunner:
         argv = message_no_spaces.split(" ")
         funcname, args = argv[0].lower(), argv[1:]
 
+        # This is a *dicebot* after all...
+        if funcname == "":
+            funcname = "roll"
+
         # Now try to call the referenced method
         args_str = ""
         try:

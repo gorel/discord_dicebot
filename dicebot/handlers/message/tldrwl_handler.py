@@ -3,10 +3,12 @@
 import logging
 
 from tldrwl.exception import TldrwlException
-from tldrwl.summarize import Summarizer
+from tldrwl.summarize import Gpt35TurboTextSummarizer, Summarizer, TextSummarizer
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
+
+LAZIER_PROMPT = "Summarize the following in fewer words, but definitely no more than 50 words:\n\n{}\n"
 
 
 # make these lowercase because I'm too lazy to write good code
@@ -21,6 +23,11 @@ TLDRWL_TRIGGERS = (
     "tl;drwl",
     "bro, i don't have time for this shit",
 )
+
+
+class LazierSummarizer(Gpt35TurboTextSummarizer):
+    def __init__(self) -> None:
+        super().__init__(prompt_string=LAZIER_PROMPT)
 
 
 class TldrwlHandler(AbstractHandler):
@@ -58,9 +65,11 @@ class TldrwlHandler(AbstractHandler):
             return
 
         await ctx.quote_reply("Beep boop, I'll get right on that")
-        logging.info("Getting message summary, this could take awhile...")
+        logging.info("Getting message summary, this could take a while...")
         try:
-            summary = await Summarizer().summarize_async(replied_message.content)
+            summary = await Summarizer(
+                text_summarizer=LazierSummarizer()
+            ).summarize_async(replied_message.content)
             logging.info(
                 f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
             )

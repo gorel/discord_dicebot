@@ -64,7 +64,12 @@ class TldrwlHandler(AbstractHandler):
             logging.info("Bot tried to summarize itself - skipping...")
             return
 
-        await ctx.quote_reply("Beep boop, I'll get right on that")
+        cowboy_eyes = self.get_emoji_by_name(ctx, "cowboy_eyes")
+        if cowboy_eyes is not None:
+            await ctx.message.add_reaction(cowboy_eyes)
+        else:
+            await ctx.quote_reply("Beep boop, I'll get right on that")
+
         logging.info("Getting message summary, this could take a while...")
         try:
             summary = await Summarizer(

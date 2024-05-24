@@ -82,7 +82,7 @@ class TldrwlHandler(AbstractHandler):
             try:
                 summary = await Summarizer(
                     text_summarizer=LazierSummarizer()
-                ).summarize_async(replied_message.content)
+                ).summarize_async(to_summarize)
                 logging.info(
                     f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
                 )

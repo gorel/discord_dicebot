@@ -37,9 +37,10 @@ class TldrwlHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return (
-            ctx.message.reference is not None
-            and ctx.message.content.lower() in TLDRWL_TRIGGERS
+        content = ctx.message.content.lower()
+        splits = content.split(" ")
+        return (ctx.message.reference is not None and content in TLDRWL_TRIGGERS) or (
+            len(splits) == 2 and splits[0] in TLDRWL_TRIGGERS and splits[1].isdigit()
         )
 
     async def handle(
@@ -71,17 +72,30 @@ class TldrwlHandler(AbstractHandler):
             await ctx.quote_reply("Beep boop, I'll get right on that")
 
         logging.info("Getting message summary, this could take a while...")
-        try:
-            summary = await Summarizer(
-                text_summarizer=LazierSummarizer()
-            ).summarize_async(replied_message.content)
-            logging.info(
-                f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
-            )
-            await ctx.quote_reply(summary.text)
-        except TldrwlException as e:
-            logging.exception(e)
-            await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")
-        except Exception as e:
-            logging.exception(e)
-            await ctx.quote_reply("On second thought, I don't have time for this shit.")
+        count = 1
+        splits = ctx.message.content.lower().split(" ")
+        if len(splits) == 2 and splits[1].isdigit():
+            count = min(int(splits[1]), 10)
+
+        to_summarize = replied_message.content
+        for _ in range(count):
+            try:
+                summary = await Summarizer(
+                    text_summarizer=LazierSummarizer()
+                ).summarize_async(replied_message.content)
+                logging.info(
+                    f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
+                )
+                to_summarize = summary.text
+            except TldrwlException as e:
+                logging.exception(e)
+                await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")
+                return
+            except Exception as e:
+                logging.exception(e)
+                await ctx.quote_reply(
+                    "On second thought, I don't have time for this shit."
+                )
+                return
+
+        await ctx.quote_reply(to_summarize)

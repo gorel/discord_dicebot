@@ -43,6 +43,10 @@ class Client(discord.Client):
             discord.Game("Fortnite", start=start),
             discord.Game("Minecraft", start=start),
             discord.Game("Neovim", start=start),
+            discord.Game("God", start=start),
+            discord.Game("charades with Alexa", start=start),
+            discord.Game("hide and seek with a Roomba", start=start),
+            discord.Game("tag with self-driving cars", start=start),
         ]
         choice = random.choice(activities)
         # If it's December, presence = advent of code

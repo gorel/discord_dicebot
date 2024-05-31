@@ -22,6 +22,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from dicebot.data.db.alias import Alias
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.base import Base
 from dicebot.data.db.custom_reaction_handler import CustomReactionHandler
@@ -144,6 +145,24 @@ class Guild(Base):
             rename_type=Rename.Type.GUILD,
         )
         session.add(rename)
+
+    async def get_alias(self, session: AsyncSession, key: str) -> Optional[Alias]:
+        return await Alias.get(session, self, key)
+
+    async def get_all_aliases(self, session: AsyncSession) -> Sequence[Alias]:
+        return await Alias.get_all(session, self)
+
+    async def add_alias(
+        self, session: AsyncSession, key: str, value: str, author: User
+    ) -> None:
+        old_alias = await self.get_alias(session, key)
+        if old_alias is None:
+            new_alias = Alias(
+                guild_id=self.id, added_by=author.id, key=key, value=value
+            )
+            session.add(new_alias)
+        else:
+            old_alias.value = value
 
     async def roll_scoreboard_str(
         self,

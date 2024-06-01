@@ -93,8 +93,7 @@ class CommandRunner:
         args_str = ""
         try:
             alias = await ctx.guild.get_alias(ctx.session, funcname)
-            if alias is not None:
-                funcname = alias
+            funcname = alias or funcname
             func = self.cmds[funcname]
 
             prepared_args = await self.typify_all(ctx, func, args)

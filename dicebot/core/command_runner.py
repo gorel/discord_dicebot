@@ -92,7 +92,10 @@ class CommandRunner:
         # Now try to call the referenced method
         args_str = ""
         try:
+            alias = await ctx.guild.get_alias(ctx.session, funcname)
+            funcname = alias or funcname
             func = self.cmds[funcname]
+
             prepared_args = await self.typify_all(ctx, func, args)
             args_str = ", ".join(args)
             self.logger.info(f"Calling {funcname}(ctx, {args_str}) successfully")

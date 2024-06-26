@@ -10,6 +10,11 @@ from dicebot.web.forms import AddMacroForm, LoginForm, UpdateGuildForm
 from dicebot.web.models import CombinedGuildContext, RelevantGuild
 
 
+@quart_app.route("/")
+async def home():
+    return await render_template("home.html")
+
+
 @quart_app.route("/help")
 async def help():
     runner = CommandRunner()

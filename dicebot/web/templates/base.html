@@ -62,7 +62,15 @@
     </div>
 
     <div>
-      <a href="{{ url_for('help') }}">Bot help page</a>
+      <a href="{{ url_for('home') }}">Home</a>
+      <span class="divider">|</span>
+      {% if not user %}
+      <a href="{{ url_for('login') }}">Log in</a>
+      <span class="divider">|</span>
+      <a href="{{ url_for('help') }}">Help</a>
+      <span class="divider">|</span>
+      {% endif %}
+      <a href="{{ url_for('list') }}">List all servers</a>
     </div>
 
     {% if user %}

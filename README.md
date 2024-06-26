@@ -5,7 +5,7 @@ to the other commands and handlers it has in place.
 
 Setup:
 
-```
+```sh
 # venv is optional but highly encouraged
 python3.10 -m venv .venv
 source .venv/bin/activate
@@ -14,7 +14,7 @@ pip install -r requirements.txt
 
 Usage:
 
-```
+```sh
 # From project root directory
 $ python -m dicebot.app.bot
 ```
@@ -60,13 +60,13 @@ As a result, I'll document what I can here below, but there are no promises on t
 
 To run all services locally for debugging:
 
-```
+```sh
 $ docker compose up
 ```
 
 To run the webserver without other services:
 
-```
+```sh
 $ docker compose run --service-ports web
 ```
 
@@ -74,7 +74,7 @@ $ docker compose run --service-ports web
 
 If you want to run the db _without_ starting other services:
 
-```
+```sh
 $ docker compose run db
 $ docker compose exec db /bin/bash
 # Inside the container -- assumes username of dicebot
@@ -90,7 +90,7 @@ and ran `cat migration.sql | psql -1 -U dicebot`
 
 To run all services automatically as part of a daemonization job
 
-```
+```sh
 $ ./setup-service.sh
 ```
 
@@ -99,7 +99,7 @@ To check the status, type `systemctl status docker-compose@dicebot`.
 
 Edit the `/etc/sudoers.d/$USER` file and include the following (replace $VARIABLES with real values):
 
-```
+```txt
 %$USER ALL= NOPASSWD: /bin/systemctl start docker-compose@dicebot
 %$USER ALL= NOPASSWD: /bin/systemctl stop docker-compose@dicebot
 %$USER ALL= NOPASSWD: /bin/systemctl restart docker-compose@dicebot

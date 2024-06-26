@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Logan Gore</title>
+
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="{{ url_for('static', filename='home/favicon/apple-touch-icon.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="32x32"
+      href="{{ url_for('static', filename='home/favicon/favicon-32x32.png') }}"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="16x16"
+      href="{{ url_for('static', filename='home/favicon/favicon-16x16.png') }}"
+    />
+    <link
+      rel="manifest"
+      href="{{ url_for('static', filename='home/favicon/site.webmanifest') }}"
+    />
+
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='home/style.css') }}"
+    />
+  </head>
+
+  <header>
+    <nav>
+      <ul>
+        <li class="quiet"><b>Logan Gore</b></li>
+        <li><a href="https://github.com/gorel" target="_blank">GitHub</a></li>
+        <li>
+          <a href="https://linkedin.com/in/logan-gore" target="_blank"
+            >LinkedIn</a
+          >
+        </li>
+        <li>
+          <a href="https://stytch.com" target="_blank">Current Company</a>
+        </li>
+        <li>
+          <a
+            href="https://www.dropbox.com/scl/fi/kl1dww1teyqrqv7qf0y8n/Logan_Resume.pdf?rlkey=dl2e8xe0og5wei9vowr12zf0a&st=i4pbgep2&dl=0"
+            target="_blank"
+            >Resume</a
+          >
+        </li>
+      </ul>
+      <span class="divider">|</span>
+      <ul>
+        <li class="quiet"><b>Hobbies</b></li>
+        <li>
+          <a href="https://lichess.org/@/lgore93" target="_blank">Lichess</a>
+        </li>
+        <li>
+          <a
+            href="https://www.goodreads.com/user/show/150767479-logan-gore"
+            target="_blank"
+            >Goodreads</a
+          >
+        </li>
+        <li><a href="/help">Dicebot</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <img
+      class="headshot"
+      src="{{ url_for('static', filename='home/assets/profile.jpg') }}"
+    />
+    <p>
+      My name is Logan and I'm a software engineer based in Seattle. I'm
+      currently working remotely for a company called
+      <a href="https://stytch.com">Stytch</a> on the Platform team, focusing on
+      building reliable services that can scale to meet growing needs and
+      building tooling to improve the internal developer experience.
+    </p>
+    <p>
+      Before Stytch, I worked at Facebook/Meta for ~6.5 years on various
+      platform teams.
+    </p>
+    <p>
+      Since I first learned to program a TI-83 in high school to do my algebra
+      homework for me, I have been fascinated with all things related to
+      programming. In my spare time, I enjoy playing
+      <a href="https://lichess.org/@/lgore93">online chess</a>, participating in
+      my work
+      <a href="https://www.goodreads.com/user/show/150767479-logan-gore"
+        >book club</a
+      >, and I also recently got back into weightlifting.
+    </p>
+  </main>
+</html>

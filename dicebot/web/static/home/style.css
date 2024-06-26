@@ -1,0 +1,107 @@
+/* This was mostly taken from adventofcode.com in order to achieve a similar style */
+@import url("https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@300");
+
+body {
+  background: #0f0f23; /*337 x 5*/
+  color: #cccccc;
+  font-family: "Source Code Pro", monospace;
+  font-weight: 300;
+  font-size: 14pt;
+  min-width: 60em;
+}
+a {
+  outline: 0;
+}
+main {
+  max-width: 1000px;
+  padding: 20px;
+  display: block;
+  text-align: justify;
+}
+header,
+main {
+  -webkit-text-size-adjust: none;
+}
+
+a {
+  text-decoration: none;
+  color: #009900;
+}
+a:hover,
+a:focus {
+  color: #99ff99;
+}
+h1,
+h2 {
+  font-size: 1em;
+  font-weight: normal;
+}
+.quiet {
+  opacity: 0.5;
+}
+p.wrap {
+  width: 45em;
+}
+header {
+  white-space: nowrap;
+  cursor: default;
+  z-index: 100;
+  margin-bottom: 2em;
+}
+header h1 {
+  display: inline-block;
+  margin: 0;
+  padding-right: 1em;
+}
+header h1 a,
+header h1 span {
+  display: inline-block;
+  text-decoration: none;
+  color: #00cc00;
+  text-shadow:
+    0 0 2px #00cc00,
+    0 0 5px #00cc00;
+}
+header h1 a:hover,
+header h1 a:focus {
+  color: #99ff99;
+  text-shadow:
+    0 0 2px #99ff99,
+    0 0 5px #99ff99;
+}
+header nav {
+  display: inline-block;
+}
+header nav ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: inline-block;
+}
+header nav li {
+  display: inline-block;
+  padding: 0 0.6em;
+}
+header nav a {
+  display: inline-block;
+  text-decoration: none;
+  outline: none;
+}
+
+label img {
+  vertical-align: bottom;
+  position: relative;
+  top: -3px;
+  margin-right: 0.3em;
+}
+.divider {
+  color: #fff;
+  font-size: 1.5em;
+  margin: 0 10px;
+}
+.headshot {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: block;
+}

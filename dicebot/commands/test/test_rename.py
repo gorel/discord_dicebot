@@ -13,7 +13,6 @@ from dicebot.test.utils import DicebotTestCase, TestMessageContext
 class TestRename(DicebotTestCase):
     @patch("dicebot.commands.rename.Rename")
     async def test_rename(self, mock_rename) -> None:
-
         with self.subTest("winner"):
             # Arrange
             ctx = TestMessageContext.get()

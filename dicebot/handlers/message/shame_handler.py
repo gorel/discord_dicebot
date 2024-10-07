@@ -35,8 +35,12 @@ class ShameHandler(AbstractHandler):
             )
         else:
             logging.warning(f"{ctx.author_id} is banned! Shame them.")
-            await ctx.message.add_reaction("🇸")
-            await ctx.message.add_reaction("🇭")
-            await ctx.message.add_reaction("🇦")
-            await ctx.message.add_reaction("🇲")
-            await ctx.message.add_reaction("🇪")
+            emoji = self.get_emoji_by_name(ctx, "shame")
+            if ctx.guild.use_short_shame and emoji is not None:
+                await ctx.message.add_reaction(emoji)
+            else:
+                await ctx.message.add_reaction("🇸")
+                await ctx.message.add_reaction("🇭")
+                await ctx.message.add_reaction("🇦")
+                await ctx.message.add_reaction("🇲")
+                await ctx.message.add_reaction("🇪")

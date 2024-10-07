@@ -38,7 +38,8 @@ class WisdomGiver:
         to be a real person and give any kind of opinion or advice, especially
         from someone who is not a public figure anymore and my knowledge cut-off is 2021.
         It's also important to note that it's not a good idea to ask random people for wisdom,
-        it's better to seek advice from experts in the field or people that you trust."""
+        it's better to seek advice from experts in the field or people that you trust.
+        """
 
         person_to_roleplay = random.choice(cls._WISE_PEOPLE)
         cls._logger.info(f"Creating WisdomGiver for {person_to_roleplay}")

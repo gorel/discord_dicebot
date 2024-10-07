@@ -134,5 +134,5 @@ async def toggle_short_shame(ctx: MessageContext) -> None:
     """Toggle whether shame should be sent as a single reacc"""
     ctx.guild.use_short_shame = not ctx.guild.use_short_shame
     await ctx.session.commit()
-    f = "short " if ctx.guild.use_short_shame else "long"
-    await ctx.send(f"Shame will now be sent to this channel in **{f}** format.")
+    f = "short" if ctx.guild.use_short_shame else "long"
+    await ctx.send(f"Shame will now be sent to this server in **{f}** format.")

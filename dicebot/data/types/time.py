@@ -3,11 +3,14 @@ from __future__ import annotations
 
 import datetime
 import logging
+import re
 
 import dateutil.parser
 import pytz
 
 from dicebot.data.types.message_context import MessageContext
+
+OLD_STYLE_REGEX = re.compile(r"\d+[smhdy]")
 
 
 class Time:
@@ -67,6 +70,9 @@ class Time:
 
     @classmethod
     def from_str_with_ctx(cls, s: str, ctx: MessageContext) -> Time:
+        if OLD_STYLE_REGEX.match(s) is not None:
+            return cls(s)
+
         res = cls("0s")
 
         if "@" in s:

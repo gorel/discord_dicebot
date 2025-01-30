@@ -9,3 +9,4 @@ async def autotldr(ctx: MessageContext) -> None:
     """Flip the server's autotldr setting"""
     ctx.guild.auto_tldr = not ctx.guild.auto_tldr
     await ctx.quote_reply(f"Set autotldr to {ctx.guild.auto_tldr}")
+    await ctx.session.commit()

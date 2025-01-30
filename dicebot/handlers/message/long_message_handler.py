@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -23,6 +24,7 @@ class LongMessageHandler(AbstractHandler):
         ctx: MessageContext,
     ) -> None:
         await ctx.send(LONG_MESSAGE_RESPONSE)
+        logging.info(f"Server's auto_tldr setting: {ctx.guild.auto_tldr}")
         if ctx.guild.auto_tldr:
             summary = await do_tldr_summary(ctx.message.content)
             await ctx.quote_reply(summary)

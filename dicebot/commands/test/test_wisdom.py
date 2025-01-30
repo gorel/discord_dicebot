@@ -16,10 +16,8 @@ class TestWisdom(DicebotTestCase):
         empty_prompt_wisdom = "wisdom for random topic"
         not_empty_prompt_wisdom = "wisdom for a specific topic"
 
-        mock_ask.side_effect = (
-            lambda x: empty_prompt_wisdom
-            if "a random topic" in x
-            else not_empty_prompt_wisdom
+        mock_ask.side_effect = lambda x: (
+            empty_prompt_wisdom if "a random topic" in x else not_empty_prompt_wisdom
         )
 
         with self.subTest("prompt: None"):

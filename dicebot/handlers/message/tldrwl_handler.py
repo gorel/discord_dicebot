@@ -25,6 +25,26 @@ TLDRWL_TRIGGERS = (
 )
 
 
+async def do_tldr_summary(content: str, splits: int = 1) -> str:
+    logging.info("Getting message summary, this could take a while...")
+    to_summarize = content
+    for _ in range(splits):
+        try:
+            summary = await Summarizer(
+                text_summarizer=LazierSummarizer()
+            ).summarize_async(to_summarize)
+            logging.info(
+                f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
+            )
+            to_summarize = summary.text
+        except TldrwlException as e:
+            logging.exception(e)
+            return "OpenAI isn't free. Summarize this yourself."
+        except Exception as e:
+            return "On second thought, I don't have time for this shit."
+    return to_summarize
+
+
 class LazierSummarizer(ChatCompletionsTextSummarizer):
     def __init__(self) -> None:
         super().__init__(prompt_string=LAZIER_PROMPT)
@@ -71,31 +91,10 @@ class TldrwlHandler(AbstractHandler):
         else:
             await ctx.quote_reply("Beep boop, I'll get right on that")
 
-        logging.info("Getting message summary, this could take a while...")
         count = 1
         splits = ctx.message.content.lower().split(" ")
         if len(splits) == 2 and splits[1].isdigit():
             count = min(int(splits[1]), 10)
 
-        to_summarize = replied_message.content
-        for _ in range(count):
-            try:
-                summary = await Summarizer(
-                    text_summarizer=LazierSummarizer()
-                ).summarize_async(to_summarize)
-                logging.info(
-                    f"Done with message summary. {summary=}, {summary.estimated_cost_usd=}"
-                )
-                to_summarize = summary.text
-            except TldrwlException as e:
-                logging.exception(e)
-                await ctx.quote_reply("OpenAI isn't free. Summarize this yourself.")
-                return
-            except Exception as e:
-                logging.exception(e)
-                await ctx.quote_reply(
-                    "On second thought, I don't have time for this shit."
-                )
-                return
-
-        await ctx.quote_reply(to_summarize)
+        summary = await do_tldr_summary(replied_message.content, count)
+        await ctx.quote_reply(summary)

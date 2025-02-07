@@ -42,7 +42,7 @@ async def do_tldr_summary(content: str, splits: int = 1) -> str:
             return "OpenAI isn't free. Summarize this yourself."
         except Exception as e:
             return "On second thought, I don't have time for this shit."
-    return to_summarize
+    return f"TL;DR:\n{to_summarize}"
 
 
 class LazierSummarizer(ChatCompletionsTextSummarizer):

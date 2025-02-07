@@ -26,3 +26,4 @@ stytch~=6.1
 coverage
 mypy
 pyright
+types-pytz

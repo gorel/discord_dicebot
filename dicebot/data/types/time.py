@@ -19,7 +19,7 @@ class Time:
     def __init__(self, s: str) -> None:
         self.logger = logging.getLogger(__name__)
         self.s = s
-        self.datetime = None
+        self.datetime: datetime.datetime | None = None
         self.seconds = self._old_style_seconds(s)
         self.str = f"in {self.s} ({self.seconds} seconds)"
 

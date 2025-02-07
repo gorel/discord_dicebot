@@ -9,6 +9,7 @@ from dicebot.commands import giffer
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
+from dicebot.handlers.message.long_message_handler import LongMessageHandler
 
 SPONGEBOB_IMG_URL = "https://imgflip.com/s/meme/Mocking-Spongebob.jpg"
 
@@ -42,10 +43,14 @@ class FoolHandler(AbstractHandler):
             embed.set_image(url=SPONGEBOB_IMG_URL)
             await ctx.send(self.spongebobify(ctx.message.content), embed=embed)
 
-        # April Fool's 2024
+        # April Fool's 2024 - random gifs for every message
         if now.year == 2024:
             handlers = await ctx.guild.get_all_reaction_handlers(ctx.session)
             handler = random.choice(handlers)
             gif_url = await giffer.get_random_gif_url(handler.gif_search)
             if gif_url is not None:
                 await ctx.quote_reply(gif_url)
+
+        # April Fool's 2025 - tl;dr everything over 10 characters
+        if now.year == 2025:
+            await LongMessageHandler(threshold=10, autotldr=True).handle(ctx)

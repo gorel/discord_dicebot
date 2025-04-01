@@ -53,6 +53,10 @@ class FoolHandler(AbstractHandler):
 
         # April Fool's 2025 - tl;dr everything over 10 characters
         if now.year == 2025:
-            handler = LongMessageHandler(threshold=10, autotldr=True)
+            handler = LongMessageHandler(
+                threshold=10,
+                skip_image=True,
+                autotldr=True,
+            )
             if await handler.should_handle(ctx):
                 return await handler.handle(ctx)

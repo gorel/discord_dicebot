@@ -16,12 +16,14 @@ class LongMessageHandler(AbstractHandler):
     def __init__(
         self,
         threshold: int = LONG_MESSAGE_CHAR_THRESHOLD,
+        skip_image: bool = False,
         autotldr: bool = False,
         *args,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
         self.threshold = threshold
+        self.skip_image = skip_image
         self.autotldr = autotldr
 
     async def should_handle(
@@ -34,8 +36,9 @@ class LongMessageHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        await ctx.send(LONG_MESSAGE_RESPONSE)
-        logging.info(f"Server's auto_tldr setting: {ctx.guild.auto_tldr}")
+        logging.info(f"{self.skip_image=}, {self.autotldr=}, {ctx.guild.auto_tldr=}")
+        if not self.skip_image:
+            await ctx.send(LONG_MESSAGE_RESPONSE)
         if self.autotldr or ctx.guild.auto_tldr:
             summary = await do_tldr_summary(ctx.message.content)
             await ctx.quote_reply(summary)

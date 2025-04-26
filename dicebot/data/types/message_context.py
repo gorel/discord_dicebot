@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 import asyncio
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import textwrap
-from typing import Optional
+from typing import Optional, Any
 
 import discord
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,6 +26,8 @@ class MessageContext:
     reactor: Optional[User]
     reaction: Optional[discord.Reaction]
     is_test: bool
+    # Arbitrary state bag for handlers to communicate
+    state: dict[str, Any] = field(default_factory=dict)
 
     @property
     def guild_id(self) -> int:

@@ -51,6 +51,22 @@ class GenericGifReactionHandler(AbstractReactionHandler):
         elapsed = now - ctx.reaction.message.created_at
         is_turbo = elapsed.total_seconds() <= ctx.guild.turbo_reaction_threshold
 
+        # This is kind of hard-coding specific behavior for our server...
+        # But... it's my bot. So I don't care.
+        # If the reaction was this_tbh and the message began with hbd, send a birthday
+        # gif instead of the server's custom handler.
+        is_this_tbh = ctx.reaction.emoji.name.upper() == "THIS_TBH" 
+        is_hbd = ctx.message.content.upper().startswith("HBD")
+        if is_this_tbh and is_hbd:
+            logging.info("Short-circuiting for hbd gif")
+            gif_url = await giffer.get_random_gif_url("grumpy birthday")
+            if gif_url is not None:
+                await ctx.quote_reply(gif_url)
+            # Regardless of whether we sent a quote reply, return here
+            # because otherwise we may get an IndexError below for a bad lookup.
+            return
+
+
         if is_turbo:
             emojis = {e.name: f"<:{e.name}:{e.id}>" for e in ctx.client.emojis}
             turbo = ["T_", "U_", "R_", "B_", "O_"]

@@ -25,6 +25,7 @@ from dicebot.handlers.message.long_message_handler import LongMessageHandler
 from dicebot.handlers.message.shame_handler import ShameHandler
 from dicebot.handlers.message.tldrwl_handler import TldrwlHandler
 from dicebot.handlers.message.youtube_handler import YoutubeHandler
+from dicebot.handlers.message.thanks_nudge_handler import ThanksNudgeHandler
 
 # on_reaction handlers
 from dicebot.handlers.reaction.ban_handler import BanReactionHandler
@@ -72,6 +73,7 @@ class GuildContext:
             FoolHandler(),
             ShameHandler(),
             YoutubeHandler(),
+            ThanksNudgeHandler(),
             # These can be slow, so keep them at the end of the list
             TldrwlHandler(),
             PunHandler(),

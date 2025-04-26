@@ -6,6 +6,7 @@ from dicebot.commands.ask import AskOpenAI
 from dicebot.commands.ban import ban_internal
 from dicebot.data.types.time import Time
 from dicebot.data.types.message_context import MessageContext
+from dicebot.data.types.state_keys import WAS_REPOST
 from dicebot.data.db.pun import Pun
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
@@ -46,6 +47,8 @@ class RepostHandler(AbstractHandler):
             # Notify and ban
             user = await ctx.client.fetch_user(existing.first_poster_id)
             await ctx.quote_reply(f"Looks like a repost from {user.name}")
+            # Mark that a repost was handled to skip further pun logic
+            ctx.state[WAS_REPOST] = True
             reason = f"Reposted a pun originally by {user.name}"
             await ban_internal(
                 ctx,

@@ -77,8 +77,8 @@ class GuildContext:
             ThanksNudgeHandler(),
             # These can be slow, so keep them at the end of the list
             TldrwlHandler(),
-            RepostHandler(),
             PunHandler(),
+            RepostHandler(),
         ]
 
         for handler in handlers:

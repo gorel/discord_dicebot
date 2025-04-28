@@ -3,5 +3,7 @@
 State dict keys for MessageContext.
 """
 
-# Indicates that the message was handled as a repost, so pun logic should be skipped
+# Indicates that the message was identified as a repost
 WAS_REPOST = "was_repost"
+# Indicates that the message was identified as a pun
+WAS_PUN = "was_pun"

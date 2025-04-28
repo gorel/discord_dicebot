@@ -3,7 +3,7 @@
 import logging
 from dicebot.commands.ask import AskOpenAI
 from dicebot.data.types.message_context import MessageContext
-from dicebot.data.types.state_keys import WAS_REPOST
+from dicebot.data.types import state_keys
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 
@@ -14,9 +14,6 @@ class PunHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        # Skip pun detection if message already handled as a repost
-        if ctx.state.get(WAS_REPOST):
-            return False
         return "||" in ctx.message.content and ctx.message.guild is not None
 
     async def handle(
@@ -30,6 +27,7 @@ class PunHandler(AbstractHandler):
             f"{ctx.message.content}"
         )
         if "yes" in resp.lower():
+            ctx.state[state_keys.WAS_PUN] = True
             guild = ctx.message.guild
             # `should_handle` verified that this is a guild context
             assert guild is not None

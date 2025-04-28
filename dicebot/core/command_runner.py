@@ -89,27 +89,41 @@ class CommandRunner:
         if funcname == "":
             funcname = "roll"
 
-        # Now try to call the referenced method
-        args_str = ""
-        try:
-            alias = await ctx.guild.get_alias(ctx.session, funcname)
-            if alias is not None:
-                funcname = alias.value
-            func = self.cmds[funcname]
+        # Resolve aliases first
+        alias = await ctx.guild.get_alias(ctx.session, funcname)
+        if alias is not None:
+            funcname = alias.value
 
-            prepared_args = await self.typify_all(ctx, func, args)
+        # If this is a built-in or aliased command, invoke it
+        if funcname in self.cmds:
+            func = self.cmds[funcname]
+            # Prepare and type-check arguments
             args_str = ", ".join(args)
+            prepared_args = await self.typify_all(ctx, func, args)
             self.logger.info(f"Calling {funcname}(ctx, {args_str}) successfully")
-            await func(ctx, **prepared_args)
-        except KeyError:
-            self.logger.error(f"Could not find function {funcname}")
-            raise
+            try:
+                await func(ctx, **prepared_args)
+            except Exception as e:
+                # Log execution failure and re-raise to let handler send help
+                self.logger.error(f"Failed to call function: {funcname}(ctx, {args_str})")
+                self.logger.error(f"{type(e)}: {e}")
+                raise
+            return
+
+        # Fallback: if no command found, try macros
+        try:
+            macro = await ctx.guild.get_macro(ctx.session, funcname)
         except Exception as e:
-            # TODO: Log helpful message to message.guild
-            self.logger.error(f"Failed to call function: {funcname}(ctx, {args_str})")
-            self.logger.error(f"{type(e)}: {e}")
-            # Reraise to let server context provide help content
-            raise
+            self.logger.error(f"Error retrieving macro '{funcname}': {e}")
+            macro = None
+        if macro is not None:
+            # Send macro value directly
+            await ctx.send(macro.value)
+            return
+
+        # Unknown command: log and raise to trigger help response
+        self.logger.error(f"Could not find function or macro '{funcname}'")
+        raise KeyError(funcname)
 
     @classmethod
     def help_context(cls, f: CommandFunc, limit: Optional[int] = None) -> HelpContext:

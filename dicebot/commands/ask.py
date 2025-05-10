@@ -80,3 +80,14 @@ async def ask(ctx: MessageContext, prompt: GreedyStr) -> None:
     asker = AskOpenAI()
     response = await asker.ask(prompt_str)
     await ctx.quote_reply(response)
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    prompt = input("Input prompt: ")
+    tools = input("Input tools comma separated (or hit enter to continue): ")
+    tool_ids = tools.split(",")
+    asker = AskOpenAI(tool_ids=tool_ids)
+
+    print(asyncio.run(asker.ask(prompt)))

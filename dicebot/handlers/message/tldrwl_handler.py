@@ -7,7 +7,7 @@ from dicebot.commands.ask import AskOpenAI
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
-LAZIER_PROMPT = "Summarize the following in fewer words, but definitely no more than 50 words:\n\n{}\n"
+LAZIER_PROMPT = "Summarize the following in fewer words, but definitely no more than 50 words. Include just the summary.:\n\n{}\n"
 
 
 # make these lowercase because I'm too lazy to write good code
@@ -34,7 +34,7 @@ async def do_tldr_summary(content: str, splits: int = 1) -> str:
             logging.info(f"Done with message summary. {to_summarize=}")
         except Exception:
             return "On second thought, I don't have time for this shit."
-    return f"TL;DR:\n{to_summarize}"
+    return f"TL;DR:\n\n{to_summarize}"
 
 
 class TldrwlHandler(AbstractHandler):
@@ -85,3 +85,11 @@ class TldrwlHandler(AbstractHandler):
 
         summary = await do_tldr_summary(replied_message.content, count)
         await ctx.quote_reply(summary)
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    prompt = input("Input prompt: ")
+
+    print(asyncio.run(do_tldr_summary(prompt)))

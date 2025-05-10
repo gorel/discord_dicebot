@@ -15,7 +15,6 @@ pytube~=15.0
 pytz~=2022.6
 redis~=3.5
 sqlalchemy~=2.0.0b3
-tldrwl>=2.0.0,<3.0.0
 
 
 # Additional requirements for web

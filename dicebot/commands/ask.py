@@ -12,9 +12,10 @@ from dicebot.data.types.message_context import MessageContext
 
 class AskOpenAI:
     # https://platform.openai.com/docs/api-reference/chat/create
-    _URL = "https://api.openai.com/v1/chat/completions"
-    _DEFAULT_MODEL = "gpt-3.5-turbo"
-    _DEFAULT_MAX_TOKENS = 2048
+    # _URL = "https://api.openai.com/v1/chat/completions"
+    _URL = "https://llm.jrodal.com/api/chat/completions"
+    _DEFAULT_MODEL = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+    _DEFAULT_MAX_TOKENS = 4096
     _DEFAULT_TEMPERATURE = 0.5
 
     def __init__(
@@ -23,6 +24,8 @@ class AskOpenAI:
         max_tokens: int | None = None,
         temperature: int | None = None,
         secret: str | None = None,
+        url: str | None = None,
+        tool_ids: list[str] | None = None,
     ) -> None:
         self.model = model or self._DEFAULT_MODEL
         self.max_tokens = (
@@ -32,6 +35,8 @@ class AskOpenAI:
             temperature if temperature is not None else self._DEFAULT_TEMPERATURE
         )
         self._secret = secret or os.getenv("OPENAI_API_KEY")
+        self._url = url or self._URL
+        self._tools = {"tool_ids": tool_ids} if tool_ids else {}
 
     async def ask(self, prompt: str) -> str:
         """Ask a question to openai"""
@@ -44,10 +49,10 @@ class AskOpenAI:
             return "Bruh idk"
 
     async def _ask_openai(self, prompt: str) -> str:
-        """Ask a question to openai"""
+        """Ask a question to openai... compatible endpoints"""
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                self._URL,
+                self._url,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {self._secret}",
@@ -57,7 +62,8 @@ class AskOpenAI:
                     "model": self.model,
                     "max_tokens": self.max_tokens,
                     "temperature": self.temperature,
-                },
+                }
+                | self._tools,
             ) as response:
                 json_resp = await response.json()
                 logging.info(f"JSON response from model: {json_resp}")

@@ -14,11 +14,17 @@ from dicebot.data.types.time import Time
 from dicebot.tasks.unban import unban as unban_task
 
 VERY_BAD_THRESHOLD = 0.05
+L_URL = "https://preview.redd.it/ulbdm5wicpha1.jpeg?width=1850&format=pjpg&auto=webp&s=37f7481b396e7966a02a77211e3fe0819ee3c913"
 
 
 # Intentionally *not* a registered command
 async def ban_internal(
-    ctx: MessageContext, target: User, timer: Time, ban_as_bot: bool, reason: str
+    ctx: MessageContext,
+    target: User,
+    timer: Time,
+    ban_as_bot: bool,
+    reason: str,
+    give_them_an_l: bool = False,
 ) -> None:
     """Ban a user for a given amount of time"""
     if random.random() < VERY_BAD_THRESHOLD:
@@ -36,6 +42,10 @@ async def ban_internal(
     new_ban = int(time.time()) + timer.seconds + 1
     new_ban_end_str = timezone.localize(new_ban, ctx.guild.timezone)
     banner_id = ctx.message.author.id
+
+    if give_them_an_l:
+        await ctx.send("This is for you.")
+        await ctx.send(L_URL)
 
     if ban_as_bot:
         await ctx.send(

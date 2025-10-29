@@ -89,4 +89,5 @@ class BanReactionHandler(AbstractReactionHandler):
                 timer=Time("1hr"),
                 ban_as_bot=True,
                 reason="Got react-banned",
+                give_them_an_l=True,
             )

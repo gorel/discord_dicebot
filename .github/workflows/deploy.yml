@@ -17,7 +17,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSHKEY }}
-          script_stop: true
           script: |
             cd /home/gorel/github/discord_dicebot/
             git pull

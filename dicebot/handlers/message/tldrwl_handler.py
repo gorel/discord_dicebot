@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+import re
 
 from dicebot.commands.ask import AskOpenAI
 
@@ -8,6 +9,17 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
 
 LAZIER_PROMPT = "Summarize the following in fewer words, but definitely no more than 50 words. Include just the summary.:\n\n{}\n"
+
+
+def count_words(text: str) -> int:
+    """Count the number of words in a text"""
+    return len(text.split())
+
+
+def extract_urls(text: str) -> list[str]:
+    """Extract URLs from text"""
+    url_pattern = r'https?://[^\s<>"{}|\\^`\[\]]+'
+    return re.findall(url_pattern, text)
 
 
 # make these lowercase because I'm too lazy to write good code
@@ -83,7 +95,25 @@ class TldrwlHandler(AbstractHandler):
         if len(splits) == 2 and splits[1].isdigit():
             count = min(int(splits[1]), 10)
 
-        summary = await do_tldr_summary(replied_message.content, count)
+        # Check if message is short and contains a link
+        word_count = count_words(replied_message.content)
+        urls = extract_urls(replied_message.content)
+
+        logging.info(f"Message has {word_count} words and {len(urls)} URLs: {urls}")
+
+        # If the message is short (<100 words) AND contains a link,
+        # summarize the link content instead of the message
+        if word_count < 100 and len(urls) > 0:
+            logging.info(
+                f"Short message with link detected. Summarizing first URL: {urls[0]}"
+            )
+            content_to_summarize = urls[0]
+        else:
+            # Otherwise, summarize the message content
+            logging.info("Summarizing message content")
+            content_to_summarize = replied_message.content
+
+        summary = await do_tldr_summary(content_to_summarize, count)
         await ctx.quote_reply(summary)
 
 

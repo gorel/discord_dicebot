@@ -20,7 +20,7 @@ class PunHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> None:
-        asker = AskOpenAI()
+        asker = AskOpenAI("gpt-5-nano")
         resp = await asker.ask(
             "Does this look like a pun?\n"
             "Only answer yes or no, nothing else:\n"

@@ -30,7 +30,7 @@ class LongMessageHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return len(ctx.message.content) > self.threshold
+        return len(ctx.message.content) > self.threshold and "||" not in ctx.message.content
 
     async def handle(
         self,

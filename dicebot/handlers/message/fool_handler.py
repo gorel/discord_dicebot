@@ -69,6 +69,7 @@ class FoolHandler(AbstractHandler):
                 "Rewrite the following message as a cringy LinkedIn humble-brag post. "
                 "Keep it under 3 sentences. Use corporate buzzwords, mention personal growth, "
                 "and end with at least 3 hashtags. Only output the rewritten post, nothing else:\n"
-                f"{ctx.message.content}"
+                f"{ctx.message.content}",
+                channel=ctx.channel,
             )
             await ctx.quote_reply(linkedin_post)

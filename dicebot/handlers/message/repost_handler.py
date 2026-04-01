@@ -61,4 +61,3 @@ class RepostHandler(AbstractHandler):
                 ban_as_bot=True,
                 reason=reason,
             )
-

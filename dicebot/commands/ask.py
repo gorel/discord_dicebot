@@ -14,9 +14,9 @@ class AskOpenAI:
     # https://platform.openai.com/docs/api-reference/chat/create
     # _URL = "https://api.openai.com/v1/chat/completions"
     _URL = "https://llm.jrodal.com/api/chat/completions"
-    _DEFAULT_MODEL = "Llama-4-Maverick-17B-128E-Instruct-FP8"
+    _DEFAULT_MODEL = "gpt-5-nano"
     _DEFAULT_MAX_TOKENS = 4096
-    _DEFAULT_TEMPERATURE = 0.5
+    _DEFAULT_TEMPERATURE = 1
 
     def __init__(
         self,

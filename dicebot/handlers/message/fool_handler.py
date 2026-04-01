@@ -64,7 +64,7 @@ class FoolHandler(AbstractHandler):
 
         # April Fool's 2026 - rewrite messages as LinkedIn humble-brags
         if now.year == 2026 and len(ctx.message.content) > 32:
-            asker = AskOpenAI("gpt-5-nano")
+            asker = AskOpenAI()
             linkedin_post = await asker.ask(
                 "Rewrite the following message as a cringy LinkedIn humble-brag post. "
                 "Keep it under 3 sentences. Use corporate buzzwords, mention personal growth, "

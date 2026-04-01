@@ -4,6 +4,7 @@ import logging
 import os
 
 import aiohttp
+from discord import TextChannel
 
 from dicebot.core.register_command import register_command
 from dicebot.data.types.greedy_str import GreedyStr
@@ -38,12 +39,16 @@ class AskOpenAI:
         self._url = url or self._URL
         self._tools = {"tool_ids": tool_ids} if tool_ids else {}
 
-    async def ask(self, prompt: str) -> str:
+    async def ask(self, prompt: str, channel: TextChannel | None = None) -> str:
         """Ask a question to openai"""
         if not prompt:
             return "You have to ask a question..."
         try:
-            return await self._ask_openai(prompt)
+            if channel is not None:
+                async with channel.typing():
+                    return await self._ask_openai(prompt)
+            else:
+                return await self._ask_openai(prompt)
         except Exception as e:
             logging.exception(e)
             return "Bruh idk"

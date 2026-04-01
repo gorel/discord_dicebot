@@ -6,6 +6,7 @@ import random
 import pytz
 from discord import Embed
 from dicebot.commands import giffer
+from dicebot.commands.ask import AskOpenAI
 
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -60,3 +61,14 @@ class FoolHandler(AbstractHandler):
             )
             if await handler.should_handle(ctx):
                 return await handler.handle(ctx)
+
+        # April Fool's 2026 - rewrite messages as LinkedIn humble-brags
+        if now.year == 2026 and len(ctx.message.content) > 32:
+            asker = AskOpenAI()
+            linkedin_post = await asker.ask(
+                "Rewrite the following message as a cringy LinkedIn humble-brag post. "
+                "Keep it under 3 sentences. Use corporate buzzwords, mention personal growth, "
+                "and end with at least 3 hashtags. Only output the rewritten post, nothing else:\n"
+                f"{ctx.message.content}"
+            )
+            await ctx.quote_reply(linkedin_post)

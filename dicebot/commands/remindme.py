@@ -75,12 +75,13 @@ async def _parse_reminder(
 @register_command
 async def remindme(ctx: MessageContext, text: GreedyStr) -> None:
     """Set a reminder for yourself"""
-    result = await _parse_reminder(text.unwrap(), ctx)
-    if result is None:
-        await ctx.send(_ERROR_MSG)
-        return
-    seconds_until, reminder_text, time_description = result
-    await ctx.send(f"Okay, <@{ctx.author_id}>, I'll remind you {time_description}")
-    send_reminder.apply_async(
-        (ctx.channel.id, ctx.author_id, reminder_text), countdown=seconds_until
-    )
+    async with ctx.channel.typing():
+        result = await _parse_reminder(text.unwrap(), ctx)
+        if result is None:
+            await ctx.send(_ERROR_MSG)
+            return
+        seconds_until, reminder_text, time_description = result
+        await ctx.send(f"Okay, <@{ctx.author_id}>, I'll remind you {time_description}")
+        send_reminder.apply_async(
+            (ctx.channel.id, ctx.author_id, reminder_text), countdown=seconds_until
+        )

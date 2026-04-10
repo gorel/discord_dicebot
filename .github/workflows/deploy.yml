@@ -9,8 +9,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v1
-
       - name: Executing remote command
         uses: appleboy/ssh-action@master
         with:
@@ -19,6 +17,10 @@ jobs:
           key: ${{ secrets.SSHKEY }}
           script: |
             cd /home/gorel/github/discord_dicebot/
+            git fetch
+            CHANGED=$(git diff HEAD..origin/main -- requirements.txt compose/Dockerfile | wc -l)
             git pull
-            docker compose build
+            if [ "$CHANGED" -gt "0" ]; then
+              docker compose build
+            fi
             sudo systemctl restart docker-compose@dicebot

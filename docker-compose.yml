@@ -31,10 +31,7 @@ services:
     image: redis:alpine
 
   celery_worker:
-    build:
-      context: .
-      dockerfile: ${APP_ROOT}/compose/Dockerfile
-    image: celery_worker
+    image: dicebot
     command: /start-celeryworker
     volumes:
       - ${APP_ROOT}:/app

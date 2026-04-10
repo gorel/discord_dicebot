@@ -22,7 +22,7 @@ Extract the reminder time and the thing to be reminded about.
 Respond with JSON only, no other text:
 {{
   "seconds_until": <integer seconds from now, or -1 if no time is specified>,
-  "reminder_text": "<what the user wants to be reminded about, as a clean short phrase>",
+  "reminder_text": "<what the user wants to be reminded about, effectively the input text without the time part>",
   "time_description": "<human-readable time, e.g. \\"in 5 minutes\\" or \\"at 12:00pm Thursday\\">"
 }}"""
 

@@ -52,6 +52,11 @@ class User(Base):
             latest_ban is not None and latest_ban.banned_until > datetime.datetime.now()
         )
 
+    async def is_currently_immune(self, session: AsyncSession, guild: Guild) -> bool:
+        from dicebot.data.db.ban_immunity import BanImmunity
+
+        return await BanImmunity.get_active(session, guild, self) is not None
+
     @classmethod
     async def get_or_create(cls, session: AsyncSession, discord_id: int) -> User:
         res = await session.get(cls, discord_id)

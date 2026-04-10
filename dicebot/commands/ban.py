@@ -8,6 +8,7 @@ from typing import Optional
 from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.ban import Ban
+from dicebot.data.db.ban_immunity import BanImmunity
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
@@ -27,6 +28,13 @@ async def ban_internal(
     give_them_an_l: bool = False,
 ) -> None:
     """Ban a user for a given amount of time"""
+    active_immunity = await BanImmunity.get_active(ctx.session, ctx.guild, target)
+    if active_immunity is not None:
+        localized = timezone.localize_dt(active_immunity.immune_until, ctx.guild.timezone)
+        await ctx.send(
+            f"{target.as_mention()} has ban immunity until {localized}. Nice try."
+        )
+        return
     if random.random() < VERY_BAD_THRESHOLD:
         msg = f"I have decided that {timer} is not enough.\n"
         msg += "Let's multiply that by 10."

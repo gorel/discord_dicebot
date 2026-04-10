@@ -5,21 +5,24 @@ from unittest.mock import create_autospec, patch
 
 from dicebot.commands import ban
 from dicebot.data.db.ban import Ban
+from dicebot.data.db.ban_immunity import BanImmunity
 from dicebot.data.db.user import User
 from dicebot.data.types.time import Time
 from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
 class TestBan(DicebotTestCase):
+    @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
     @patch("dicebot.commands.ban.unban_task", autospec=True)
     @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
-    async def test_ban_internal(self, mock_ban, mock_unban_task) -> None:
+    async def test_ban_internal(self, mock_ban, mock_unban_task, mock_get_active) -> None:
         with self.subTest("simple"):
             # Arrange
             ctx = TestMessageContext.get()
             target = create_autospec(User)
             timer = Time("10seconds")
             mock_ban.return_value = None
+            mock_get_active.return_value = None
             # Act
             with patch("dicebot.commands.ban.timezone"):
                 await ban.ban_internal(ctx, target, timer, False, "ban reason")
@@ -27,9 +30,10 @@ class TestBan(DicebotTestCase):
             ctx.session.refresh.assert_awaited_once()
             mock_unban_task.apply_async.assert_called_once()
 
+    @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
     @patch("dicebot.commands.ban.unban_task", autospec=True)
     @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
-    async def test_ban_internal_already_banned(self, mock_ban, mock_unban_task) -> None:
+    async def test_ban_internal_already_banned(self, mock_ban, mock_unban_task, mock_get_active) -> None:
         with self.subTest("already banned"):
             # Arrange
             ctx = TestMessageContext.get()
@@ -37,6 +41,7 @@ class TestBan(DicebotTestCase):
             timer = create_autospec(Time, seconds=30)
             until = datetime.datetime.now() + datetime.timedelta(days=7)
             mock_ban.return_value = create_autospec(Ban, banned_until=until)
+            mock_get_active.return_value = None
             # Act
             with patch("dicebot.commands.ban.timezone"):
                 await ban.ban_internal(ctx, target, timer, False, "ban reason")
@@ -95,3 +100,21 @@ class TestBan(DicebotTestCase):
         # Assert
         ctx.quote_reply.assert_awaited_once()
         mock_ban_internal.assert_awaited_once()
+
+    @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
+    async def test_ban_internal_immune_user(self, mock_get_active) -> None:
+        # Arrange
+        ctx = TestMessageContext.get()
+        target = create_autospec(User)
+        timer = create_autospec(Time, seconds=3600)
+        mock_immunity = create_autospec(BanImmunity)
+        mock_immunity.immune_until = datetime.datetime.now() + datetime.timedelta(hours=1)
+        mock_get_active.return_value = mock_immunity
+        # Act
+        with patch("dicebot.commands.ban.timezone"):
+            await ban.ban_internal(ctx, target, timer, False, "ban reason")
+        # Assert - immunity message sent, no ban record created
+        ctx.message.channel.send.assert_awaited_once()
+        call_args = ctx.message.channel.send.call_args
+        assert "ban immunity" in call_args.args[0]
+        ctx.session.add.assert_not_called()

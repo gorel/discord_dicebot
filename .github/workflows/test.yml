@@ -5,7 +5,7 @@ on:
     branches: [main]
 
 jobs:
-  test-stytch:
+  test:
     runs-on: ubuntu-latest
 
     name: Run tests
@@ -24,9 +24,6 @@ jobs:
 
       - name: Create coverage report
         env:
-          STYTCH_PROJECT_ID: ""
-          STYTCH_SECRET: ""
-          WEB_SECRET_KEY: ""
           OPENAI_API_KEY: "FAKE_VALUE"
         run: |
           coverage run -m unittest

@@ -30,15 +30,13 @@ def _localize_pretty(
         minutes = int(delta.total_seconds()) // 60
         plural = "s" if minutes > 1 else ""
         return f"{minutes} minute{plural} {specifier}"
-    elif (
-        target_localized.day == now_localized.day + 1
-        or target_localized.day == now_localized.day - 1
-    ):
+    elif (target_localized.date() - now_localized.date()) == datetime.timedelta(days=1):
         # Happening in a different day (and longer than an hour)
         # The "longer than an hour" matters because if we're converting a target
         # datetime at 11:50pm, "2 hours from now" is completely valid for 2am.
-        specifier = "yesterday" if in_past else "tomorrow"
-        return target_localized.strftime(f"{specifier} at %I:%M %p %Z")
+        return target_localized.strftime("tomorrow at %I:%M %p %Z")
+    elif (now_localized.date() - target_localized.date()) == datetime.timedelta(days=1):
+        return target_localized.strftime("yesterday at %I:%M %p %Z")
     elif delta < datetime.timedelta(days=1):
         # Longer than an hour, less than a day
         specifier = "ago" if in_past else "from now"

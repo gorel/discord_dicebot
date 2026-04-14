@@ -3,6 +3,8 @@
 import random
 import re
 
+import discord
+
 from dicebot.commands import giffer
 from dicebot.data.types.message_context import MessageContext
 from dicebot.handlers.message.abstract_handler import AbstractHandler
@@ -20,6 +22,16 @@ class LeeRoyHandler(AbstractHandler):
         bot_user = ctx.client.user
         bot_name = bot_user.name if bot_user is not None else DEFAULT_BOT_NAME
         pattern = re.compile(rf"\b{bot_name}\b", re.IGNORECASE)
+        if (
+            bot_user is not None
+            and ctx.message.reference is not None
+            and ctx.message.reference.resolved is not None
+            and isinstance(ctx.message.reference.resolved, discord.Message)
+            and ctx.message.reference.resolved.author is not None
+            and ctx.message.reference.resolved.author.id == bot_user.id
+        ):
+            # Don't trigger if the message is a reply to the bot itself
+            return False
         return pattern.search(ctx.message.content) is not None
 
     async def handle(

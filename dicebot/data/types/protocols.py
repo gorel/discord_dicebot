@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Protocol, runtime_checkable
+import types
+from typing import Protocol, Union, get_args, get_origin, runtime_checkable
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,9 +58,19 @@ StrTypifiable = (
 )
 
 
+def _unwrap_optional(typ):
+    """If typ is Optional[T] (i.e. Union[T, None]), return T. Otherwise return typ as-is."""
+    if get_origin(typ) is Union:
+        args = [a for a in get_args(typ) if a is not type(None)]
+        if len(args) == 1:
+            return args[0]
+    return typ
+
+
 async def typify_str(
     ctx: MessageContext, typ: StrTypifiable, value: str
 ) -> StrTypifiable:
+    typ = _unwrap_optional(typ)
     if isinstance(typ, _FromStrWithCtxProtocol):
         return typ.from_str_with_ctx(value, ctx=ctx)
     if isinstance(typ, _FromStrProtocol):

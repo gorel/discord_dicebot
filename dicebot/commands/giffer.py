@@ -12,18 +12,18 @@ from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 
 
-class TenorGifRetriever:
+class KlipyGifRetriever:
     def __init__(self, api_key: Optional[str] = None) -> None:
-        self.api_key = api_key or os.getenv("TENOR_API_KEY")
+        self.api_key = api_key or os.getenv("KLIPY_API_KEY")
 
     async def get(self, q: str) -> List[str]:
-        url = "https://g.tenor.com/v1/search"
+        url = f"https://api.klipy.com/v1/{self.api_key}/gifs/search"
         params = {
             "q": q,
+            "customer_id": "discord-bot",
             "key": self.api_key,
             "locale": "en_US",
             "content_filter": "low",
-            "media_filter": "basic",
         }
         try:
             async with aiohttp.ClientSession() as session:
@@ -36,7 +36,7 @@ class TenorGifRetriever:
 
 
 async def get_random_gif_url(q: str) -> Optional[str]:
-    retriever = TenorGifRetriever()
+    retriever = KlipyGifRetriever()
     urls = await retriever.get(q)
     if len(urls) == 0:
         logging.warning(f"Could not find any GIFs for query {q}")

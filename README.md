@@ -26,7 +26,7 @@ but within `sample.env`, `dicebot_pw` is the password used to illustrate how to 
 There are three important API keys you will need to retrieve:
 
 - `DISCORD_TOKEN`: Your [Discord bot token](https://discord.com/developers/docs/topics/oauth2)
-- `TENOR_API_KEY`: A key for [tenor](https://tenor.com/gifapi/documentation)
+- `KLIPY_API_KEY`: A key for [Klipy](https://docs.klipy.com/gifs-api/gifs-search-api)
 - `OPENAI_API_KEY`: A key for [OpenAI](https://beta.openai.com/account/api-keys)
 
 You must also replace the `DISCORD_OAUTH_LINK` with the OAuth link from Stytch and set up the OAuth2 redirect at

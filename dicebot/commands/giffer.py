@@ -17,7 +17,7 @@ class KlipyGifRetriever:
         self.api_key = api_key or os.getenv("KLIPY_API_KEY")
 
     async def get(self, q: str) -> List[str]:
-        url = f"https://api.klipy.com/v1/{self.api_key}/gifs/search"
+        url = f"https://api.klipy.com/api/v1/{self.api_key}/gifs/search"
         params = {
             "q": q,
             "customer_id": "discord-bot",

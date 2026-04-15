@@ -29,8 +29,8 @@ class KlipyGifRetriever:
             async with aiohttp.ClientSession() as session:
                 async with session.get(url, params=params) as response:
                     json_resp = await response.json()
-                    top_gifs = json_resp["results"]
-                    return [gif["url"] for gif in top_gifs]
+                    top_gifs = json_resp["data"]["data"]
+                    return [res["file"]["hd"]["gif"]["url"] for res in top_gifs]
         except Exception:
             return []
 

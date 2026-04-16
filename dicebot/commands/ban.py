@@ -7,6 +7,7 @@ from typing import Optional
 
 from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
+from dicebot.data.db.active_event import ActiveEvent, EventType
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.ban_immunity import BanImmunity
 from dicebot.data.db.user import User
@@ -35,6 +36,13 @@ async def ban_internal(
             f"{target.as_mention()} has ban immunity until {localized}. Nice try."
         )
         return
+    active_event = await ActiveEvent.get_current(ctx.session, ctx.guild_id)
+    if active_event is not None:
+        if active_event.event_type_enum is EventType.DOUBLE_BAN:
+            timer.seconds *= 2
+        elif active_event.event_type_enum is EventType.LUCKY_HOUR:
+            timer.seconds //= 2
+            timer.seconds = max(timer.seconds, 1)  # don't allow 0-second bans
     if random.random() < VERY_BAD_THRESHOLD:
         msg = f"I have decided that {timer} is not enough.\n"
         msg += "Let's multiply that by 10."

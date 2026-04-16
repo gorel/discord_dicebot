@@ -7,6 +7,7 @@ import random
 from dicebot.commands import ban, timezone
 from dicebot.commands.admin import requires_admin
 from dicebot.core.register_command import register_command
+from dicebot.data.db.active_event import ActiveEvent, EventType
 from dicebot.data.db.roll import Roll
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
@@ -21,6 +22,9 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
     num_rolls_str = num_rolls.unwrap()
     next_roll = ctx.guild.current_roll
     name = ctx.message.author.name
+
+    active_event = await ActiveEvent.get_current(ctx.session, ctx.guild_id)
+    event_type = active_event.event_type_enum if active_event is not None else None
 
     last_roll = await Roll.get_last_roll(ctx.session, ctx.guild, ctx.author)
     now = datetime.datetime.now()
@@ -107,13 +111,20 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
         ctx.session.add(roll_obj)
         await ctx.session.commit()
 
+        # Apply event modifiers
+        effective_roll = roll
+        if event_type is EventType.CURSE_DAY and roll < 5 and roll != 1:
+            effective_roll = 1  # treat as critical fail
+        elif event_type is EventType.BLESSING_DAY and roll >= next_roll - 2 and roll != next_roll:
+            effective_roll = next_roll  # treat as win
+
         # We batch all the roll messages so the bot doesn't get rate limited
         roll_results_strings.append(f"```# {roll}\nDetails: [d{next_roll} ({roll})]```")
         if roll == SPECIAL_ROLL_NUMBER:
             roll_results_strings.append("Nice")
         logging.info(f"{name} rolled a {roll} (d{next_roll})")
 
-        if roll == 1:
+        if effective_roll == 1:
             batched_rolls_message = "\n".join(roll_results_strings)
             await ctx.send(batched_rolls_message)
             sent_message = True
@@ -126,7 +137,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
                 ban_as_bot=True,
                 reason="Rolled a 1",
             )
-        elif roll == next_roll - 1:
+        elif effective_roll == next_roll - 1:
             batched_rolls_message = "\n".join(roll_results_strings)
             await ctx.send(batched_rolls_message)
             sent_message = True
@@ -140,7 +151,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
                 await ctx.send(
                     f"{ctx.author.as_mention()}: {ctx.guild.critical_failure_msg}"
                 )
-        elif roll == next_roll:
+        elif effective_roll == next_roll:
             # Increment the current roll
             ctx.guild.current_roll = next_roll + 1
             await ctx.session.commit()

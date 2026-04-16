@@ -4,6 +4,7 @@ import asyncio
 import datetime
 
 from dicebot.commands import ban
+from dicebot.data.db.active_event import ActiveEvent, EventType
 from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
@@ -40,6 +41,11 @@ class BanReactionHandler(AbstractReactionHandler):
                     ban_as_bot=True,
                     reason="Tried to react-ban the bot",
                 )
+
+        # Check for TURBO_DAY event — threshold becomes 1
+        active_event = await ActiveEvent.get_current(ctx.session, ctx.guild_id)
+        if active_event is not None and active_event.event_type_enum is EventType.TURBO_DAY:
+            return await self.should_handle_without_threshold_check(ctx) and ctx.reaction.count == 1
 
         return await super().should_handle(ctx)
 

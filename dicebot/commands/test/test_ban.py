@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
 import datetime
-from unittest.mock import create_autospec, patch
+from unittest.mock import AsyncMock, MagicMock, create_autospec, patch
 
 from dicebot.commands import ban
+from dicebot.data.db.active_event import ActiveEvent, EventType
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.ban_immunity import BanImmunity
 from dicebot.data.db.user import User
@@ -12,6 +13,21 @@ from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
 class TestBan(DicebotTestCase):
+    async def asyncSetUp(self) -> None:
+        await super().asyncSetUp()
+        # Patch ActiveEvent.get_current to return None (no active event) for all ban tests
+        # unless a specific test overrides it
+        self._active_event_patcher = patch(
+            "dicebot.commands.ban.ActiveEvent.get_current",
+            new_callable=AsyncMock,
+            return_value=None,
+        )
+        self._active_event_patcher.start()
+
+    async def asyncTearDown(self) -> None:
+        self._active_event_patcher.stop()
+        await super().asyncTearDown()
+
     @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
     @patch("dicebot.commands.ban.unban_task", autospec=True)
     @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
@@ -118,3 +134,51 @@ class TestBan(DicebotTestCase):
         call_args = ctx.message.channel.send.call_args
         assert "ban immunity" in call_args.args[0]
         ctx.session.add.assert_not_called()
+
+    @patch("dicebot.commands.ban.ActiveEvent.get_current", new_callable=AsyncMock)
+    @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
+    @patch("dicebot.commands.ban.unban_task", autospec=True)
+    @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
+    async def test_ban_internal_double_ban(self, mock_ban, mock_unban_task, mock_get_active, mock_get_current) -> None:
+        """DOUBLE_BAN event: timer.seconds should be doubled before the ban is applied"""
+        # Arrange
+        ctx = TestMessageContext.get()
+        target = create_autospec(User)
+        timer = Time("1hr")
+        original_seconds = timer.seconds
+        mock_ban.return_value = None
+        mock_get_active.return_value = None  # no ban immunity
+        mock_event = MagicMock(spec=ActiveEvent)
+        mock_event.event_type_enum = EventType.DOUBLE_BAN
+        mock_get_current.return_value = mock_event
+        # Act
+        with patch("dicebot.commands.ban.timezone"):
+            with patch("dicebot.commands.ban.random") as mock_random:
+                mock_random.random.return_value = 1.0  # avoid the 10x penalty
+                await ban.ban_internal(ctx, target, timer, False, "ban reason")
+        # Assert — timer should have been doubled
+        self.assertEqual(original_seconds * 2, timer.seconds)
+
+    @patch("dicebot.commands.ban.ActiveEvent.get_current", new_callable=AsyncMock)
+    @patch("dicebot.commands.ban.BanImmunity.get_active", autospec=True)
+    @patch("dicebot.commands.ban.unban_task", autospec=True)
+    @patch("dicebot.commands.ban.Ban.get_latest_unvoided_ban", autospec=True)
+    async def test_ban_internal_lucky_hour(self, mock_ban, mock_unban_task, mock_get_active, mock_get_current) -> None:
+        """LUCKY_HOUR event: timer.seconds should be halved (minimum 1)"""
+        # Arrange
+        ctx = TestMessageContext.get()
+        target = create_autospec(User)
+        timer = Time("1hr")
+        original_seconds = timer.seconds
+        mock_ban.return_value = None
+        mock_get_active.return_value = None  # no ban immunity
+        mock_event = MagicMock(spec=ActiveEvent)
+        mock_event.event_type_enum = EventType.LUCKY_HOUR
+        mock_get_current.return_value = mock_event
+        # Act
+        with patch("dicebot.commands.ban.timezone"):
+            with patch("dicebot.commands.ban.random") as mock_random:
+                mock_random.random.return_value = 1.0  # avoid the 10x penalty
+                await ban.ban_internal(ctx, target, timer, False, "ban reason")
+        # Assert — timer should have been halved
+        self.assertEqual(original_seconds // 2, timer.seconds)

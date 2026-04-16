@@ -54,6 +54,8 @@ class TestSchedule(DicebotTestCase):
         mock_notify.apply_async.assert_called_once()
         call_args = mock_notify.apply_async.call_args
         assert call_args.kwargs["countdown"] == 3600
+        added_event = ctx.session.add.call_args[0][0]
+        self.assertEqual(added_event.message_id, mock_msg.id)
 
     @patch("dicebot.commands.schedule.ScheduledEventSignup.get_all_for_event", new_callable=AsyncMock)
     @patch("dicebot.commands.schedule.ScheduledEvent.get_by_id", new_callable=AsyncMock)

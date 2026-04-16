@@ -10,7 +10,6 @@ from dicebot.commands.admin import requires_admin
 from dicebot.commands.ask import AskOpenAI
 from dicebot.core.register_command import register_command
 from dicebot.data.db.scheduled_event import ScheduledEvent, ScheduledEventSignup
-from dicebot.data.db.user import User
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.data.types.message_context import MessageContext
 
@@ -63,7 +62,7 @@ async def _parse_schedule(text: str, ctx: MessageContext) -> tuple[int, str, str
         log.warning(f"Failed to parse AI schedule response: {response!r}")
         return None
 
-    if seconds_until < 0 or seconds_until > _MAX_SECONDS:
+    if seconds_until <= 0 or seconds_until > _MAX_SECONDS:
         return None
 
     return seconds_until, event_name, time_description

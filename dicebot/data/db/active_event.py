@@ -6,7 +6,7 @@ import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Annotated, Optional
 
-from sqlalchemy import BigInteger, ForeignKey, select
+from sqlalchemy import BigInteger, ForeignKey, UniqueConstraint, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -29,6 +29,7 @@ class EventType(str, Enum):
 
 class ActiveEvent(Base):
     __tablename__ = "active_event"
+    __table_args__ = (UniqueConstraint("guild_id", name="uq_active_event_guild"),)
 
     id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
     guild_id: Mapped[bigint_ix] = mapped_column(ForeignKey("guild.id"))

@@ -3,9 +3,8 @@
 import datetime
 import unittest
 
-from sqlalchemy import BigInteger, Integer, event as sa_event
+from sqlalchemy import BigInteger, Integer
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.schema import CreateTable
 
 from dicebot.data.db.active_event import ActiveEvent, EventType
 from dicebot.data.db.base import Base
@@ -38,13 +37,14 @@ async def _create_tables(conn):
 
 class TestActiveEvent(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        engine = create_async_engine("sqlite+aiosqlite:///:memory:")
-        async with engine.begin() as conn:
+        self.engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+        async with self.engine.begin() as conn:
             await _create_tables(conn)
-        self.session = AsyncSession(engine, expire_on_commit=False)
+        self.session = AsyncSession(self.engine, expire_on_commit=False)
 
     async def asyncTearDown(self):
         await self.session.close()
+        await self.engine.dispose()
 
     async def test_get_current_no_event(self):
         """get_current returns None when no rows exist."""

@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import random
 
+import discord
 import pytz
 
 from dicebot.app import app_sessionmaker, celery_app
@@ -49,7 +50,7 @@ async def check_daily_event_async() -> None:
 
             # Pick a random event and create it
             event_type = random.choice(list(EventType))
-            now = datetime.datetime.utcnow()
+            now = datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
             active_event = ActiveEvent(
                 guild_id=guild.id,
                 event_type=event_type.value,
@@ -61,7 +62,6 @@ async def check_daily_event_async() -> None:
 
             # Announce it
             channel = await client.fetch_channel(guild.events_channel_id)
-            import discord  # local import to avoid heavy discord import at module load
             if isinstance(channel, discord.TextChannel):
                 title, description = _event_announcement(event_type)
                 embed = discord.Embed(
@@ -74,6 +74,8 @@ async def check_daily_event_async() -> None:
 
 
 def _event_announcement(event_type: EventType) -> tuple[str, str]:
+    from dicebot.commands.roll import CURSE_DAY_CRITICAL_THRESHOLD
+
     announcements = {
         EventType.DOUBLE_BAN: (
             "Double Ban Day",
@@ -85,7 +87,7 @@ def _event_announcement(event_type: EventType) -> tuple[str, str]:
         ),
         EventType.CURSE_DAY: (
             "Curse Day",
-            f"Any roll under {5} counts as a critical fail today. Tread carefully.",
+            f"Any roll under {CURSE_DAY_CRITICAL_THRESHOLD} counts as a critical fail today. Tread carefully.",
         ),
         EventType.BLESSING_DAY: (
             "Blessing Day",

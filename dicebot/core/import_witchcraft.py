@@ -21,7 +21,7 @@ def import_submodules(package: str, recursive: bool = False) -> Dict[str, Module
         full_name = module.__name__ + "." + name
         try:
             results[full_name] = importlib.import_module(full_name)
-        except (ModuleNotFoundError, Exception):
+        except Exception:
             pass
 
         if recursive and is_pkg:

@@ -30,6 +30,7 @@ from dicebot.handlers.message.thanks_nudge_handler import ThanksNudgeHandler
 
 # on_reaction handlers
 from dicebot.handlers.reaction.ban_handler import BanReactionHandler
+from dicebot.handlers.reaction.eyes_handler import EyesReactionHandler
 from dicebot.handlers.reaction.generic_gif_handler import GenericGifReactionHandler
 from dicebot.handlers.reaction.kekw_handler import KekwReactionHandler
 from dicebot.handlers.reaction.shrek_handler import ShrekReactionHandler
@@ -108,6 +109,7 @@ class GuildContext:
 
         # TODO: Build handlers from set of handlers defined on guild features
         handlers = [
+            EyesReactionHandler(),
             BanReactionHandler(),
             GenericGifReactionHandler(),
             KekwReactionHandler(),

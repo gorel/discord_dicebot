@@ -51,6 +51,7 @@ class TestEventsOff(DicebotTestCase):
         await events.events_off(ctx)
         # Assert
         self.assertIsNone(ctx.guild.events_probability)
+        self.assertIsNone(ctx.guild.events_channel_id)
         ctx.session.commit.assert_awaited_once()
         ctx.channel.send.assert_awaited_once()
 

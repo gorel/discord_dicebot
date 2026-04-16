@@ -30,6 +30,7 @@ async def events_on(ctx: MessageContext, probability: float) -> None:
 async def events_off(ctx: MessageContext) -> None:
     """Disable random events for this server"""
     ctx.guild.events_probability = None
+    ctx.guild.events_channel_id = None
     await ctx.session.commit()
     await ctx.send("Random events disabled.")
 

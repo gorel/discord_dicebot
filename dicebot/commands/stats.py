@@ -12,6 +12,7 @@ from dicebot.commands import timezone
 from dicebot.core.register_command import register_command
 from dicebot.data.db.ban import Ban
 from dicebot.data.db.pun import Pun
+from dicebot.data.db.rep import Rep
 from dicebot.data.db.roll import Roll
 from dicebot.data.db.thanks import Thanks
 from dicebot.data.db.user import User
@@ -112,6 +113,51 @@ async def get_social_stats(
     }
 
 
+async def get_rep_stats(
+    session: AsyncSession, guild, user: User, discord_client: discord.Client
+) -> dict:
+    received = await Rep.get_total_received(session, guild.id, user.id)
+    given = await Rep.get_total_given(session, guild.id, user.id)
+
+    async def mention_or_none(user_id: int | None) -> str:
+        if user_id is None:
+            return "None"
+        return f"<@{user_id}>"
+
+    biggest_fan_data = await Rep.get_biggest_fan(session, guild.id, user.id)
+    biggest_fan = "No one yet"
+    if biggest_fan_data is not None:
+        fan_id, fan_total = biggest_fan_data
+        biggest_fan = f"<@{fan_id}> ({fan_total:+d})"
+
+    hater_data = await Rep.get_hater(session, guild.id, user.id)
+    hater = "No haters yet"
+    if hater_data is not None:
+        hater_id, hater_total = hater_data
+        hater = f"<@{hater_id}> ({hater_total:+d})"
+
+    best_friend_data = await Rep.get_best_friend(session, guild.id, user.id)
+    best_friend = "No one yet"
+    if best_friend_data is not None:
+        friend_id, friend_total = best_friend_data
+        best_friend = f"<@{friend_id}> ({friend_total:+d})"
+
+    nemesis_data = await Rep.get_nemesis(session, guild.id, user.id)
+    nemesis = "No nemesis yet"
+    if nemesis_data is not None:
+        nemesis_id, nemesis_total = nemesis_data
+        nemesis = f"<@{nemesis_id}> ({nemesis_total:+d})"
+
+    return {
+        "received": received,
+        "given": given,
+        "biggest_fan": biggest_fan,
+        "hater": hater,
+        "best_friend": best_friend,
+        "nemesis": nemesis,
+    }
+
+
 @register_command
 async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     """Show stats for a user (defaults to yourself). Usage: !stats [@user]"""
@@ -121,6 +167,7 @@ async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     roll_stats = await get_roll_stats(ctx.session, ctx.guild, target)
     ban_stats = await get_ban_stats(ctx.session, ctx.guild, target)
     social_stats = await get_social_stats(ctx.session, ctx.guild, target)
+    rep_stats = await get_rep_stats(ctx.session, ctx.guild, target, ctx.client)
 
     is_banned = ban_stats["currently_banned"] != "No"
     color = discord.Color.red() if is_banned else discord.Color.blue()
@@ -160,5 +207,16 @@ async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     embed.add_field(name="Thanks Given", value=str(social_stats["thanks_given"]), inline=True)
     embed.add_field(name="Thanks Received", value=str(social_stats["thanks_received"]), inline=True)
     embed.add_field(name="Puns Caught", value=str(social_stats["puns_caught"]), inline=True)
+
+    # Rep Stats section
+    embed.add_field(name="\u200b", value="**⭐ Rep Stats**", inline=False)
+    embed.add_field(name="Rep Received", value=f"{rep_stats['received']:+d}", inline=True)
+    embed.add_field(name="Rep Given", value=f"{rep_stats['given']:+d}", inline=True)
+    embed.add_field(name="\u200b", value="\u200b", inline=True)
+    embed.add_field(name="Biggest Fan", value=rep_stats["biggest_fan"], inline=True)
+    embed.add_field(name="Hater", value=rep_stats["hater"], inline=True)
+    embed.add_field(name="\u200b", value="\u200b", inline=True)
+    embed.add_field(name="Best Friend", value=rep_stats["best_friend"], inline=True)
+    embed.add_field(name="Nemesis", value=rep_stats["nemesis"], inline=True)
 
     await ctx.send(embed=embed)

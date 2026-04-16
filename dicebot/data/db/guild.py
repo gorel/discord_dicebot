@@ -97,6 +97,8 @@ class Guild(Base):
     gambling_limit: Mapped[Optional[int]]
     use_short_shame: Mapped[bool_f_sd]
     auto_tldr: Mapped[bool_f_sd]
+    events_enabled: Mapped[bool_f_sd]
+    events_channel_id: Mapped[Optional[bigint]]
 
     # Relationships
     admins: Mapped[list[User]] = relationship(

@@ -14,6 +14,7 @@ from dicebot.data.types.message_context import MessageContext
 from dicebot.data.types.time import Time
 
 SPECIAL_ROLL_NUMBER = 69
+CURSE_DAY_CRITICAL_THRESHOLD = 5
 
 
 @register_command
@@ -113,7 +114,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
 
         # Apply event modifiers
         effective_roll = roll
-        if event_type is EventType.CURSE_DAY and roll < 5 and roll != 1:
+        if event_type is EventType.CURSE_DAY and roll < CURSE_DAY_CRITICAL_THRESHOLD and roll != 1:
             effective_roll = 1  # treat as critical fail
         elif event_type is EventType.BLESSING_DAY and roll >= next_roll - 2 and roll != next_roll:
             effective_roll = next_roll  # treat as win

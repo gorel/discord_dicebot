@@ -20,7 +20,8 @@ class BanReactionHandler(AbstractReactionHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        if await self.should_handle_without_threshold_check(ctx):
+        basic = await self.should_handle_without_threshold_check(ctx)
+        if basic:
             # Appease pyright
             assert ctx.reaction is not None
             assert not isinstance(ctx.reaction.emoji, str)
@@ -45,9 +46,9 @@ class BanReactionHandler(AbstractReactionHandler):
         # Check for TURBO_DAY event — threshold becomes 1
         active_event = await ActiveEvent.get_current(ctx.session, ctx.guild_id)
         if active_event is not None and active_event.event_type_enum is EventType.TURBO_DAY:
-            return await self.should_handle_without_threshold_check(ctx) and ctx.reaction.count == 1
+            return basic and ctx.reaction.count == 1
 
-        return await super().should_handle(ctx)
+        return basic and self.meets_threshold_check(ctx)
 
     async def handle(
         self,

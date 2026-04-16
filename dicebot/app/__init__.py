@@ -39,3 +39,12 @@ celery_app = Celery(
     namespace="CELERY",
 )
 celery_app.conf.broker_transport_options = {"visibility_timeout": ONE_YEAR_IN_SECONDS}
+
+from celery.schedules import crontab
+
+celery_app.conf.beat_schedule = {
+    "check-daily-event": {
+        "task": "dicebot.tasks.daily_event.check_daily_event",
+        "schedule": crontab(minute=0),  # every hour on the hour
+    },
+}

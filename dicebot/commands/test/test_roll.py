@@ -215,6 +215,24 @@ class TestRoll(DicebotTestCase):
             ctx.guild.add_chat_rename.assert_not_awaited()
             ctx.guild.add_guild_rename.assert_not_awaited()
 
+    @patch("dicebot.commands.roll.roast", autospec=True)
+    @patch("dicebot.commands.roll.Roll", autospec=True)
+    @patch("dicebot.commands.roll.ban", autospec=True)
+    @patch("dicebot.commands.roll.ActiveEvent.get_current", new_callable=AsyncMock, return_value=None)
+    async def test_roll_critical_fail_calls_roast(self, mock_event, mock_ban, mock_roll, mock_roast):
+        # Arrange
+        ctx = TestMessageContext.get()
+        ctx.guild.roll_timeout = 0
+        ctx.guild.current_roll = 10
+        ctx.guild.gambling_limit = None
+        mock_roll.get_last_roll = AsyncMock(return_value=None)
+        # Act
+        with patch("dicebot.commands.roll.random") as mock_random:
+            mock_random.randint.return_value = 1
+            await roll.roll(ctx, GreedyStr(""))
+        # Assert
+        mock_roast.generate_roast.assert_awaited_once()
+
     async def test_set_gambling_limit(self) -> None:
         with self.subTest("simple"):
             # Arrange

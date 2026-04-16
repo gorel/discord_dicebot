@@ -4,7 +4,7 @@ import datetime
 import logging
 import random
 
-from dicebot.commands import ban, timezone
+from dicebot.commands import ban, roast, timezone
 from dicebot.commands.admin import requires_admin
 from dicebot.core.register_command import register_command
 from dicebot.data.db.active_event import ActiveEvent, EventType
@@ -130,6 +130,7 @@ async def roll(ctx: MessageContext, num_rolls: GreedyStr) -> None:
             await ctx.send(batched_rolls_message)
             sent_message = True
             await ctx.send("Lol, you suck")
+            await roast.generate_roast(ctx, roll=roll, die_size=next_roll)
             ban_time = Time(f"{next_roll + gambling_penalty}hr")
             await ban.ban_internal(
                 ctx,

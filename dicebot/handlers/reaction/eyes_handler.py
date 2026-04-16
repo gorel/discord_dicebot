@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import logging
+from typing import Optional
 
 from sqlalchemy.exc import IntegrityError
 
@@ -10,6 +10,9 @@ from dicebot.handlers.reaction.abstract_reaction_handler import AbstractReaction
 
 
 class EyesReactionHandler(AbstractReactionHandler):
+    def __init__(self) -> None:
+        self._cached_event: Optional[ScheduledEvent] = None
+
     @property
     def reaction_name(self) -> str:
         return "eyes"
@@ -17,18 +20,22 @@ class EyesReactionHandler(AbstractReactionHandler):
     async def should_handle(self, ctx: MessageContext) -> bool:
         if ctx.reaction is None:
             return False
-        if not self.is_emoji_with_name(ctx.reaction, self.reaction_name):
-            return False
-        assert ctx.reaction is not None
-        # Only handle if this message corresponds to a scheduled event
-        event = await ScheduledEvent.get_by_message_id(ctx.session, ctx.reaction.message.id)
-        return event is not None
+        emoji = ctx.reaction.emoji
+        # Accept both Unicode 👀 (\U0001f440) and any custom :eyes: guild emoji
+        if isinstance(emoji, str):
+            if emoji != "\U0001f440":
+                return False
+        else:
+            if (emoji.name or "").lower() != self.reaction_name:
+                return False
+        self._cached_event = await ScheduledEvent.get_by_message_id(ctx.session, ctx.reaction.message.id)
+        return self._cached_event is not None
 
     async def handle(self, ctx: MessageContext) -> None:
         assert ctx.reaction is not None
         assert ctx.reactor is not None
 
-        event = await ScheduledEvent.get_by_message_id(ctx.session, ctx.reaction.message.id)
+        event = self._cached_event
         if event is None:
             return
 

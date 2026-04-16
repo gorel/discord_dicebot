@@ -9,8 +9,8 @@ from dicebot.app import app_sessionmaker, celery_app
 
 @celery_app.task(ignore_result=True)
 def notify_event(event_id: int, channel_id: int) -> None:
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(_notify_event_async(event_id, channel_id))
+    # NOTE: unban.py and remind.py still use get_event_loop() — pre-existing debt
+    asyncio.run(_notify_event_async(event_id, channel_id))
 
 
 async def _notify_event_async(event_id: int, channel_id: int) -> None:

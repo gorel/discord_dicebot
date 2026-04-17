@@ -6,11 +6,18 @@ from dicebot.data.db.user import User
 from dicebot.data.types.message_context import MessageContext
 
 
+REP_MAX = 10000
+
+
 @register_command
 async def rep(ctx: MessageContext, amount: int, target: User) -> None:
     """Give rep to another user. Use negative amounts to take away rep."""
     if target.id == ctx.author_id:
         await ctx.send("You can't rep yourself.")
+        return
+
+    if amount > REP_MAX or amount < -REP_MAX:
+        await ctx.send(f"Rep amount must be between -{REP_MAX:,} and {REP_MAX:,}.")
         return
 
     await Rep.give(

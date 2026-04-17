@@ -5,7 +5,7 @@ from __future__ import annotations
 import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import BigInteger, ForeignKey, func, select
+from sqlalchemy import BigInteger, ForeignKey, Integer, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -23,7 +23,7 @@ class Rep(Base):
     guild_id: Mapped[bigint_ix] = mapped_column(ForeignKey("guild.id"))
     giver_id: Mapped[bigint_ix] = mapped_column(ForeignKey("discord_user.id"))
     receiver_id: Mapped[bigint_ix] = mapped_column(ForeignKey("discord_user.id"))
-    amount: Mapped[bigint]
+    amount: Mapped[int] = mapped_column(Integer)
     given_at: Mapped[datetime.datetime] = mapped_column(
         default=datetime.datetime.now
     )

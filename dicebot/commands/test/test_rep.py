@@ -28,6 +28,30 @@ class TestRep(DicebotTestCase):
         assert "+5" in msg
         assert "15" in msg or "+15" in msg
 
+    @patch("dicebot.commands.rep.Rep.give", new_callable=AsyncMock)
+    async def test_rep_over_limit(self, mock_give):
+        ctx = TestMessageContext.get()
+        ctx.author.id = 1
+        target = create_autospec(User)
+        target.id = 2
+        await rep_cmd.rep(ctx, 99999, target)
+        ctx.channel.send.assert_awaited_once()
+        msg = ctx.channel.send.call_args[0][0]
+        assert "10,000" in msg
+        mock_give.assert_not_awaited()
+
+    @patch("dicebot.commands.rep.Rep.give", new_callable=AsyncMock)
+    async def test_rep_under_negative_limit(self, mock_give):
+        ctx = TestMessageContext.get()
+        ctx.author.id = 1
+        target = create_autospec(User)
+        target.id = 2
+        await rep_cmd.rep(ctx, -99999, target)
+        ctx.channel.send.assert_awaited_once()
+        msg = ctx.channel.send.call_args[0][0]
+        assert "10,000" in msg
+        mock_give.assert_not_awaited()
+
     async def test_rep_self(self):
         ctx = TestMessageContext.get()
         target = create_autospec(User)

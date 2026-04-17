@@ -40,7 +40,7 @@ class TestStats(DicebotTestCase):
         mock_roll.assert_awaited_once_with(ctx.session, ctx.guild, ctx.author)
         mock_ban.assert_awaited_once_with(ctx.session, ctx.guild, ctx.author)
         mock_social.assert_awaited_once_with(ctx.session, ctx.guild, ctx.author)
-        mock_rep.assert_awaited_once_with(ctx.session, ctx.guild, ctx.author, ctx.client)
+        mock_rep.assert_awaited_once_with(ctx.session, ctx.guild, ctx.author)
         ctx.channel.send.assert_awaited_once()
         # The embed should have been passed
         call_kwargs = ctx.channel.send.call_args.kwargs
@@ -68,7 +68,7 @@ class TestStats(DicebotTestCase):
         mock_roll.assert_awaited_once_with(ctx.session, ctx.guild, other_user)
         mock_ban.assert_awaited_once_with(ctx.session, ctx.guild, other_user)
         mock_social.assert_awaited_once_with(ctx.session, ctx.guild, other_user)
-        mock_rep.assert_awaited_once_with(ctx.session, ctx.guild, other_user, ctx.client)
+        mock_rep.assert_awaited_once_with(ctx.session, ctx.guild, other_user)
         ctx.channel.send.assert_awaited_once()
 
     @patch("dicebot.commands.stats.get_rep_stats", autospec=True)
@@ -177,7 +177,7 @@ class TestGetRepStats(DicebotTestCase):
     async def test_get_rep_stats(self, mock_nemesis, mock_friend, mock_hater, mock_fan, mock_given, mock_received):
         from dicebot.commands.stats import get_rep_stats
         ctx = TestMessageContext.get()
-        result = await get_rep_stats(ctx.session, ctx.guild, ctx.author, ctx.client)
+        result = await get_rep_stats(ctx.session, ctx.guild, ctx.author)
         assert result["received"] == 10
         assert result["given"] == 5
         assert "<@99>" in result["biggest_fan"]

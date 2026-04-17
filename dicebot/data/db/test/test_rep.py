@@ -82,6 +82,13 @@ class TestRep(unittest.IsolatedAsyncioTestCase):
         result = await Rep.get_biggest_fan(self.session, guild_id=GUILD_ID, user_id=USER_C)
         self.assertIsNone(result)
 
+    async def test_get_biggest_fan_none_when_net_negative(self):
+        """get_biggest_fan returns None when the top giver has a net-negative total."""
+        await Rep.give(self.session, guild_id=GUILD_ID, giver_id=USER_A, receiver_id=USER_C, amount=1)
+        await Rep.give(self.session, guild_id=GUILD_ID, giver_id=USER_A, receiver_id=USER_C, amount=-5)
+        result = await Rep.get_biggest_fan(self.session, guild_id=GUILD_ID, user_id=USER_C)
+        self.assertIsNone(result)
+
     async def test_get_hater(self):
         """get_hater returns (giver_id, total) for the person who gave the most negative rep."""
         await Rep.give(self.session, guild_id=GUILD_ID, giver_id=USER_A, receiver_id=USER_C, amount=-5)
@@ -109,6 +116,13 @@ class TestRep(unittest.IsolatedAsyncioTestCase):
 
     async def test_get_best_friend_none(self):
         """get_best_friend returns None when the user has given no rep."""
+        result = await Rep.get_best_friend(self.session, guild_id=GUILD_ID, user_id=USER_A)
+        self.assertIsNone(result)
+
+    async def test_get_best_friend_none_when_net_negative(self):
+        """get_best_friend returns None when the top recipient has a net-negative total."""
+        await Rep.give(self.session, guild_id=GUILD_ID, giver_id=USER_A, receiver_id=USER_B, amount=1)
+        await Rep.give(self.session, guild_id=GUILD_ID, giver_id=USER_A, receiver_id=USER_B, amount=-5)
         result = await Rep.get_best_friend(self.session, guild_id=GUILD_ID, user_id=USER_A)
         self.assertIsNone(result)
 

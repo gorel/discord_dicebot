@@ -86,7 +86,10 @@ class Rep(Base):
         row = result.one_or_none()
         if row is None:
             return None
-        return (row.giver_id, int(row.total))
+        total = int(row.total)
+        if total <= 0:
+            return None
+        return (row.giver_id, total)
 
     @classmethod
     async def get_hater(
@@ -125,7 +128,10 @@ class Rep(Base):
         row = result.one_or_none()
         if row is None:
             return None
-        return (row.receiver_id, int(row.total))
+        total = int(row.total)
+        if total <= 0:
+            return None
+        return (row.receiver_id, total)
 
     @classmethod
     async def get_nemesis(

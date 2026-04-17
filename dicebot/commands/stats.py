@@ -114,15 +114,10 @@ async def get_social_stats(
 
 
 async def get_rep_stats(
-    session: AsyncSession, guild, user: User, discord_client: discord.Client
+    session: AsyncSession, guild, user: User
 ) -> dict:
     received = await Rep.get_total_received(session, guild.id, user.id)
     given = await Rep.get_total_given(session, guild.id, user.id)
-
-    async def mention_or_none(user_id: int | None) -> str:
-        if user_id is None:
-            return "None"
-        return f"<@{user_id}>"
 
     biggest_fan_data = await Rep.get_biggest_fan(session, guild.id, user.id)
     biggest_fan = "No one yet"
@@ -167,7 +162,7 @@ async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     roll_stats = await get_roll_stats(ctx.session, ctx.guild, target)
     ban_stats = await get_ban_stats(ctx.session, ctx.guild, target)
     social_stats = await get_social_stats(ctx.session, ctx.guild, target)
-    rep_stats = await get_rep_stats(ctx.session, ctx.guild, target, ctx.client)
+    rep_stats = await get_rep_stats(ctx.session, ctx.guild, target)
 
     is_banned = ban_stats["currently_banned"] != "No"
     color = discord.Color.red() if is_banned else discord.Color.blue()

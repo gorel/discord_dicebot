@@ -183,13 +183,10 @@ async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     embed.add_field(name="\u200b", value="**🎲 Roll Stats**", inline=False)
     embed.add_field(name="Total Rolls", value=str(roll_stats["total"]), inline=True)
     embed.add_field(name="Win Rate", value=roll_stats["win_rate"], inline=True)
-    embed.add_field(name="\u200b", value="\u200b", inline=True)
     embed.add_field(name="Wins", value=str(roll_stats["wins"]), inline=True)
     embed.add_field(name="Losses", value=str(roll_stats["losses"]), inline=True)
-    embed.add_field(name="\u200b", value="\u200b", inline=True)
     embed.add_field(name="Best Roll", value=str(roll_stats["best"]), inline=True)
     embed.add_field(name="Last Roll", value=roll_stats["last_roll"], inline=True)
-    embed.add_field(name="\u200b", value="\u200b", inline=True)
 
     # Ban Stats section
     embed.add_field(name="\u200b", value="**🔨 Ban Stats**", inline=False)
@@ -210,7 +207,6 @@ async def stats(ctx: MessageContext, target: Optional[User] = None) -> None:
     embed.add_field(name="\u200b", value="\u200b", inline=True)
     embed.add_field(name="Biggest Fan", value=rep_stats["biggest_fan"], inline=True)
     embed.add_field(name="Hater", value=rep_stats["hater"], inline=True)
-    embed.add_field(name="\u200b", value="\u200b", inline=True)
     embed.add_field(name="Best Friend", value=rep_stats["best_friend"], inline=True)
     embed.add_field(name="Nemesis", value=rep_stats["nemesis"], inline=True)
 

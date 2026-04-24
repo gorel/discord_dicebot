@@ -70,6 +70,62 @@ class TestSchedule(DicebotTestCase):
         ctx.channel.send.assert_awaited_once()
         ctx.session.delete.assert_not_called()
 
+    @patch("dicebot.commands.schedule.ScheduledEvent.get_upcoming", new_callable=AsyncMock)
+    async def test_list_events_no_events(self, mock_get_upcoming):
+        # Arrange
+        ctx = TestMessageContext.get()
+        mock_get_upcoming.return_value = []
+        # Act
+        await schedule.list_events(ctx)
+        # Assert
+        ctx.channel.send.assert_awaited_once()
+        call_kwargs = ctx.channel.send.call_args.kwargs
+        embed = call_kwargs["embed"]
+        self.assertEqual(embed.title, "Upcoming Events")
+        self.assertEqual(len(embed.fields), 1)
+        self.assertIn("No upcoming events", embed.fields[0].value)
+
+    @patch("dicebot.commands.schedule.ScheduledEvent.get_upcoming", new_callable=AsyncMock)
+    async def test_list_events_one_event(self, mock_get_upcoming):
+        # Arrange
+        ctx = TestMessageContext.get()
+        ctx.guild.timezone = "US/Pacific"
+        mock_event = MagicMock(spec=ScheduledEvent)
+        mock_event.name = "Jackbox"
+        mock_event.event_time = datetime.datetime(2099, 5, 1, 17, 0, 0)
+        mock_get_upcoming.return_value = [mock_event]
+        # Act
+        await schedule.list_events(ctx)
+        # Assert
+        ctx.channel.send.assert_awaited_once()
+        call_kwargs = ctx.channel.send.call_args.kwargs
+        embed = call_kwargs["embed"]
+        self.assertEqual(embed.title, "Upcoming Events")
+        self.assertEqual(len(embed.fields), 1)
+        self.assertEqual(embed.fields[0].name, "Jackbox")
+
+    @patch("dicebot.commands.schedule.ScheduledEvent.get_upcoming", new_callable=AsyncMock)
+    async def test_list_events_multiple_events(self, mock_get_upcoming):
+        # Arrange
+        ctx = TestMessageContext.get()
+        ctx.guild.timezone = "US/Pacific"
+        event1 = MagicMock(spec=ScheduledEvent)
+        event1.name = "Jackbox"
+        event1.event_time = datetime.datetime(2099, 5, 1, 17, 0, 0)
+        event2 = MagicMock(spec=ScheduledEvent)
+        event2.name = "Movie Night"
+        event2.event_time = datetime.datetime(2099, 5, 8, 20, 0, 0)
+        mock_get_upcoming.return_value = [event1, event2]
+        # Act
+        await schedule.list_events(ctx)
+        # Assert
+        ctx.channel.send.assert_awaited_once()
+        call_kwargs = ctx.channel.send.call_args.kwargs
+        embed = call_kwargs["embed"]
+        self.assertEqual(len(embed.fields), 2)
+        self.assertEqual(embed.fields[0].name, "Jackbox")
+        self.assertEqual(embed.fields[1].name, "Movie Night")
+
     @patch("dicebot.commands.schedule.ScheduledEventSignup.get_all_for_event", new_callable=AsyncMock)
     @patch("dicebot.commands.schedule.ScheduledEvent.get_by_id", new_callable=AsyncMock)
     async def test_cancel_event_found(self, mock_get, mock_signups):

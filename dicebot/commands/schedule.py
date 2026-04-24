@@ -4,8 +4,10 @@ import datetime
 import json
 import logging
 
+import discord
 import pytz
 
+from dicebot.commands import timezone
 from dicebot.commands.admin import requires_admin
 from dicebot.commands.ask import AskOpenAI
 from dicebot.core.register_command import register_command
@@ -126,3 +128,17 @@ async def cancel_event(ctx: MessageContext, event_id: int) -> None:
     await ctx.session.delete(event)
     await ctx.session.commit()
     await ctx.send(f"Event **{event.name}** (ID: {event_id}) has been cancelled.")
+
+
+@register_command
+async def list_events(ctx: MessageContext) -> None:
+    """List upcoming scheduled events for this server."""
+    events = await ScheduledEvent.get_upcoming(ctx.session, ctx.guild_id)
+    embed = discord.Embed(title="Upcoming Events", color=discord.Color.blue())
+    if not events:
+        embed.add_field(name="​", value="No upcoming events scheduled.", inline=False)
+    else:
+        for event in events:
+            time_str = timezone.localize_dt(event.event_time, ctx.guild.timezone)
+            embed.add_field(name=event.name, value=time_str, inline=False)
+    await ctx.send(embed=embed)

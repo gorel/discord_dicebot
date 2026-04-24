@@ -132,6 +132,55 @@ class TestScheduledEvent(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(IntegrityError):
             await self.session.commit()
 
+    async def test_get_upcoming_excludes_past_events(self):
+        """get_upcoming returns only events in the future."""
+        past = ScheduledEvent(
+            guild_id=1,
+            channel_id=100,
+            name="Past Event",
+            event_time=datetime.datetime(2000, 1, 1, 0, 0, 0),
+            message_id=None,
+        )
+        future = ScheduledEvent(
+            guild_id=1,
+            channel_id=100,
+            name="Future Event",
+            event_time=datetime.datetime(2099, 1, 1, 0, 0, 0),
+            message_id=None,
+        )
+        self.session.add(past)
+        self.session.add(future)
+        await self.session.commit()
+
+        results = await ScheduledEvent.get_upcoming(self.session, guild_id=1)
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].name, "Future Event")
+
+    async def test_get_upcoming_returns_ordered_ascending(self):
+        """get_upcoming returns multiple future events sorted by event_time ascending."""
+        later = ScheduledEvent(
+            guild_id=1,
+            channel_id=100,
+            name="Later Event",
+            event_time=datetime.datetime(2099, 6, 1, 0, 0, 0),
+            message_id=None,
+        )
+        sooner = ScheduledEvent(
+            guild_id=1,
+            channel_id=100,
+            name="Sooner Event",
+            event_time=datetime.datetime(2099, 1, 1, 0, 0, 0),
+            message_id=None,
+        )
+        self.session.add(later)
+        self.session.add(sooner)
+        await self.session.commit()
+
+        results = await ScheduledEvent.get_upcoming(self.session, guild_id=1)
+        self.assertEqual(len(results), 2)
+        self.assertEqual(results[0].name, "Sooner Event")
+        self.assertEqual(results[1].name, "Later Event")
+
 
 if __name__ == "__main__":
     unittest.main()

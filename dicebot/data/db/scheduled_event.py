@@ -43,6 +43,16 @@ class ScheduledEvent(Base):
         res = await session.scalars(select(cls).filter_by(guild_id=guild_id))
         return res.all()
 
+    @classmethod
+    async def get_upcoming(cls, session: AsyncSession, guild_id: int) -> Sequence[ScheduledEvent]:
+        now = datetime.datetime.utcnow()
+        res = await session.scalars(
+            select(cls)
+            .filter(cls.guild_id == guild_id, cls.event_time > now)
+            .order_by(cls.event_time)
+        )
+        return res.all()
+
 
 class ScheduledEventSignup(Base):
     __tablename__ = "scheduled_event_signup"

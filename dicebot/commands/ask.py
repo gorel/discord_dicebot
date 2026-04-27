@@ -85,7 +85,7 @@ async def ask(ctx: MessageContext, prompt: GreedyStr) -> None:
     """Ask a question to openai"""
     prompt_str = prompt.unwrap()
     asker = AskOpenAI()
-    response = await asker.ask(prompt_str)
+    response = await asker.ask(prompt_str, channel=ctx.channel)
     await ctx.quote_reply(response)
 
 

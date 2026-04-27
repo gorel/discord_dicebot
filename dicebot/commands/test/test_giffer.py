@@ -8,7 +8,7 @@ from dicebot.test.utils import DicebotTestCase, TestMessageContext
 
 
 class TestGiffer(DicebotTestCase):
-    @patch("dicebot.commands.giffer.TenorGifRetriever", autospec=True)
+    @patch("dicebot.commands.giffer.KlipyGifRetriever", autospec=True)
     async def test_get_random_gif_url(self, mock_retriever) -> None:
         with self.subTest("simple"):
             # Arrange

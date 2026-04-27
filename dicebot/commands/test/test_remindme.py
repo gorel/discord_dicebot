@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 from dicebot.commands import remindme
 from dicebot.data.types.greedy_str import GreedyStr
 from dicebot.test.utils import DicebotTestCase, TestMessageContext
+
+
+def _make_typing_ctx_manager():
+    cm = MagicMock()
+    cm.__aenter__ = AsyncMock(return_value=None)
+    cm.__aexit__ = AsyncMock(return_value=False)
+    return cm
 
 
 class TestRemindMe(DicebotTestCase):
@@ -16,6 +23,7 @@ class TestRemindMe(DicebotTestCase):
     ) -> None:
         # Arrange
         ctx = TestMessageContext.get()
+        ctx.channel.typing = MagicMock(return_value=_make_typing_ctx_manager())
         ai_response = json.dumps(
             {
                 "seconds_until": 300,
@@ -39,6 +47,7 @@ class TestRemindMe(DicebotTestCase):
     ) -> None:
         # Arrange
         ctx = TestMessageContext.get()
+        ctx.channel.typing = MagicMock(return_value=_make_typing_ctx_manager())
         ai_response = json.dumps(
             {
                 "seconds_until": -1,
@@ -60,6 +69,7 @@ class TestRemindMe(DicebotTestCase):
     ) -> None:
         # Arrange
         ctx = TestMessageContext.get()
+        ctx.channel.typing = MagicMock(return_value=_make_typing_ctx_manager())
         mock_askopenai_cls.return_value.ask = AsyncMock(return_value="not json at all")
         # Act
         await remindme.remindme(ctx, GreedyStr("to check the oven in 5 minutes"))

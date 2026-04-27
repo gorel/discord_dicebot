@@ -141,8 +141,8 @@ async def unban(ctx: MessageContext, target: User) -> None:
 async def ban_leaderboard(ctx: MessageContext) -> None:
     """View the ban leaderboard"""
 
-    leaderboard_str = await ctx.guild.ban_scoreboard_str(ctx.client, ctx.session)
-    await ctx.send(leaderboard_str)
+    embed = await ctx.guild.ban_scoreboard_str(ctx.client, ctx.session)
+    await ctx.send(embed=embed)
 
 
 # Intentionally *not* a registered command

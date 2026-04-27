@@ -59,5 +59,5 @@ async def thanks(
 @register_command
 async def thanks_scoreboard(ctx: MessageContext) -> None:
     """Display the scoreboard for !thanks"""
-    msg = await ctx.guild.thanks_scoreboard_str(ctx.client, ctx.session)
-    await ctx.send(msg)
+    embed = await ctx.guild.thanks_scoreboard_str(ctx.client, ctx.session)
+    await ctx.send(embed=embed)

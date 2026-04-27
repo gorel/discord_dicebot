@@ -172,8 +172,7 @@ class Guild(Base):
         self,
         client: discord.Client,
         session: AsyncSession,
-    ) -> str:
-        # TODO: Probably a better way to do this with declarative ORM style
+    ) -> discord.Embed:
         records = await session.execute(
             select(
                 Roll.discord_user_id,
@@ -191,24 +190,25 @@ class Guild(Base):
             .order_by(text("wins"), text("losses"), text("ones"), text("attempts"))
         )
 
-        msg = "**Stats:**\n"
-        record_strs = []
-        # TODO: Put this in a nice table
-        for rec in records.all():
+        embed = discord.Embed(title="🎲 Roll Scoreboard", color=discord.Color.gold())
+        rows = records.all()
+        if not rows:
+            embed.description = "No rolls yet."
+            return embed
+        for rec in rows:
             user = client.get_user(rec.discord_user_id)
             if not user:
                 user = await client.fetch_user(rec.discord_user_id)
-            record_strs.append(
-                f"\t- {user.name} {rec.wins} wins, {rec.losses} losses, "
-                f"{rec.ones} critical losses (rolled 1), {rec.attempts} total rolls"
+            embed.add_field(
+                name=user.name,
+                value=f"{rec.wins}W / {rec.losses}L / {rec.ones} crits / {rec.attempts} total",
+                inline=False,
             )
-        msg += "\n".join(record_strs)
-        return msg
+        return embed
 
     async def ban_scoreboard_str(
         self, client: discord.Client, session: AsyncSession
-    ) -> str:
-        # TODO: Probably a better way to do this with declarative ORM style
+    ) -> discord.Embed:
         ban_records = await session.execute(
             select(Ban.bannee_id, func.count(Ban.bannee_id).label("ban_count"))
             .filter_by(guild_id=self.id)
@@ -216,22 +216,25 @@ class Guild(Base):
             .order_by(desc(text("ban_count")))
         )
 
-        msg = "**Ban stats:**\n"
-        record_strs = []
-        for record in ban_records.all():
+        embed = discord.Embed(title="🔨 Ban Leaderboard", color=discord.Color.red())
+        rows = ban_records.all()
+        if not rows:
+            embed.description = "No bans yet."
+            return embed
+        for record in rows:
             user = client.get_user(record.bannee_id)
             if not user:
                 user = await client.fetch_user(record.bannee_id)
-            record_strs.append(
-                f"\t- {user.name} has been banned {record.ban_count} times"
+            embed.add_field(
+                name=user.name,
+                value=f"Banned {record.ban_count} time{'s' if record.ban_count != 1 else ''}",
+                inline=False,
             )
-        msg += "\n".join(record_strs)
-        return msg
+        return embed
 
     async def thanks_scoreboard_str(
         self, client: discord.Client, session: AsyncSession
-    ) -> str:
-        # TODO: Probably a better way to do this with declarative ORM style
+    ) -> discord.Embed:
         users_q = (
             select(Thanks.thanker_id.label("user_id"))
             .filter_by(guild_id=self.id)
@@ -247,7 +250,7 @@ class Guild(Base):
             select(Thanks.thanker_id, Thanks.thankee_id).filter_by(guild_id=self.id)
         ).subquery()
 
-        # This is an intentional Cartesian product
+        # Intentional Cartesian product to count per-user sent/received
         joined_q = select(
             distinct_users_q.c.user_id, thanks_q.c.thanker_id, thanks_q.c.thankee_id
         ).subquery()
@@ -266,17 +269,21 @@ class Guild(Base):
             .order_by(text("received"), text("sent"))
         )
 
-        msg = "**Thanks stats:**\n"
-        record_strs = []
-        for record in records.all():
+        embed = discord.Embed(title="🙏 Thanks Scoreboard", color=discord.Color.green())
+        rows = records.all()
+        if not rows:
+            embed.description = "No thanks yet."
+            return embed
+        for record in rows:
             user = client.get_user(record.user_id)
             if not user:
-                user = await client.fetch_user(record.bannee_id)
-            record_strs.append(
-                f"\t- {user.name}: {record.received} received, {record.sent} sent"
+                user = await client.fetch_user(record.user_id)
+            embed.add_field(
+                name=user.name,
+                value=f"{record.received} received / {record.sent} sent",
+                inline=False,
             )
-        msg += "\n".join(record_strs)
-        return msg
+        return embed
 
     async def clear_stats(self, session: AsyncSession) -> None:
         await session.execute(delete(Roll).where(Roll.guild_id == self.id))

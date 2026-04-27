@@ -119,9 +119,14 @@ class TestGetRollStats(DicebotTestCase):
         """Returns zeroed stats when user has no rolls"""
         # Arrange
         ctx = TestMessageContext.get()
+        mock_row = MagicMock()
+        mock_row.total = 0
+        mock_row.wins = 0
+        mock_row.best = None
+        mock_row.last_rolled_at = None
         mock_result = MagicMock()
-        mock_result.all.return_value = []
-        ctx.session.scalars = AsyncMock(return_value=mock_result)
+        mock_result.one.return_value = mock_row
+        ctx.session.execute = AsyncMock(return_value=mock_result)
         # Act
         result = await stats.get_roll_stats(ctx.session, ctx.guild, ctx.author)
         # Assert
@@ -131,6 +136,29 @@ class TestGetRollStats(DicebotTestCase):
         assert result["win_rate"] == "0%"
         assert result["best"] == 0
         assert result["last_roll"] == "Never"
+
+    async def test_get_roll_stats_with_rolls(self) -> None:
+        """Returns correct aggregated stats when user has rolls"""
+        # Arrange
+        ctx = TestMessageContext.get()
+        mock_row = MagicMock()
+        mock_row.total = 10
+        mock_row.wins = 7
+        mock_row.best = 95
+        mock_row.last_rolled_at = MagicMock()
+        mock_row.last_rolled_at.strftime.return_value = "Apr 27, 2026"
+        mock_result = MagicMock()
+        mock_result.one.return_value = mock_row
+        ctx.session.execute = AsyncMock(return_value=mock_result)
+        # Act
+        result = await stats.get_roll_stats(ctx.session, ctx.guild, ctx.author)
+        # Assert
+        assert result["total"] == 10
+        assert result["wins"] == 7
+        assert result["losses"] == 3
+        assert result["win_rate"] == "70.0%"
+        assert result["best"] == 95
+        assert result["last_roll"] == "Apr 27, 2026"
 
 
 class TestGetBanStats(DicebotTestCase):

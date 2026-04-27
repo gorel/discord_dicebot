@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Optional
 
 import discord
-from sqlalchemy import func, select
+from sqlalchemy import case, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from dicebot.commands import timezone
@@ -22,12 +22,20 @@ from dicebot.data.types.message_context import MessageContext
 async def get_roll_stats(
     session: AsyncSession, guild, user: User
 ) -> dict:
-    result = await session.scalars(
-        select(Roll).filter_by(guild_id=guild.id, discord_user_id=user.id)
+    result = await session.execute(
+        select(
+            func.count(Roll.id).label("total"),
+            func.sum(
+                case((Roll.actual_roll >= Roll.target_roll, 1), else_=0)
+            ).label("wins"),
+            func.max(Roll.actual_roll).label("best"),
+            func.max(Roll.rolled_at).label("last_rolled_at"),
+        ).filter_by(guild_id=guild.id, discord_user_id=user.id)
     )
-    rolls = result.all()
+    row = result.one()
 
-    if not rolls:
+    total = row.total or 0
+    if total == 0:
         return {
             "total": 0,
             "wins": 0,
@@ -37,13 +45,11 @@ async def get_roll_stats(
             "last_roll": "Never",
         }
 
-    total = len(rolls)
-    wins = sum(1 for r in rolls if r.actual_roll >= r.target_roll)
+    wins = row.wins or 0
     losses = total - wins
     win_rate = f"{100 * wins / total:.1f}%"
-    best = max(r.actual_roll for r in rolls)
-    last_dt = max(r.rolled_at for r in rolls)
-    last_roll = last_dt.strftime("%b %d, %Y")
+    best = row.best or 0
+    last_roll = row.last_rolled_at.strftime("%b %d, %Y")
 
     return {
         "total": total,

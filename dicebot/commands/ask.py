@@ -18,6 +18,7 @@ class AskOpenAI:
     _DEFAULT_MODEL = "gpt-5-nano"
     _DEFAULT_MAX_TOKENS = 4096
     _DEFAULT_TEMPERATURE = 1
+    _DEFAULT_TOOL_IDS = ["web_content_fetcher"]
 
     def __init__(
         self,
@@ -37,7 +38,7 @@ class AskOpenAI:
         )
         self._secret = secret or os.getenv("OPENAI_API_KEY")
         self._url = url or self._URL
-        self._tools = {"tool_ids": tool_ids} if tool_ids else {}
+        self._tools = {"tool_ids": tool_ids or self._DEFAULT_TOOL_IDS}
 
     async def ask(
         self,
@@ -85,12 +86,12 @@ class AskOpenAI:
             messages.append({"role": "user", "content": prompt})
             async with session.post(
                 self._url,
-                messages=messages,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {self._secret}",
                 },
                 json={
+                    "messages": messages,
                     "model": self.model,
                     "max_tokens": self.max_tokens,
                     "temperature": self.temperature,

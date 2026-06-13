@@ -30,6 +30,13 @@ class MessageContext:
     state: dict[str, Any] = field(default_factory=dict)
 
     @property
+    def bot_user_id(self) -> int:
+        u = self.client.user
+        if u is not None:
+            return u.id
+        return -1
+
+    @property
     def guild_id(self) -> int:
         return self.guild.id
 

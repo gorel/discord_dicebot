@@ -40,7 +40,11 @@ class AskOpenAI:
         self._tools = {"tool_ids": tool_ids} if tool_ids else {}
 
     async def ask(
-        self, prompt: str, channel: TextChannel | DMChannel | None = None
+        self,
+        prompt: str,
+        channel: TextChannel | DMChannel | None = None,
+        num_context_messages: int | None = None,
+        bot_user_id: int | None = None,
     ) -> str:
         """Ask a question to openai"""
         if not prompt:
@@ -48,24 +52,45 @@ class AskOpenAI:
         try:
             if channel is not None:
                 async with channel.typing():
-                    return await self._ask_openai(prompt)
+                    hist = []
+                    if num_context_messages is not None:
+                        async for msg in channel.history(limit=num_context_messages):
+                            sender = (
+                                msg.author.display_name
+                                if msg.author.id != bot_user_id
+                                else "YOU"
+                            )
+                            hist.append(f"{sender}: {msg}")
+                    return await self._ask_openai(
+                        prompt, hist=list(reversed(hist))[:-1]
+                    )
             else:
                 return await self._ask_openai(prompt)
         except Exception as e:
             logging.exception(e)
             return "Bruh idk"
 
-    async def _ask_openai(self, prompt: str) -> str:
+    async def _ask_openai(self, prompt: str, hist: list[str] | None = None) -> str:
         """Ask a question to openai... compatible endpoints"""
         async with aiohttp.ClientSession() as session:
+            messages = []
+            if hist is not None and len(hist) > 0:
+                hist_text = "\n".join(hist)
+                messages.append(
+                    {
+                        "role": "system",
+                        "content": f"Recent channel history:\n\n{hist_text}",
+                    }
+                )
+            messages.append({"role": "user", "content": prompt})
             async with session.post(
                 self._url,
+                messages=messages,
                 headers={
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {self._secret}",
                 },
                 json={
-                    "messages": [{"role": "user", "content": prompt}],
                     "model": self.model,
                     "max_tokens": self.max_tokens,
                     "temperature": self.temperature,
@@ -85,7 +110,12 @@ async def ask(ctx: MessageContext, prompt: GreedyStr) -> None:
     """Ask a question to openai"""
     prompt_str = prompt.unwrap()
     asker = AskOpenAI()
-    response = await asker.ask(prompt_str, channel=ctx.channel)
+    response = await asker.ask(
+        prompt_str,
+        channel=ctx.channel,
+        num_context_messages=20,
+        bot_user_id=ctx.bot_user_id,
+    )
     await ctx.quote_reply(response)
 
 

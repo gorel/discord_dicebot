@@ -30,7 +30,10 @@ class LongMessageHandler(AbstractHandler):
         self,
         ctx: MessageContext,
     ) -> bool:
-        return len(ctx.message.content) > self.threshold and "||" not in ctx.message.content
+        return (
+            len(ctx.message.content) > self.threshold
+            and "||" not in ctx.message.content
+        )
 
     async def handle(
         self,
@@ -38,7 +41,7 @@ class LongMessageHandler(AbstractHandler):
     ) -> None:
         logging.info(f"{self.skip_image=}, {self.autotldr=}, {ctx.guild.auto_tldr=}")
         if not self.skip_image:
-            await ctx.send(LONG_MESSAGE_RESPONSE)
+            await ctx.quote_reply(LONG_MESSAGE_RESPONSE)
         if self.autotldr or ctx.guild.auto_tldr:
             summary = await do_tldr_summary(ctx.message.content)
             await ctx.quote_reply(summary)

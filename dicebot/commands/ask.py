@@ -61,7 +61,7 @@ class AskOpenAI:
                                 if msg.author.id != bot_user_id
                                 else "YOU"
                             )
-                            hist.append(f"{sender}: {msg}")
+                            hist.append(f"{sender}: {msg.content}")
                     return await self._ask_openai(
                         prompt, hist=list(reversed(hist))[:-1]
                     )

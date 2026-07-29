@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from dicebot.data.db.guild import Guild
 from dicebot.data.db.user import User
 
-MAX_CHARS_PER_MSG = 3000
+MAX_CHARS_PER_MSG = 1900
 
 
 @dataclass

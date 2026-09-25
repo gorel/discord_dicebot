@@ -17,6 +17,7 @@ from dicebot.handlers.message.fool_handler import FoolHandler
 from dicebot.handlers.message.hbd_handler import HbdHandler
 from dicebot.handlers.message.leeroy_handler import LeeRoyHandler
 from dicebot.handlers.message.pun_handler import PunHandler
+from dicebot.handlers.message.quotes_only_handler import QuotesOnlyHandler
 from dicebot.handlers.message.log_message_handler import (
     LogMessageHandler,
     LogMessageHandlerSource,
@@ -73,6 +74,7 @@ class GuildContext:
             LeeRoyHandler(),
             LongMessageHandler(),
             FoolHandler(),
+            QuotesOnlyHandler(),
             ShameHandler(),
             YoutubeHandler(),
             ThanksNudgeHandler(),

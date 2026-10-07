@@ -18,7 +18,7 @@ class OrbTranslatorHandler(AbstractHandler):
     async def handle(self, ctx: MessageContext) -> None:
         parts = []
         for orb in ORBS:
-            if n := ctx.message.content.count(orb) > 0:
+            if (n := ctx.message.content.count(orb)) > 0:
                 parts.append(orb * n)
         if len(parts) > 0:
             await ctx.quote_reply("\n".join(parts))

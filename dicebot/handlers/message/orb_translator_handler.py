@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import logging
 import re
 
 from dicebot.data.types.message_context import MessageContext
@@ -13,7 +14,9 @@ class OrbTranslatorHandler(AbstractHandler):
     """Translate the DailyOrbs messages into a human-readable format."""
 
     async def should_handle(self, ctx: MessageContext) -> bool:
-        return ORB_REGEX.search(ctx.message.content) is not None
+        res = ORB_REGEX.search(ctx.message.content) is not None
+        logging.info(f"ORB regex match? {res}")
+        return res
 
     async def handle(self, ctx: MessageContext) -> None:
         parts = []
@@ -21,4 +24,5 @@ class OrbTranslatorHandler(AbstractHandler):
             emoji = f":{color}_circle:"
             n = ctx.message.content.count(emoji)
             parts.append(emoji * n)
+            logging.info(f"Count of {color} in {ctx.message.content} = {n}")
         await ctx.quote_reply("\n".join(parts))
